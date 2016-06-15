@@ -1,11 +1,9 @@
 CC=gcc
 CFLAGS=-m32 -nostdlib -std=c99
+COMPILE=-c
 
-kernelExecutable: boot.o kernel.o
-	$(CC) $(CFLAGS) boot.s kernel.c -o ../myos.bin
-
+boot.o: boot.s
+	$(CC) $(CFLAGS) $(COMPILE) boot.s
 
 clean:
 	rm -f *.o
-	rm -f *.bin
-	rm -f *.iso
