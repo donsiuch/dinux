@@ -1,0 +1,8 @@
+
+/driver
+1. Migrate VGA driver code to the driver directory (currently in kernel/main.c)
+2. Implement newlines
+
+Questions:
+1. How can I compile in 32 bit mode, with gcc and have it run in 16 bit real mode?
+2. Where is the BIOS loading the boot code?

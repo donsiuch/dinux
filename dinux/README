@@ -1,0 +1,11 @@
+
+To build the OS for the VM:
+	1. Run BuildKernel
+	2. Run StartVM
+
+To build the OS for bare metal via USB:
+	1. Plug in USB
+	2. dmesg command to find the assigned device name
+	3. Modify the last line in BuildKernel and uncomment
+	4. Run BuildKernel
+	5. Boot from USB
