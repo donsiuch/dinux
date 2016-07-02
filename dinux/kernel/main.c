@@ -8,9 +8,6 @@
 
 extern void terminal_writestring(const char *);
  
-#if defined(__cplusplus)
-extern "C" /* Use C linkage for kernel_main. */
-#endif
 void kernel_main() {
 	/* Initialize terminal interface */
 	terminal_initialize();
@@ -20,5 +17,5 @@ void kernel_main() {
          * This is normal.
          */
 
-	terminal_writestring("Let's get this party started.");
+	terminal_writestring("Let's get this party started.\nHi!");
 }

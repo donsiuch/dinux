@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-m32 -nostdlib -std=c99
+CFLAGS=-Wall -m32 -nostdlib -std=c99
 COMPILE=-c
 
 main.o: main.c 

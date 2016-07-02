@@ -59,7 +59,8 @@ _start:
 	# We are now ready to actually execute C code. We cannot embed that in an
 	# assembly file, so we'll create a kernel.c file in a moment. In that file,
 	# we'll create a C entry point called kernel_main and call it here.
-	call kernel_main
+	//call kernel_main
+	call setup_32
 
 	# In case the function returns, we'll want to put the computer into an
 	# infinite loop. To do that, we use the clear interrupt ('cli') instruction
@@ -72,6 +73,8 @@ _start:
 .Lhang:
 	jmp .Lhang
 
+# Define
+
 # Set the size of the _start symbol to the current location '.' minus its start.
 # This is useful when debugging or when you implement call tracing.
-.size _start, . - _start
+//.size _start, . - _start

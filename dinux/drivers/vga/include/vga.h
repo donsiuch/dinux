@@ -2,6 +2,8 @@
 #ifndef __VGA_HEADER__
 #define __VGA_HEADER__
 
+static const size_t VGA_BUFFER_ADDRESS = 0x0B8000;
+
 /* Hardware text mode color constants. */
 enum vga_color {
 	COLOR_BLACK = 0,
@@ -29,6 +31,8 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t* terminal_buffer;
 
+static const unsigned char VGA_NEWLINE = 0x0A;
+
 // Function prototypes
 uint8_t make_color(enum vga_color, enum vga_color);
 uint16_t make_vgaentry(char, uint8_t);
@@ -37,6 +41,7 @@ void terminal_initialize(void);
 void terminal_setcolor(uint8_t);
 void terminal_putentryat(char, uint8_t, size_t, size_t);
 void terminal_putchar(char);
+
 void terminal_writestring(const char *);
 
 #endif
