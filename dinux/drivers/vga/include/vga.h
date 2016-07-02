@@ -2,6 +2,9 @@
 #ifndef __VGA_HEADER__
 #define __VGA_HEADER__
 
+#include <stddef.h>
+#include <stdint.h>
+
 static const size_t VGA_BUFFER_ADDRESS = 0x0B8000;
 
 /* Hardware text mode color constants. */

@@ -1,7 +1,4 @@
 
-# For more cool makefile stuff:
-# https://www3.ntu.edu.sg/home/ehchua/programming/cpp/gcc_make.html
-
 LD=ld
 32BIT=-m elf_i386
 
@@ -14,6 +11,7 @@ link:
 	cd ./boot && make
 	cd ./kernel && make
 	cd ./drivers/vga && make
+	cd ./utility && make
 
 clean:
 	rm -f grub.cfg
@@ -23,3 +21,4 @@ clean:
 	cd ./boot && make clean
 	cd ./kernel && make clean	
 	cd ./drivers && make clean
+	cd ./utility && make clean

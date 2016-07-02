@@ -10,8 +10,6 @@
 #ifndef __VGA_SOURCE__
 #define __VGA_SOURCE__
 
-#include <stddef.h>
-#include <stdint.h>
 #include "../include/vga.h"
  
 uint8_t make_color(enum vga_color fg, enum vga_color bg) {
