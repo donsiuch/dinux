@@ -1,5 +1,5 @@
 
-#include "../drivers/vga/include/vga.h"
+#include "../utility/include/io.h"
 
 .data 
 hello: 
@@ -14,11 +14,11 @@ false:
 setup_32:
 	call	terminal_initialize
 
-	movl	%ebx, 	%edx
-	and	$0x100,	%edx
+	//movl	%ebx, 	%edx
+	//and	$0x100,	%edx
 		
-
-	call 	terminal_writestring
+	pushl 	$hello
+	call 	printd	
 	popl	%edx
 
 	//call 	kernel_main 		 
