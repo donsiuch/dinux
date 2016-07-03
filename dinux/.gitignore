@@ -1,0 +1,14 @@
+# Files being edited
+*~
+
+#######################
+# Make and build files
+#######################
+*.o
+
+# Executable file
+*.bin
+
+# Image file
+*.iso
+

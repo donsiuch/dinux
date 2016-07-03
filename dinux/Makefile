@@ -5,7 +5,11 @@ LD=ld
 all: myos.bin
 
 myos.bin: link
-	$(LD) $(32BIT) ./boot/setup_32.o ./boot/boot.o ./kernel/main.o ./drivers/vga/objects/vga.o -o myos.bin
+	$(LD) $(32BIT) 	./utility/objects/io.o \
+			./boot/setup_32.o \
+			./boot/boot.o \
+			./kernel/main.o \
+			./drivers/vga/objects/vga.o -o myos.bin
 
 link:
 	cd ./boot && make
