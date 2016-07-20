@@ -5,7 +5,7 @@
 
 #include "../include/io.h"
 
-static void isDigit(const char character)
+static unsigned char isDigit(const char character)
 {
 	if ( character >= 0 && character <= 9 )
 	{
@@ -16,8 +16,6 @@ static void isDigit(const char character)
 
 static void vprintd(const char * string, const va_list args)
 {
-	int 	index = 0;
-	
 	// While we haven't hit the newline
 	while ( *string != 0 )
 	{
@@ -30,7 +28,7 @@ static void vprintd(const char * string, const va_list args)
 			switch (*string)
 			{
 				// decimal
-				case 'd': break;
+				case 'd': isDigit('x'); break;
 		
 				// address
 				case 'p': break;
@@ -42,7 +40,7 @@ static void vprintd(const char * string, const va_list args)
 				// sub-%'s will be treated as the characters they are
 				case 's': break;
 					
-				default: 
+				default: break; 
 			}
 		}
 

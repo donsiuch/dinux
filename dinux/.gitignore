@@ -12,3 +12,5 @@
 # Image file
 *.iso
 
+# Swap files
+*.swp
