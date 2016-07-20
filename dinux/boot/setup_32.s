@@ -1,7 +1,7 @@
 
 //#include "../utility/include/io.h"
 
-.data .local
+.data 
 hello: 
 	.asciz "Hello world"
 true:
@@ -10,11 +10,21 @@ false:
 	.asciz "False"
 
 /*
-	7		   0
-	PR Priv 1 Ex DC RW Ac
 
-	7	4
-	Gr Sz 0 0
+7 	6 	5 	4 	3 	0
+P 	DPL 		DT 	Type
+P - Segment is present? (1 = Yes)
+DPL - Which Ring (0 to 3) (2 bits)
+DT - Descriptor Type (1 bit)
+Type - Which type? (4 bits)
+	
+	
+7 	6 	5 	4 	3 		0
+G 	D 	0 	A 	Seg Len. 19:16
+G - Granularity (0 = 1byte, 1 = 4kbyte) (1 bit)
+D - Operand Size (0 = 16bit, 1 = 32-bit) (1 bit)
+0 - Always 0 (1 bit)
+A - Available for System (Always set to 0) (4 bits)
 
 The bit fields are:
 
@@ -37,6 +47,7 @@ Not shown in the picture is the 'L' bit (bit 21, next to 'Sz') which is used for
 */
 
 // This is currently the main global descriptor table.
+.align 16
 gdt:
 	// Index 0x00
 	.quad	0x00
@@ -48,22 +59,26 @@ gdt:
 	// 000000000000000 | 1111111111111111 (limit)
 	// bit 31 (base)		bit 0
 	.word	0xFFFF
-	.word	0x0000
-	.word	0x9A00	// 1001 1010 0000 0000
-	.word	0x00CF	// 0000 0000 1100 1111
+	.word	0xFFFF
+	.word	0x9A00	# 1001 1010 0000 0000
+	.word	0x00CF	# 0000 0000 1100 1111
 	
 	// 0x10
 	// data segment
 	.word	0xFFFF
-	.word	0x0000
-	.word	0x9200 // 1001 0010 0000 0000
+	.word	0xFFFF
+	.word	0x9200 # 1001 0010 0000 0000
 	.word	0x00CF
-	
-	
 
 .global setup_32
 .section .text
 setup_32:
+	
+	cli
+	lgdt 	gdt
+
+	call loadSegmentRegisters
+
 	// The next lines clears the terminal. Enable this to print anything.
 	call	terminal_initialize
 	
@@ -94,4 +109,15 @@ ClearTerminal:
 	pop	%ebp
 	ret
 
+loadSegmentRegisters:
+	push	%ebp
+
+	movl	$0x10, %ds
+	mov	$0x18, %cs
+	mov	%ds, %gs
+	mov	%ds, %ss
+	mov	%ds, %fs
+	mov	%ds, %es
 	
+	pop 	%ebp
+	ret	
