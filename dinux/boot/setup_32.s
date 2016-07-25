@@ -50,44 +50,69 @@ Not shown in the picture is the 'L' bit (bit 21, next to 'Sz') which is used for
 .align 16
 gdt:
 	// Index 0x00
+	// Required dummy
 	.quad	0x00
 
-	//0x08
+	// 0x08
+	// Unused
+	.quad	0x00
+
+	// 0x10
 	// code segment
 	// bit 63			bit 32
 	// 000000000000000 | 1001101000000000
 	// 000000000000000 | 1111111111111111 (limit)
 	// bit 31 (base)		bit 0
 	.word	0xFFFF
-	.word	0xFFFF
+	.word	0x0000
 	.word	0x9A00	# 1001 1010 0000 0000
 	.word	0x00CF	# 0000 0000 1100 1111
 	
-	// 0x10
+	// 0x18
 	// data segment
 	.word	0xFFFF
-	.word	0xFFFF
+	.word	0x0000
 	.word	0x9200 # 1001 0010 0000 0000
 	.word	0x00CF
+gdt_end:
+gdt_info:
+	.word	gdt_end - gdt - 1	# Size of GDT
+	.word	0x0000			# Upper 2 Bytes of GDT address.
+	.word	0x0000			# Lower 2 Bytes of GDT address.
 
 .global setup_32
 .section .text
 setup_32:
-	
+
+	// Return to real mode
+	movw	$0x00,	%ax
+	lmsw	%ax
+
+	// Load a new global descriptor table
+	xorw	%ax, %ax	# Clear register
+	movl	$gdt, (gdt_info + 2)
 	cli
-	lgdt 	gdt
+	lgdt	gdt_info
 
-	call loadSegmentRegisters
+	// Return to protected mode
+	movw	$0x01,	%ax
+	lmsw	%ax
 
-	// The next lines clears the terminal. Enable this to print anything.
+	// Prep the terminal screen
 	call	terminal_initialize
-	
-	// Don't remember what the next few lines are.
-	//movl	%ebx, 	%edx
-	//and	$0x100,	%edx
-	
-	call	ClearTerminal
 
+	// Set the %cs register
+	jmp $0x10, $loadSegmentRegisters
+
+loadSegmentRegisters:
+
+	movl	$0x18, %eax
+	movl	%eax, %ds
+	mov	%eax, %gs
+	mov	%eax, %fs
+	mov	%eax, %es
+	mov	%eax, %ss
+	
 	// The next three lines are working.
 	// For fun, try to do it in assembly.	
 	pushl 	$hello
@@ -97,27 +122,3 @@ setup_32:
 	//call 	kernel_main 		 
 	ret
 
-ClearTerminal:
-	push	%ebp
-	mov	%esp, %ebp	
-	mov	%ds:0xB8000, %edi
-
-	pushl 	$false
-	call 	printd	
-	popl	%edx
-
-	pop	%ebp
-	ret
-
-loadSegmentRegisters:
-	push	%ebp
-
-	movl	$0x10, %ds
-	mov	$0x18, %cs
-	mov	%ds, %gs
-	mov	%ds, %ss
-	mov	%ds, %fs
-	mov	%ds, %es
-	
-	pop 	%ebp
-	ret	

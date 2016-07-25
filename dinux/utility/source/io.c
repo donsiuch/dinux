@@ -7,11 +7,49 @@
 
 static unsigned char isDigit(const char character)
 {
-	if ( character >= 0 && character <= 9 )
+	if ( character >= 0 && character <= 127   )
 	{
 		return 1;
 	}
 	return 0;
+}
+/*
+static unsigned char isHexDigit(const char character)
+{
+	if ( character >= 0x00 && character <= 0x0F )
+	{
+		return 1;
+	}
+	return 0;
+}
+*/
+
+// Dumps hexadecimal number
+void dumpHex(const unsigned long hexNumber)
+{
+	int index = 0;
+	unsigned char *ptr = 0;
+	unsigned char upperNibble = 0;	
+	unsigned char lowerNibble = 0;
+
+	terminal_putchar('0');
+	terminal_putchar('x');
+
+	while ( index < 4 )
+	{
+		// Convert little endian into human read-able form
+		// Get the last byte, then second to last, etc.
+		// Introduce a macro to convert Bytes?
+		ptr = (unsigned char*)&hexNumber + ( 4 - (index + 1));
+		
+		upperNibble = (0xF0 & *ptr) >> 4;
+		terminal_putchar( digToAlphaNum(upperNibble+48) );
+
+		lowerNibble = (0x0F & *ptr);
+		terminal_putchar( digToAlphaNum(lowerNibble+48));	
+	
+		index ++;
+	}
 }
 
 static void vprintd(const char * string, const va_list args)
@@ -19,13 +57,15 @@ static void vprintd(const char * string, const va_list args)
 	// While we haven't hit the newline
 	while ( *string != 0 )
 	{
+		char current = *string;
+
 		// If we have a format specifier, the next character specifies how to format it
-		if ( *string == '%' )
+		if ( current == '%' )
 		{
-			string++;
+			current = *(string++);
 
 			// Find how we should convert the next argument
-			switch (*string)
+			switch (current)
 			{
 				// decimal
 				case 'd': isDigit('x'); break;
@@ -44,7 +84,7 @@ static void vprintd(const char * string, const va_list args)
 			}
 		}
 
-		terminal_putchar(*string);	
+		terminal_putchar(current);	
 	
 		//va_arg(args, #type);	
 	

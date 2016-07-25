@@ -13,7 +13,10 @@
 
 #include "../../drivers/vga/include/vga.h"
 
+void dumpHex(const unsigned long);
 void printd(const char *, ...); 
 char intToChar(const int);
+
+#define	digToAlphaNum(d) (d >= 0x3A && d <= 0x3F ? d + 0x07 : d)
 
 #endif
