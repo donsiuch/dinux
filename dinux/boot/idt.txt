@@ -1,0 +1,15 @@
+
+1. Define an idt_info to hold the limit and base address of the idt.
+2. Define the struct idt_descriptor ( 64 Bytes )
+
+struct IDTDescr{
+   uint16_t offset_1; // offset bits 0..15
+   uint16_t selector; // a code segment selector in GDT or LDT
+   uint8_t zero;      // unused, set to 0
+   uint8_t type_attr; // type and attributes, see below
+   uint16_t offset_2; // offset bits 16..31
+}__attribute__((packed));
+
+3. Define the idt ( an array of 256 entries )
+4a. Create a file that defines the service routines and use the stategies in the OS guide
+

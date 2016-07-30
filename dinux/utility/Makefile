@@ -1,4 +1,3 @@
-
 CC=gcc
 CFLAGS=-Wall -m32 -nostdlib -std=c99
 COMPILE=-c

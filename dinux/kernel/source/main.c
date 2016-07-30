@@ -1,10 +1,7 @@
-#if !defined(__cplusplus)
-#include <stdbool.h> /* C doesn't have booleans by default. */
-#endif
 #include <stddef.h>
 #include <stdint.h>
  
-#include "../drivers/vga/include/vga.h"
+#include "../../drivers/vga/include/vga.h"
 
 extern void terminal_writestring(const char *);
  

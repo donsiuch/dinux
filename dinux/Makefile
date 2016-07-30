@@ -5,10 +5,11 @@ LD=ld
 all: myos.bin
 
 myos.bin: link
-	$(LD) $(32BIT) 	./utility/objects/io.o \
+	$(LD) $(32BIT)  ./boot/boot.o \
 			./boot/setup_32.o \
-			./boot/boot.o \
-			./kernel/main.o \
+			./kernel/objects/idt.o \
+			./kernel/objects/main.o \
+			./utility/objects/io.o \
 			./drivers/vga/objects/vga.o -o myos.bin
 
 link:
