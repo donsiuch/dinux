@@ -37,9 +37,8 @@ gdt_info:
 	.word	0x0000			# Upper 2 Bytes of GDT address.
 	.word	0x0000			# Lower 2 Bytes of GDT address.
 
-
 idt_info:
-	.word	$sizeIdt
+	.word	0x0000
 	.word	0x0000
 	.word	0x0000
 
@@ -51,8 +50,11 @@ setup_32:
 	movw	$0x00,	%ax
 	lmsw	%ax
 
+	// Fix up idt and ldt info structures
 	// Load a new global descriptor table
 	movl	$gdt, (gdt_info + 2)	# Store address of GDT
+	movl	$idtSize, idt_info
+	movl	$idt, (idt_info + 2)
 	cli
 	lgdt	gdt_info
 
@@ -66,6 +68,7 @@ setup_32:
 
 loadSegmentRegisters:
 
+	// Set all other segments to data registers
 	movl	$0x18, %eax
 	movl	%eax, %ds
 	movl	%eax, %gs
@@ -76,6 +79,9 @@ loadSegmentRegisters:
 	// Prep the terminal screen
 	call	terminal_initialize
 
+	pushl 	$(idt+0)
+	call 	dumpHex
+	popl 	%eax
 
 	pushl 	$hello
 	call 	printd	

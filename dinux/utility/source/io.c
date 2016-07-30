@@ -4,16 +4,11 @@
 // 2. Change the true and false returns to 0 and 
 
 #include "../include/io.h"
-
+/*
 static unsigned char isDigit(const char character)
 {
-	if ( character >= 0 && character <= 127   )
-	{
-		return 1;
-	}
 	return 0;
 }
-/*
 static unsigned char isHexDigit(const char character)
 {
 	if ( character >= 0x00 && character <= 0x0F )
@@ -68,7 +63,7 @@ static void vprintd(const char * string, const va_list args)
 			switch (current)
 			{
 				// decimal
-				case 'd': isDigit('x'); break;
+				//case 'd': isDigit('x'); break;
 		
 				// address
 				case 'p': break;

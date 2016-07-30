@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -m32 -nostdlib -std=c99
+CFLAGS=-Wall -Wextra -pedantic -m32 -nostdlib -std=c99
 COMPILE=-c
 
 io.o: ./source/io.c ./include/io.h

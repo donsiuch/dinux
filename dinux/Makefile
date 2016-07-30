@@ -1,16 +1,20 @@
 
 LD=ld
 32BIT=-m elf_i386
+OPTIONS=-nostartfiles
 
 all: myos.bin
 
 myos.bin: link
-	$(LD) $(32BIT)  ./boot/boot.o \
-			./boot/setup_32.o \
-			./kernel/objects/idt.o \
-			./kernel/objects/main.o \
-			./utility/objects/io.o \
-			./drivers/vga/objects/vga.o -o myos.bin
+	gcc -m32 $(OPTIONS) -o myos.bin \
+				./drivers/vga/objects/vga.o \
+				./utility/objects/io.o \
+				./kernel/objects/main.o \
+				./kernel/objects/idt.o \
+				./boot/setup_32.o \
+				./boot/boot.o \
+				
+									 
 
 link:
 	cd ./boot && make
