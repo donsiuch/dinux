@@ -116,7 +116,7 @@ void dumpBytes( const unsigned char * buffer, const unsigned long size )
 				printd(" |");
 			}
 		
-			printd("\n| %x: ", buffer+index);
+			printd("\n| %p: ", buffer+index);
 		}
 		else if ( index % 0x08 == 0 )
 		{
