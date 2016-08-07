@@ -13,10 +13,13 @@
 
 #include "../../drivers/vga/include/vga.h"
 
-void dumpHex(const unsigned long);
+void printHexChar(const unsigned long);
+void printFormalHexLong(const unsigned long);
 void printd(const char *, ...); 
-char intToChar(const int);
+void dumpBytes(const unsigned char *, const unsigned long);
 
-#define	digToAlphaNum(d) (d >= 0x3A && d <= 0x3F ? d + 0x07 : d)
+#define	ALPHA_NUM(_d) (_d >= 0x3A && _d <= 0x3F ? _d + 0x07 : _d)
+#define UPPER_NIBBLE(_c) ( (0xF0 & _c) >> 4 )
+#define LOWER_NIBBLE(_c) ( (0x0F & _c) )
 
 #endif

@@ -1,53 +1,34 @@
 
 // TO-DO:
-// 1. Currently this is tied to the VGA driver. This routine needs to be more generic so I never have to re-write it...
-// 2. Change the true and false returns to 0 and 
+// 1. Currently this is tied to the VGA driver. Have a generic API? 
 
 #include "../include/io.h"
-/*
-static unsigned char isDigit(const char character)
-{
-	return 0;
-}
-static unsigned char isHexDigit(const char character)
-{
-	if ( character >= 0x00 && character <= 0x0F )
-	{
-		return 1;
-	}
-	return 0;
-}
-*/
 
-// Dumps hexadecimal number
-void dumpHex(const unsigned long hexNumber)
+void printHexChar(const unsigned long hexChar)
+{
+	terminal_putchar( ALPHA_NUM(UPPER_NIBBLE(hexChar)+48) );
+	terminal_putchar( ALPHA_NUM(LOWER_NIBBLE(hexChar)+48));	
+}
+
+void printFormalHexLong(const unsigned long hexNumber)
 {
 	int index = 0;
 	unsigned char *ptr = 0;
-	unsigned char upperNibble = 0;	
-	unsigned char lowerNibble = 0;
 
 	terminal_putchar('0');
 	terminal_putchar('x');
 
 	while ( index < 4 )
 	{
-		// Convert little endian into human read-able form
 		// Get the last byte, then second to last, etc.
-		// Introduce a macro to convert Bytes?
 		ptr = (unsigned char*)&hexNumber + ( 4 - (index + 1));
-		
-		upperNibble = (0xF0 & *ptr) >> 4;
-		terminal_putchar( digToAlphaNum(upperNibble+48) );
-
-		lowerNibble = (0x0F & *ptr);
-		terminal_putchar( digToAlphaNum(lowerNibble+48));	
+		printHexChar(*ptr);	
 	
 		index ++;
 	}
 }
 
-static void vprintd(const char * string, const va_list args)
+static void vprintd(const char * string, va_list args)
 {
 	// While we haven't hit the newline
 	while ( *string != 0 )
@@ -57,7 +38,7 @@ static void vprintd(const char * string, const va_list args)
 		// If we have a format specifier, the next character specifies how to format it
 		if ( current == '%' )
 		{
-			current = *(string++);
+			current = *(++string);
 
 			// Find how we should convert the next argument
 			switch (current)
@@ -66,29 +47,34 @@ static void vprintd(const char * string, const va_list args)
 				//case 'd': isDigit('x'); break;
 		
 				// address
-				case 'p': break;
+				case 'p': 
+					printFormalHexLong(va_arg(args, const unsigned long));
+					break;
 			
-				// hex format
-				case 'x': break;
+				// hex character
+				case 'x': 
+					printHexChar(va_arg(args, const unsigned long));
+					break;
 	
 				// string
-				// sub-%'s will be treated as the characters they are
-				case 's': break;
+				case 's': 
+					terminal_writestring(va_arg(args, const char *));
+					break;
 					
 				default: break; 
 			}
 		}
-
-		terminal_putchar(current);	
-	
-		//va_arg(args, #type);	
+		else
+		{
+			terminal_putchar(current);
+		}
 	
 		string++;
 	}
 
 	// va_arg is a MACRO that loops through the list.
 	// Must pass the type wiht it
-	
+	va_end(args);
 }
 
 // Prints an entire string
@@ -97,17 +83,51 @@ static void vprintd(const char * string, const va_list args)
 void printd(const char * string, ...)
 {
 	va_list args;
-
 	va_start(args, string); 
-
-	// Maybe pass to vprintd whatever console to output to?
 	vprintd(string, args);		
-
 	va_end(args); 
 }
 
-// Convert integer to character and returns that character
-char intToChar(const int integer)
+/*
+ * Function:	void dumpBytes
+ *
+ * Description: Print size Bytes starting from the address of the
+ *		buffer parameter.	
+ *
+ * Parameters:
+ *	buffer	Address to start printing Bytes at	
+ *	size	Number of Bytes to print	
+ *
+ * Returns:	void
+ *
+*/
+void dumpBytes( const unsigned char * buffer, const unsigned long size )
 {
-	return 'a';
+	unsigned int index = 0;
+
+	printd("\ndumpBytes @ %p:\n", buffer);
+
+	while ( index < size )
+	{
+		if ( index % 0x10 == 0 )
+		{
+			if ( index ) 
+			{ 
+				printd(" |");
+			}
+		
+			printd("\n| %x: ", buffer+index);
+		}
+		else if ( index % 0x08 == 0 )
+		{
+			printd(" ");
+		}
+
+		printd("%x", buffer[index]);	
+
+		index ++;
+	}
+	
+	printd(" |\n\n");
 }
+

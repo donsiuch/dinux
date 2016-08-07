@@ -80,12 +80,10 @@ loadSegmentRegisters:
 	call	terminal_initialize
 
 	pushl 	$(idt+0)
-	call 	dumpHex
+	//call 	dumpHex
 	popl 	%eax
 
-	pushl 	$hello
-	call 	printd	
-	popl	%edx
+	call kernel_main
 
 	//call 	kernel_main 		 
 	ret

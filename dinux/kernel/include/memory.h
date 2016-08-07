@@ -60,5 +60,6 @@ struct GL_GDT * GL_GDT_ARRAY[GL_MAX_NUM_SEGMENT_DESCRIPTORS];
 // The global descriptor table
 struct MEM_SEGMENT_DESCRIPTOR GL_GDT[MEM_MAX_CORES];
 
+void *memset(void *, int, size_t);
 
 #endif

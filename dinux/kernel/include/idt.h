@@ -15,7 +15,6 @@ typedef struct {
 idtDescriptor idt[MAX_IDT_ENTRIES];
 
 int idtSize = MAX_IDT_ENTRIES*sizeof(idtDescriptor);
-int seven = 7;
 
 #endif
 
