@@ -6,5 +6,8 @@ void kernel_main() {
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	dumpBytes((unsigned char *)0x00, 1024); 
+	dumpBytes((unsigned char *)0x00, 16); 
+
+	while (1)
+	{}
 }

@@ -2,12 +2,12 @@ CC=gcc
 CFLAGS=-Wall -Wextra -pedantic -m32 -nostdlib -std=c99
 COMPILE=-c
 
-all: idt.o main.o 
+all: idt main 
 
-main.o: ./source/main.c
+main: ./source/main.c
 	$(CC) $(CFLAGS) $(COMPILE) ./source/main.c -I./include -o ./objects/main.o
 
-idt.o: ./source/idt.c ./include/idt.h
+idt: ./source/idt.c ./include/idt.h
 	$(CC) $(CFLAGS) $(COMPILE) ./source/idt.c -I./include -o ./objects/idt.o
 
 clean:

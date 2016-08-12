@@ -46,10 +46,12 @@ idt_info:
 .text
 setup_32:
 
+	call populateIdt
+
 	// Return to real mode
 	movw	$0x00,	%ax
 	lmsw	%ax
-
+		
 	// Fix up idt and ldt info structures
 	// Load a new global descriptor table
 	movl	$gdt, (gdt_info + 2)	# Store address of GDT
@@ -57,11 +59,14 @@ setup_32:
 	movl	$idt, (idt_info + 2)
 	cli
 	lgdt	gdt_info
+	lidt	idt_info
 
 	// Return to protected mode
 	xorw	%ax, %ax	# Clear register
 	movw	$0x01,	%ax
 	lmsw	%ax
+
+	sti
 	
 	// Set the %cs register
 	jmp 	$0x10, $loadSegmentRegisters
@@ -79,12 +84,39 @@ loadSegmentRegisters:
 	// Prep the terminal screen
 	call	terminal_initialize
 
-	pushl 	$(idt+0)
-	//call 	dumpHex
-	popl 	%eax
-
 	call kernel_main
 
-	//call 	kernel_main 		 
 	ret
+
+.globl isrCommon
+isrCommon:
+	cli
+	
+	call handleFault
+	
+	hlt
+
+idtSaveState:
+	
+	pusha
+	pushl	%ds
+	pushl	%es
+	pushl	%fs
+	pushl 	%gs
+
+	movl	%esp, %eax
+	pushl	%eax		# push stack pointer onto stack
+
+	movl	$handleFault, %eax
+	call 	*%eax	
+
+	popl	%eax		# compensate for stack pointer
+
+	popl	%gs
+	popl	%fs
+	popl	%es
+	popl	%ds
+	popa
+
+	iret
 
