@@ -92,10 +92,6 @@ loadSegmentRegisters:
 isrCommon:
 	cli
 	
-	call handleFault
-	
-	hlt
-
 idtSaveState:
 	
 	pusha

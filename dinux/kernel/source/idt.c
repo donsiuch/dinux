@@ -83,3 +83,38 @@ void populateIdt()
 	*/
 }
 
+// Traps v Interrupts: http://stackoverflow.com/questions/3425085/the-difference-between-call-gate-interrupt-gate-trap-gate 
+//
+// Source: http://phrack.org/issues/59/4.html
+// --------------------------------------------------------------------------+
+// number  | Exception 			   | Exception Handler               |
+// --------------------------------------------------------------------------+
+// 0       | Divide Error		   | divide_error() - trap gate      
+// 1       | Debug			   | debug() - trap gate             
+// 2       | Nonmaskable Interrupt  	   | nmi() - trap gate              
+// 3       | Break Point		   | int3() - ring 3
+// 4       | Overflow			   | overflow() - ring 3
+// 5       | Boundary verification	   | bounds() - ring 3 
+// 6       | Invalid operation code	   | invalid_op() - trap gate
+// 7       | Device not available	   | device_not_available() - trap gate
+// 8       | Double Fault                  | double_fault() - trap gate
+// 9       | Coprocessor segment overrun   | coprocesseur_segment_overrun() - trap gate
+// 10      | TSS not valid	    	   | invalid_tss() - trap gate
+// 11      | Segment not  present	   | segment_no_present() - trap gate
+// 12      | stack exception 		   | stack_segment() - trap gate
+// 13      | General Protection 	   | general_protection() - trap gate
+// 14 	   | Page Fault			   | page_fault() - trap gate
+// 15      | Reserved by Intel		   | none
+// 16      | Calcul Error with float virgul| coprocessor_error() - trap gate
+// 17      | Alignement check		   | alignement_check() - trap gate
+// 18      | Machine Check		   | machine_check() - trap gate
+//
+// ...
+// 
+// 32	   | IRQ0 ( maskable )
+// ...
+// 47      | IRQ15 ( maskable )
+// 
+// 0x80    | System Call		   | system_call() - ring 3
+// --------------------------------------------------------------------------+
+//
