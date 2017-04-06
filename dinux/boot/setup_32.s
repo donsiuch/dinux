@@ -81,29 +81,27 @@ loadSegmentRegisters:
 	movl	%eax, %es
 	movl	%eax, %ss
 	
-	// Prep the terminal screen
-	call	terminal_initialize
-
-	call kernel_main
+	call 	kernel_main
 
 	ret
 
 .globl isrCommon
 isrCommon:
 	cli
+	cld
 	
 idtSaveState:
 	
-	pusha
 	pushl	%ds
 	pushl	%es
 	pushl	%fs
 	pushl 	%gs
-
-	movl	%esp, %eax
-	pushl	%eax		# push stack pointer onto stack
-
-	movl	$handleFault, %eax
+	
+	// Is this really necessary?
+	movl	%esp, %ecx
+	pushl	%ecx		# push stack pointer onto stack
+	
+	// %eax is populated with the service routine
 	call 	*%eax	
 
 	popl	%eax		# compensate for stack pointer
@@ -116,3 +114,15 @@ idtSaveState:
 
 	iret
 
+# Remove this eventually
+.globl placeHolder
+placeHolder:
+	pusha
+	movl 	$handleFault, %eax
+	jmp 	$0x10, $isrCommon
+
+.globl divideErrorIsr
+divideErrorIsr:
+	pusha
+	movl 	$doDivideError, %eax
+	jmp 	$0x10, $isrCommon

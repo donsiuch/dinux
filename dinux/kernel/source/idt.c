@@ -3,23 +3,28 @@
 #include "../../utility/include/io.h"
 #include "../../utility/include/memoryOperations.h"
 
+/*
+ * Function: handleFault
+ *
+ *
+ */
 void handleFault( unsigned char *stackPtr, regs registers )
 {
 	printd("handleFault\n");
 }
 
+/*
+ * Function: setGate
+ *
+ *
+ */
 void setGate(unsigned short index, unsigned long routineAddress, unsigned short selector, unsigned char type_attr)
 {
 	idt[index].routineAddressLower = routineAddress & 0xFFFF;
 	idt[index].routineAddressUpper = (routineAddress >> 16) & 0xFFFF;
-
-	// GDT selector. Should be KERNEL_CS?
 	idt[index].selector = selector;
-
 	idt[index].type_attr = type_attr;
 }
-
-extern void isrCommon(void);
 
 /*
  * Function: populateIdt
@@ -29,7 +34,7 @@ extern void isrCommon(void);
  */
 void populateIdt()
 {
-	unsigned short index = 0;
+	unsigned short index = 1;
 
 	memset(idt, 0, sizeof(idt));
 
@@ -44,43 +49,12 @@ void populateIdt()
 		// * Causes crash if 0
 		//
 		//
-		setGate(index,(unsigned long)isrCommon, 0x10, 0x8E);
+		setGate(index,(unsigned long)placeHolder, KERNEL_CS, 0x8F);
 		index ++;
 	}
-
-/*
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	setGate(0, (unsigned long *)isr0, 0x08, 0x0E);
-	*/
+	
+	setGate(0, (unsigned long *)divideErrorIsr, KERNEL_CS, 0x8F);
+	
 }
 
 // Traps v Interrupts: http://stackoverflow.com/questions/3425085/the-difference-between-call-gate-interrupt-gate-trap-gate 
@@ -118,3 +92,14 @@ void populateIdt()
 // 0x80    | System Call		   | system_call() - ring 3
 // --------------------------------------------------------------------------+
 //
+
+/*
+ * Function: doDivideError
+ *
+ * 
+ *
+ */
+asmlinkage void doDivideError(unsigned char *stackPtr, regs registers)
+{
+	printd("do_divide_error()\n");
+}
