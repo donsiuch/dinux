@@ -114,13 +114,6 @@ placeHolder:
 
 .globl divideErrorIsr
 divideErrorIsr:
-	movl	$0xDE,	%edi
-	movl	$0xAD,	%esi
-	movl	$0xBE,	%ebx
-	movl	$0xEF,	%edx
-	movl	$0x77,	%ecx
-	movl	$0xAA,	%eax
-	
 	pusha
 	movl 	$doDivideError, %eax
 	jmp 	$0x10, $idtSaveState
