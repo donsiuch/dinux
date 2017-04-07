@@ -8,9 +8,9 @@
  *
  *
  */
-void handleFault( unsigned char *stackPtr, regs registers )
+void handleFault(regs registers, unsigned int errorCode)
 {
-	printd("handleFault\n");
+	printd("handleFault, %p %p\n", registers.eax, errorCode);
 }
 
 /*
@@ -38,22 +38,14 @@ void populateIdt()
 
 	memset(idt, 0, sizeof(idt));
 
+	// to-do: re-purpose loop for the IRQs and the rest of the IDT
 	while ( index < MAX_IDT_ENTRIES ) 
 	{
-		// 0x8E == 1000 1110
-		// *Is routine present? (yes) = 1
-		// Descriptor Privledge level bit 1 = 0
-		// Descriptor Privledge level bit 2 = 0
-		// ? Storage segment ( 0 for interrupt) = 0
-		// 
-		// * Causes crash if 0
-		//
-		//
 		setGate(index,(unsigned long)placeHolder, KERNEL_CS, 0x8F);
 		index ++;
 	}
 	
-	setGate(0, (unsigned long *)divideErrorIsr, KERNEL_CS, 0x8F);
+	setGate(0, (unsigned long)divideErrorIsr, KERNEL_CS, 0x8F);
 	
 }
 
@@ -95,11 +87,20 @@ void populateIdt()
 
 /*
  * Function: doDivideError
- *
- * 
+ * Exception class: Fault
+ * Vector: #0
  *
  */
-asmlinkage void doDivideError(unsigned char *stackPtr, regs registers)
+asmlinkage void doDivideError(regs registers)
 {
-	printd("do_divide_error()\n");
+	printd("do_divide_error(): %p, &registers: %p\n", doDivideError, &registers);
+
+	// to-do:
+	//	1. Kill current
+	//	2. Re-schedule
+	//	3. Halt must stay if we came from ring 0
+	//		call kernel die routine.
+
+	__asm__("hlt");
+		
 }

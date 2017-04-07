@@ -85,26 +85,17 @@ loadSegmentRegisters:
 
 	ret
 
-.globl isrCommon
-isrCommon:
-	cli
-	cld
-	
 idtSaveState:
+
+	cld
 	
 	pushl	%ds
 	pushl	%es
 	pushl	%fs
 	pushl 	%gs
 	
-	// Is this really necessary?
-	movl	%esp, %ecx
-	pushl	%ecx		# push stack pointer onto stack
-	
 	// %eax is populated with the service routine
 	call 	*%eax	
-
-	popl	%eax		# compensate for stack pointer
 
 	popl	%gs
 	popl	%fs
@@ -119,10 +110,17 @@ idtSaveState:
 placeHolder:
 	pusha
 	movl 	$handleFault, %eax
-	jmp 	$0x10, $isrCommon
+	jmp 	$0x10, $idtSaveState
 
 .globl divideErrorIsr
 divideErrorIsr:
+	movl	$0xDE,	%edi
+	movl	$0xAD,	%esi
+	movl	$0xBE,	%ebx
+	movl	$0xEF,	%edx
+	movl	$0x77,	%ecx
+	movl	$0xAA,	%eax
+	
 	pusha
 	movl 	$doDivideError, %eax
-	jmp 	$0x10, $isrCommon
+	jmp 	$0x10, $idtSaveState

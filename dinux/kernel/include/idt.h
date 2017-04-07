@@ -39,17 +39,8 @@ typedef struct {
 
 typedef struct
 {
-    // Manually pushed
     unsigned int gs, fs, es, ds;      
     unsigned int edi, esi, ebp, esp, ebx, edx, ecx, eax; 
-
-    // Implicitly pushed.
-    unsigned int err_code; // Might not be pushed
-    unsigned int eip;
-    unsigned int cs;
-    unsigned int eflags;
-    unsigned int useresp;
-    unsigned int ss;
 } regs;
 
 idtDescriptor idt[MAX_IDT_ENTRIES];
@@ -58,7 +49,26 @@ int idtSize = MAX_IDT_ENTRIES*sizeof(idtDescriptor);
 
 extern void placeHolder(void);
 extern void divideErrorIsr(void);
-asmlinkage void doDivideError(unsigned char *, regs);
+
+asmlinkage void doDivideError(regs);
+asmlinkage void doDebug(regs, unsigned int);
+asmlinkage void doNmi(regs, unsigned int);
+asmlinkage void doBreakPoint(regs, unsigned int);
+asmlinkage void doOverflow(regs, unsigned int);
+asmlinkage void doBoundaryVerification(regs, unsigned int);
+asmlinkage void doInvalidOpcode(regs, unsigned int);
+asmlinkage void doDeviceNotAvail(regs, unsigned int);
+asmlinkage void doDoubleFault(regs, unsigned int);
+asmlinkage void doCoProcSegOverrun(regs, unsigned int);
+asmlinkage void doInvalTss(regs, unsigned int);
+asmlinkage void doSegNotPresent(regs, unsigned int);
+asmlinkage void doStackException(regs, unsigned int);
+asmlinkage void doGeneralProtection(regs, unsigned int);
+asmlinkage void doPageFault(regs, unsigned int);
+asmlinkage void doFloatError(regs, unsigned int);
+asmlinkage void doAlignmentCheck(regs, unsigned int);
+asmlinkage void doMachineCheck(regs, unsigned int);
+asmlinkage void doSystemCall(regs, unsigned int);
 
 #endif
 
