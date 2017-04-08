@@ -1,4 +1,6 @@
 
+#include "../kernel/include/kernel_defs.h"
+
 .data 
 hello: 
 	.asciz "Hello world"
@@ -85,8 +87,9 @@ loadSegmentRegisters:
 
 	ret
 
-idtSaveState:
+isrSaveState:
 
+	// Clear direction flag.
 	cld
 	
 	pushl	%ds
@@ -105,15 +108,122 @@ idtSaveState:
 
 	iret
 
-# Remove this eventually
 .globl placeHolder
 placeHolder:
 	pusha
 	movl 	$handleFault, %eax
-	jmp 	$0x10, $idtSaveState
+	jmp 	$0x10, $isrSaveState
 
-.globl divideErrorIsr
-divideErrorIsr:
+.globl divideError
+divideError:
 	pusha
 	movl 	$doDivideError, %eax
-	jmp 	$0x10, $idtSaveState
+	jmp 	$0x10, $isrSaveState
+
+.globl debug
+debug:
+	pusha
+	movl	$doDebug, %eax
+	jmp 	$0x10, $isrSaveState
+
+.globl nmi
+nmi:
+	pusha
+	movl	$doNmi, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl breakPoint
+breakPoint:
+	pusha
+	movl	$doBreakPoint, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl overflow
+overflow:
+	pusha
+	movl	$doOverflow, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl boundaryVerification
+boundaryVerifcation:
+	pusha
+	movl	$doBoundaryVerification, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl invalidOpcode
+onvalidOpcode:
+	pusha
+	movl	$doInvalidOpcode, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl	deviceNotAvail
+deviceNotAvail:
+	pusha
+	movl	$doDeviceNotAvailIsr, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl doubleFault
+doubleFault:
+	pusha
+	movl	$doDoubleFault, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl coProcSegOverrun
+coProcSegOverrun:
+	pusha
+	movl	$doCoProcSegOverrun, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl invalTss
+invalTss:
+	pusha
+	movl	$doInvalTss, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl segNotPresent
+segNotPresent:
+	pusha
+	movl	$doSegNotPresent, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl stackException
+stackException:
+	pusha
+	movl	$doStackException, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl generalProtection
+generalProtection:
+	pusha
+	movl	$doGeneralProtection, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl pageFault
+pageFault:
+	pusha
+	movl	$doPageFault, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl floatError
+floatError:
+	pusha
+	movl	$doFloatError, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl alignmentCheck
+alignmentCheck:
+	pusha
+	movl	$doAlignmentCheck, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl machineCheck
+machineCheck:
+	pusha
+	movl	$doMachineCheck, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl systemCall
+systemCall:
+	pusha
+	movl	$doSystemCall, %eax
+	jmp	$0x10, $isrSaveState

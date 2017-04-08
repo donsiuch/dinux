@@ -48,7 +48,25 @@ idtDescriptor idt[MAX_IDT_ENTRIES];
 int idtSize = MAX_IDT_ENTRIES*sizeof(idtDescriptor);
 
 extern void placeHolder(void);
-extern void divideErrorIsr(void);
+extern void divideError(void);
+extern void debug(void);
+extern void nmi(void);
+extern void breakPoint(void);
+extern void overflow(void);
+extern void boundaryVerification(void);
+extern void invalidOpcode(void);
+extern void deviceNotAvail(void);
+extern void doubleFault(void);
+extern void coProcSefOverrun(void);
+extern void invalTss(void);
+extern void segNotPresent(void);
+extern void stackException(void);
+extern void generalProtection(void);
+extern void pageFault(void);
+extern void floatError(void);
+extern void alignmentCheck(void);
+extern void machineCheck(void);
+extern void systemCall(void);
 
 asmlinkage void doDivideError(regs);
 asmlinkage void doDebug(regs, unsigned int);

@@ -45,7 +45,7 @@ void populateIdt()
 		index ++;
 	}
 	
-	setGate(0, (unsigned long)divideErrorIsr, KERNEL_CS, 0x8F);
+	setGate(0, (unsigned long)divideError, KERNEL_CS, 0x8F);
 	
 }
 
@@ -104,3 +104,4 @@ asmlinkage void doDivideError(regs registers)
 	__asm__("hlt");
 		
 }
+
