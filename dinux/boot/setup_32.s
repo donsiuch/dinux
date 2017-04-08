@@ -1,6 +1,4 @@
 
-#include "../kernel/include/kernel_defs.h"
-
 .data 
 hello: 
 	.asciz "Hello world"
