@@ -98,6 +98,8 @@ isrSaveState:
 	// %eax is populated with the service routine
 	call 	*%eax	
 
+	popl	%eax	# Pop error code (or dummy error code)
+
 	popl	%gs
 	popl	%fs
 	popl	%es
@@ -114,6 +116,7 @@ placeHolder:
 
 .globl divideError
 divideError:
+	push 	$0	# Push dummy error code
 	pusha
 	movl 	$doDivideError, %eax
 	jmp 	$0x10, $isrSaveState

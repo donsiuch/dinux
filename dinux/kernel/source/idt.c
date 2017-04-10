@@ -90,6 +90,8 @@ void populateIdt()
  * Exception class: Fault
  * Vector: #0
  *
+ * Stack: A dummy error code was pushed for this case in the assembly caller. It is not needed though.
+ *
  */
 asmlinkage void doDivideError(regs registers)
 {
@@ -98,10 +100,101 @@ asmlinkage void doDivideError(regs registers)
 	// to-do:
 	//	1. Kill current
 	//	2. Re-schedule
-	//	3. Halt must stay if we came from ring 0
-	//		call kernel die routine.
+	//	3. We must hlt if we came from ring 0...
+	//		call kernel die() routine.
 
 	__asm__("hlt");
 		
+}
+
+asmlinkage void doDebug(regs registers)
+{
+
+}
+
+asmlinkage void doNmi(regs registers)
+{
+
+}
+
+asmlinkage void doBreakPoint(regs registers)
+{
+
+}
+
+asmlinkage void doOverflow(regs registers)
+{
+
+}
+
+asmlinkage void doBoundaryVerification(regs registers)
+{
+
+}
+
+asmlinkage void doInvalidOpcode(regs registers)
+{
+
+}
+
+asmlinkage void doDeviceNotAvail(regs registers)
+{
+
+}
+
+asmlinkage void doDoubleFault(regs registers, unsigned int errorCode)
+{
+
+}
+
+asmlinkage void doCoProcSegOverrun(regs registers)
+{
+
+}
+
+asmlinkage void doInvalTss(regs registers, unsigned int errorCode)
+{
+
+}
+
+asmlinkage void doSegNotPresent(regs registers, unsigned int errorCode)
+{
+
+}
+
+// Seg fault
+asmlinkage void doStackException(regs registers, unsigned int errorCode)
+{
+
+}
+
+asmlinkage void doGeneralProtection(regs registers, unsigned int errorCode)
+{
+
+}
+
+asmlinkage void doPageFault(regs registers, unsigned int errorCode)
+{
+
+}
+
+asmlinkage void doFloatError(regs registers)
+{
+
+}
+
+asmlinkage void doAlignmentCheck(regs registers, unsigned int errorCode)
+{
+
+}
+
+asmlinkage void doMachineCheck(regs registers)
+{
+
+}
+
+asmlinkage void doSystemCall(regs registers, unsigned int)
+{
+
 }
 
