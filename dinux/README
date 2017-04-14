@@ -9,3 +9,7 @@ To build the OS for bare metal via USB:
 	3. Modify the last line in BuildKernel and uncomment
 	4. Run BuildKernel
 	5. Boot from USB
+
+NOTES
+Qemu:
+	1. If qemu complains about the lack of a video device, modify the StartVM file by passing the parameter: -curses to the qemu binary. The problem may be experienced if using ssh ( or similar program ) to remotely connect and run StartVM.
