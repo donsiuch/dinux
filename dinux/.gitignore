@@ -14,3 +14,6 @@
 
 # Swap files
 *.swp
+
+# Grub config files
+*.cfg
