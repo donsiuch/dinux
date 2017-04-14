@@ -44,9 +44,8 @@ void populateIdt()
 		setGate(index,(unsigned long)placeHolder, KERNEL_CS, 0x8F);
 		index ++;
 	}
-	
+
 	setGate(0, (unsigned long)divideError, KERNEL_CS, 0x8F);
-	
 }
 
 // Traps v Interrupts: http://stackoverflow.com/questions/3425085/the-difference-between-call-gate-interrupt-gate-trap-gate 
@@ -95,7 +94,7 @@ void populateIdt()
  */
 asmlinkage void doDivideError(regs registers)
 {
-	printd("do_divide_error(): %p, &registers: %p\n", doDivideError, &registers);
+	printd("doDivideError(): %p, &registers: %p\n", doDivideError, &registers);
 
 	// to-do:
 	//	1. Kill current
@@ -109,92 +108,122 @@ asmlinkage void doDivideError(regs registers)
 
 asmlinkage void doDebug(regs registers)
 {
-
+	printd("doDebug(): %p, &registers: %p\n", doDebug, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doNmi(regs registers)
 {
-
+	printd("doNmi(): %p, &registers: %p\n", doNmi, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doBreakPoint(regs registers)
 {
-
+	printd("doBreakPoint(): %p, &registers: %p\n", doBreakPoint, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doOverflow(regs registers)
 {
-
+	printd("doOverflow(): %p, &registers: %p\n", doOverflow, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doBoundaryVerification(regs registers)
 {
-
+	printd("doBoundaryVerification(): %p, &registers: %p\n", doBoundaryVerification, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doInvalidOpcode(regs registers)
 {
-
+	printd("doInvalidOpcode(): %p, &registers: %p\n", doInvalidOpcode, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doDeviceNotAvail(regs registers)
 {
-
+	printd("doDeviceNotAvail(): %p, &registers: %p\n", doDeviceNotAvail, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doDoubleFault(regs registers, unsigned int errorCode)
 {
-
+	printd("doDoubleFault(): %p, errorCode: %p, &registers: %p\n", doDoubleFault, errorCode, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doCoProcSegOverrun(regs registers)
 {
-
+	printd("doCoProcSegOverrun(): %p, &registers: %p\n", doCoProcSegOverrun, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doInvalTss(regs registers, unsigned int errorCode)
 {
-
+	printd("doInvalTss(): %p, errorCode: %p, &registers: %p\n", doInvalTss, errorCode, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doSegNotPresent(regs registers, unsigned int errorCode)
 {
-
+	printd("doSegNotPresent(): %p, errorCode: %p, &registers: %p\n", doSegNotPresent, errorCode, &registers);
+	__asm__("hlt");
 }
 
 // Seg fault
 asmlinkage void doStackException(regs registers, unsigned int errorCode)
 {
-
+	printd("doStackException(): %p, errorCode: %p, &registers: %p\n", doStackException, errorCode, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doGeneralProtection(regs registers, unsigned int errorCode)
 {
-
+	printd("doGeneralProtection(): %p, errorCode: %p, &registers: %p\n", doGeneralProtection, errorCode, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doPageFault(regs registers, unsigned int errorCode)
 {
-
+	printd("doPageFault(): %p, errorCode: %p, &registers: %p\n", doPageFault, errorCode, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doFloatError(regs registers)
 {
-
+	printd("doFloatError(): %p, &registers: %p\n", doFloatError, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doAlignmentCheck(regs registers, unsigned int errorCode)
 {
-
+	printd("doAlignmentCheck(): %p, errorCode: %p, &registers: %p\n", doAlignmentCheck, errorCode, &registers);
+	__asm__("hlt");
 }
 
 asmlinkage void doMachineCheck(regs registers)
 {
-
+	printd("doMachineCheck(): %p, &registers: %p\n", doMachineCheck, &registers);
+	__asm__("hlt");
 }
 
-asmlinkage void doSystemCall(regs registers, unsigned int)
+asmlinkage void doSIMDFloatException(regs registers)
 {
+	printd("doSIMDFloatException(): %p, &registers: %p\n", doSIMDFloatException, &registers);
+	__asm__("hlt");
+}
 
+asmlinkage void doVirtException(regs registers)
+{
+	printd("doVirtException(): %p, &registers: %p\n", doVirtException, &registers);
+	__asm__("hlt");
+}
+
+asmlinkage void doSystemCall(regs registers)
+{
+	printd("doSystemCall(): %p, &registers: %p\n", doSystemCall, &registers);
+	__asm__("hlt");
 }
 

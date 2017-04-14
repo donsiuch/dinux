@@ -160,7 +160,7 @@ onvalidOpcode:
 .globl	deviceNotAvail
 deviceNotAvail:
 	pusha
-	movl	$doDeviceNotAvailIsr, %eax
+	movl	$doDeviceNotAvail, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl doubleFault
@@ -221,6 +221,18 @@ alignmentCheck:
 machineCheck:
 	pusha
 	movl	$doMachineCheck, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl simdFloatException
+simdFloatException:
+	pusha
+	movl	$doSIMDFloatException, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl virtException
+virtException:
+	pusha
+	movl	$doVirtException, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl systemCall

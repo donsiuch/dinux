@@ -4,8 +4,8 @@ COMPILE=-c
 
 all: boot.o setup_32.o
 
-setup_32.o: setup_32.s 
-	$(CC) $(CFLAGS) $(COMPILE) setup_32.s -I../kernel/include
+setup_32.o: setup_32.S 
+	$(CC) $(CFLAGS) $(COMPILE) setup_32.S 
 
 boot.o: boot.s
 	$(CC) $(CFLAGS) $(COMPILE) boot.s

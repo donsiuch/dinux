@@ -66,27 +66,31 @@ extern void pageFault(void);
 extern void floatError(void);
 extern void alignmentCheck(void);
 extern void machineCheck(void);
+extern void simdFloatException(void);
+extern void virtException(void);
 extern void systemCall(void);
 
 asmlinkage void doDivideError(regs);
-asmlinkage void doDebug(regs, unsigned int);
-asmlinkage void doNmi(regs, unsigned int);
-asmlinkage void doBreakPoint(regs, unsigned int);
-asmlinkage void doOverflow(regs, unsigned int);
-asmlinkage void doBoundaryVerification(regs, unsigned int);
-asmlinkage void doInvalidOpcode(regs, unsigned int);
-asmlinkage void doDeviceNotAvail(regs, unsigned int);
+asmlinkage void doDebug(regs);
+asmlinkage void doNmi(regs);
+asmlinkage void doBreakPoint(regs);
+asmlinkage void doOverflow(regs);
+asmlinkage void doBoundaryVerification(regs);
+asmlinkage void doInvalidOpcode(regs);
+asmlinkage void doDeviceNotAvail(regs);
 asmlinkage void doDoubleFault(regs, unsigned int);
-asmlinkage void doCoProcSegOverrun(regs, unsigned int);
+asmlinkage void doCoProcSegOverrun(regs);
 asmlinkage void doInvalTss(regs, unsigned int);
 asmlinkage void doSegNotPresent(regs, unsigned int);
 asmlinkage void doStackException(regs, unsigned int);
 asmlinkage void doGeneralProtection(regs, unsigned int);
 asmlinkage void doPageFault(regs, unsigned int);
-asmlinkage void doFloatError(regs, unsigned int);
+asmlinkage void doFloatError(regs);
 asmlinkage void doAlignmentCheck(regs, unsigned int);
-asmlinkage void doMachineCheck(regs, unsigned int);
-asmlinkage void doSystemCall(regs, unsigned int);
+asmlinkage void doMachineCheck(regs);
+asmlinkage void doSIMDFloatException(regs);
+asmlinkage void doVirtException(regs);
+asmlinkage void doSystemCall(regs);
 
 #endif
 
