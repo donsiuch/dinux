@@ -10,7 +10,8 @@
  */
 void handleFault(regs registers, unsigned int errorCode)
 {
-	printd("handleFault, %p %p\n", registers.eax, errorCode);
+//	printd("handleFault, %p %p\n", registers.eax, errorCode);
+//	terminal_initialize();
 }
 
 /*
@@ -34,18 +35,21 @@ void setGate(unsigned short index, unsigned long routineAddress, unsigned short 
  */
 void populateIdt()
 {
-	unsigned short index = 1;
+	unsigned short index = 0;
 
 	memset(idt, 0, sizeof(idt));
 
 	// to-do: re-purpose loop for the IRQs and the rest of the IDT
 	while ( index < MAX_IDT_ENTRIES ) 
 	{
-		setGate(index,(unsigned long)placeHolder, KERNEL_CS, 0x8F);
+		setGate(index,(unsigned long)placeHolder, KERNEL_CS, TRAP_GATE);
 		index ++;
 	}
 
-	setGate(0, (unsigned long)divideError, KERNEL_CS, 0x8F);
+	setGate(0, (unsigned long)divideError, KERNEL_CS, TRAP_GATE);
+	setGate(1, (unsigned long)debug, KERNEL_CS, TRAP_GATE);
+	setGate(2, (unsigned long)nmi, KERNEL_CS, INTERRUPT_GATE); 
+	setGate(3, (unsigned long)breakPoint, KERNEL_CS, TRAP_GATE);
 }
 
 // Traps v Interrupts: http://stackoverflow.com/questions/3425085/the-difference-between-call-gate-interrupt-gate-trap-gate 
@@ -108,7 +112,11 @@ asmlinkage void doDivideError(regs registers)
 
 asmlinkage void doDebug(regs registers)
 {
-	printd("doDebug(): %p, &registers: %p\n", doDebug, &registers);
+	int x = 0xDEADBEEF;
+//	printd("doDebug(): %p, &registers: %p\n", doDebug, &registers);
+
+	dumpBytes(&x, 0x50);
+
 	__asm__("hlt");
 }
 
@@ -126,7 +134,7 @@ asmlinkage void doBreakPoint(regs registers)
 
 asmlinkage void doOverflow(regs registers)
 {
-	printd("doOverflow(): %p, &registers: %p\n", doOverflow, &registers);
+//	printd("doOverflow(): %p, &registers: %p\n", doOverflow, &registers);
 	__asm__("hlt");
 }
 

@@ -98,18 +98,19 @@ isrSaveState:
 	// %eax is populated with the service routine
 	call 	*%eax	
 
-	popl	%eax	# Pop error code (or dummy error code)
-
 	popl	%gs
 	popl	%fs
 	popl	%es
 	popl	%ds
 	popa
 
+	subl	$4, %eax	# Pop error code (or dummy error code)
+
 	iret
 
 .globl placeHolder
 placeHolder:
+	push	$0
 	pusha
 	movl 	$handleFault, %eax
 	jmp 	$0x10, $isrSaveState
@@ -123,42 +124,49 @@ divideError:
 
 .globl debug
 debug:
+	push	$0
 	pusha
 	movl	$doDebug, %eax
 	jmp 	$0x10, $isrSaveState
 
 .globl nmi
 nmi:
+	push 	$0
 	pusha
 	movl	$doNmi, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl breakPoint
 breakPoint:
+	push	$0
 	pusha
 	movl	$doBreakPoint, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl overflow
 overflow:
+	push	$0
 	pusha
 	movl	$doOverflow, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl boundaryVerification
 boundaryVerifcation:
+	push	$0
 	pusha
 	movl	$doBoundaryVerification, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl invalidOpcode
 onvalidOpcode:
+	push	$0
 	pusha
 	movl	$doInvalidOpcode, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl	deviceNotAvail
 deviceNotAvail:
+	push	$0
 	pusha
 	movl	$doDeviceNotAvail, %eax
 	jmp	$0x10, $isrSaveState
@@ -171,6 +179,7 @@ doubleFault:
 
 .globl coProcSegOverrun
 coProcSegOverrun:
+	push	$0
 	pusha
 	movl	$doCoProcSegOverrun, %eax
 	jmp	$0x10, $isrSaveState
@@ -207,6 +216,7 @@ pageFault:
 
 .globl floatError
 floatError:
+	push	$0
 	pusha
 	movl	$doFloatError, %eax
 	jmp	$0x10, $isrSaveState
@@ -219,24 +229,28 @@ alignmentCheck:
 
 .globl machineCheck
 machineCheck:
+	push	$0
 	pusha
 	movl	$doMachineCheck, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl simdFloatException
 simdFloatException:
+	push	$0
 	pusha
 	movl	$doSIMDFloatException, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl virtException
 virtException:
+	push	$0
 	pusha
 	movl	$doVirtException, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl systemCall
 systemCall:
+	push	$0
 	pusha
 	movl	$doSystemCall, %eax
 	jmp	$0x10, $isrSaveState

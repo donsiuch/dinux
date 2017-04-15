@@ -6,6 +6,11 @@
 
 #define MAX_IDT_ENTRIES 256
 
+#define TRAP_GATE		0x8F
+#define	INTERRUPT_GATE		0x8E
+#define SYSTEM_INTERRUPT_GATE	0xFE
+#define	SYSTEM_GATE		0xEF
+
 /*
 
    

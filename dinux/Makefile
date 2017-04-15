@@ -7,13 +7,13 @@ all: myos.bin
 
 myos.bin: link
 	gcc -m32 $(OPTIONS) -o myos.bin \
-				./drivers/vga/objects/vga.o \
-				./utility/objects/io.o \
-				./utility/objects/memoryOperations.o \
-				./kernel/objects/main.o \
-				./kernel/objects/idt.o \
-				./boot/setup_32.o \
-				./boot/boot.o \
+		./drivers/vga/objects/vga.o \
+		./utility/objects/io.o \
+		./utility/objects/memoryOperations.o \
+		./kernel/objects/main.o \
+		./kernel/objects/idt.o \
+		./boot/setup_32.o \
+		./boot/boot.o \
 				
 									 
 

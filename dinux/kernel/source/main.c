@@ -10,5 +10,7 @@ void kernel_main() {
 
 	while (1)
 	{
+	//	printd("In the main loop\n");
+		terminal_initialize();
 	}
 }

@@ -1,9 +1,9 @@
+Loader script
+1. Create a loader script that places kernel code at 0xC0000000 ( or wherever Linux does )
 
 /driver
 1. Migrate VGA driver code to the driver directory (currently in kernel/main.c) [ DONE ]
 2. Implement newlines [ DONE ]
-3. Implement printf
+3. Implement better format specifiers in printd 
 4. Implement itoa
 
-Questions:
-1. Where is the BIOS loading the boot code? 0x1000?
