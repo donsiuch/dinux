@@ -1,12 +1,12 @@
 
 LD=ld
 32BIT=-m elf_i386
-OPTIONS=-nostartfiles
+OPTIONS=-m32 -nostartfiles
 
 all: myos.bin
 
 myos.bin: link
-	gcc -m32 $(OPTIONS) -o myos.bin \
+	gcc $(OPTIONS) -T linker.ld -o myos.bin \
 		./drivers/vga/objects/vga.o \
 		./utility/objects/io.o \
 		./utility/objects/memoryOperations.o \

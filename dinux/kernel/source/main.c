@@ -6,11 +6,10 @@ void kernel_main() {
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	//dumpBytes((unsigned char *)0x00, 16); 
+	//printd("In the main loop %p\n", x);
 
 	while (1)
 	{
-	//	printd("In the main loop\n");
-		terminal_initialize();
+		
 	}
 }

@@ -10,8 +10,8 @@
  */
 void handleFault(regs registers, unsigned int errorCode)
 {
-//	printd("handleFault, %p %p\n", registers.eax, errorCode);
-//	terminal_initialize();
+	printd("handleFault, %p %p\n", registers.eax, errorCode);
+	__asm__("hlt");
 }
 
 /*
@@ -50,6 +50,25 @@ void populateIdt()
 	setGate(1, (unsigned long)debug, KERNEL_CS, TRAP_GATE);
 	setGate(2, (unsigned long)nmi, KERNEL_CS, INTERRUPT_GATE); 
 	setGate(3, (unsigned long)breakPoint, KERNEL_CS, TRAP_GATE);
+	setGate(4, (unsigned long)overflow, KERNEL_CS, TRAP_GATE);
+	setGate(5, (unsigned long)boundaryVerification, KERNEL_CS, TRAP_GATE);
+	setGate(6, (unsigned long)invalidOpcode, KERNEL_CS, TRAP_GATE); 
+	setGate(7, (unsigned long)deviceNotAvail, KERNEL_CS, TRAP_GATE);
+	setGate(8, (unsigned long)doubleFault, KERNEL_CS, TRAP_GATE);
+	setGate(9, (unsigned long)coProcSegOverrun, KERNEL_CS, TRAP_GATE);
+	setGate(10, (unsigned long)invalTss, KERNEL_CS, TRAP_GATE); 
+	setGate(11, (unsigned long)segNotPresent, KERNEL_CS, TRAP_GATE);
+	setGate(12, (unsigned long)stackException, KERNEL_CS, TRAP_GATE);
+	setGate(13, (unsigned long)generalProtection, KERNEL_CS, TRAP_GATE);
+	setGate(14, (unsigned long)pageFault, KERNEL_CS, TRAP_GATE); 
+	// 15 unused. Reserved by Intel
+	setGate(15, (unsigned long)alignmentCheck, KERNEL_CS, TRAP_GATE);
+	setGate(16, (unsigned long)machineCheck, KERNEL_CS, TRAP_GATE);
+	setGate(17, (unsigned long)simdFloatException, KERNEL_CS, TRAP_GATE); 
+	setGate(18, (unsigned long)virtException, KERNEL_CS, TRAP_GATE);
+	// ... ?
+	setGate(32, (unsigned long)systemTimer, KERNEL_CS, INTERRUPT_GATE);
+
 }
 
 // Traps v Interrupts: http://stackoverflow.com/questions/3425085/the-difference-between-call-gate-interrupt-gate-trap-gate 
@@ -112,10 +131,7 @@ asmlinkage void doDivideError(regs registers)
 
 asmlinkage void doDebug(regs registers)
 {
-	int x = 0xDEADBEEF;
-//	printd("doDebug(): %p, &registers: %p\n", doDebug, &registers);
-
-	dumpBytes(&x, 0x50);
+	printd("doDebug(): %p, &registers: %p\n", doDebug, &registers);
 
 	__asm__("hlt");
 }
@@ -134,7 +150,7 @@ asmlinkage void doBreakPoint(regs registers)
 
 asmlinkage void doOverflow(regs registers)
 {
-//	printd("doOverflow(): %p, &registers: %p\n", doOverflow, &registers);
+	printd("doOverflow(): %p, &registers: %p\n", doOverflow, &registers);
 	__asm__("hlt");
 }
 
@@ -158,8 +174,11 @@ asmlinkage void doDeviceNotAvail(regs registers)
 
 asmlinkage void doDoubleFault(regs registers, unsigned int errorCode)
 {
+	int x = 0x77777777;
 	printd("doDoubleFault(): %p, errorCode: %p, &registers: %p\n", doDoubleFault, errorCode, &registers);
-	__asm__("hlt");
+	dumpBytes(&x, 128);
+
+	// Automatically aborts (hlts)
 }
 
 asmlinkage void doCoProcSegOverrun(regs registers)
@@ -229,9 +248,16 @@ asmlinkage void doVirtException(regs registers)
 	__asm__("hlt");
 }
 
+asmlinkage void doSystemTimer(regs registers)
+{
+	printd("doSystemTimer(): %p, &registers: %p\n", doSystemCall, &registers);
+	__asm__("hlt");
+}
+
 asmlinkage void doSystemCall(regs registers)
 {
 	printd("doSystemCall(): %p, &registers: %p\n", doSystemCall, &registers);
 	__asm__("hlt");
 }
+
 

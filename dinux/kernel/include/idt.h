@@ -62,7 +62,7 @@ extern void boundaryVerification(void);
 extern void invalidOpcode(void);
 extern void deviceNotAvail(void);
 extern void doubleFault(void);
-extern void coProcSefOverrun(void);
+extern void coProcSegOverrun(void);
 extern void invalTss(void);
 extern void segNotPresent(void);
 extern void stackException(void);
@@ -73,6 +73,7 @@ extern void alignmentCheck(void);
 extern void machineCheck(void);
 extern void simdFloatException(void);
 extern void virtException(void);
+extern void systemTimer(void);
 extern void systemCall(void);
 
 asmlinkage void doDivideError(regs);
@@ -95,6 +96,7 @@ asmlinkage void doAlignmentCheck(regs, unsigned int);
 asmlinkage void doMachineCheck(regs);
 asmlinkage void doSIMDFloatException(regs);
 asmlinkage void doVirtException(regs);
+asmlinkage void doSystemTimer(regs);
 asmlinkage void doSystemCall(regs);
 
 #endif

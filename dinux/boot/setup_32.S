@@ -94,9 +94,13 @@ isrSaveState:
 	pushl	%es
 	pushl	%fs
 	pushl 	%gs
-	
+
+	pushl $0xdeadbeef
+
 	// %eax is populated with the service routine
 	call 	*%eax	
+
+	subl	$4, %esp
 
 	popl	%gs
 	popl	%fs
@@ -104,13 +108,13 @@ isrSaveState:
 	popl	%ds
 	popa
 
-	subl	$4, %eax	# Pop error code (or dummy error code)
+	subl	$4, %esp	# Pop error code (or dummy error code)
 
 	iret
 
 .globl placeHolder
 placeHolder:
-	push	$0
+#	push	$0
 	pusha
 	movl 	$handleFault, %eax
 	jmp 	$0x10, $isrSaveState
@@ -151,14 +155,14 @@ overflow:
 	jmp	$0x10, $isrSaveState
 
 .globl boundaryVerification
-boundaryVerifcation:
+boundaryVerification:
 	push	$0
 	pusha
 	movl	$doBoundaryVerification, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl invalidOpcode
-onvalidOpcode:
+invalidOpcode:
 	push	$0
 	pusha
 	movl	$doInvalidOpcode, %eax
@@ -246,6 +250,13 @@ virtException:
 	push	$0
 	pusha
 	movl	$doVirtException, %eax
+	jmp	$0x10, $isrSaveState
+
+.globl systemTimer
+systemTimer:
+	push	$0
+	pusha
+	movl	$doSystemTimer, %eax
 	jmp	$0x10, $isrSaveState
 
 .globl systemCall
