@@ -1,5 +1,8 @@
+###############
+# How to run
+###############
 
-To build the OS for the VM:
+To build the OS and run on a VM:
 	1. Run BuildKernel
 	2. Run StartVM
 
@@ -10,6 +13,29 @@ To build the OS for bare metal via USB:
 	4. Run BuildKernel
 	5. Boot from USB
 
-NOTES
-Qemu:
-	1. If qemu complains about the lack of a video device, modify the StartVM file by passing the parameter: -curses to the qemu binary. The problem may be experienced if using ssh ( or similar program ) to remotely connect and run StartVM.
+###################
+# Required Tools
+###################
+
+gcc (sudo apt-get install gcc )
+qemu ( sudo apt-get install qemu )
+make ( sudo apt-get install make )
+xorriso 1.2.9 or later ( sudo apt-get install xorisso )
+
+#########
+# Qemu 
+########
+
+1. If qemu complains about the lack of a video device, modify the StartVM file by passing the parameter: -curses to the qemu binary. The problem may be experienced if using ssh ( or similar program ) to remotely connect and run StartVM.
+
+###################################################
+# Compiling 32 bit programs on a 64 bit machine:
+###################################################
+
+1. The compiler is passed a flag -m32 indicating to gcc to generate a 32 bit binary. If an error occurs:
+		
+	/usr/include/features.h:xxx:xx: fatal error: sys/cdefs.h: No such file or directory
+	
+execute the following two commands exactly (for Debian based OS'):
+	sudo apt-get install libx32gcc-4.8-dev
+	sudo apt-get install libc6-dev-i386
