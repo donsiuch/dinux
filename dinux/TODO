@@ -7,3 +7,8 @@ Loader script
 3. Implement better format specifiers in printd 
 4. Implement itoa
 
+Useful links:
+https://software.intel.com/sites/default/files/managed/a4/60/325384-sdm-vol-3abcd.pdf
+http://www.plantation-productions.com/Webster/www.artofasm.com/DOS/pdf/ch17.pdf
+http://wiki.osdev.org/Interrupt_Descriptor_Table
+https://geeksww.com/tutorials/operating_systems/linux/tips_and_tricks/some_tricks_used_by_the_linux_kernel.php
