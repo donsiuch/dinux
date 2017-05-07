@@ -101,8 +101,7 @@ isrSaveState:
 	movl	%esp, %edx	# Get a pointer to the registers pointer
 	pushl 	%edx		# push the register pointer onto the stack
 
-	// %eax is populated with the service routine
-	call 	*%eax
+	call 	*%eax		# %eax is populated with the service routine
 	
 	addl	$4, %esp	# Pop the register pointer from the stack	
 
@@ -112,7 +111,7 @@ isrSaveState:
 	popl	%ds
 	popal
 
-	addl	$4, %esp	# Pop error code (or dummy error code)
+	addl	$4, %esp	# Pop interrupt number, then error code 
 
 	sti
 	
@@ -121,7 +120,7 @@ isrSaveState:
 .globl placeHolder
 placeHolder:
 	cli
-	pushl	$0x1234567A
+	pushl	$0
 	pushal
 	movl 	$handleFault, %eax
 	jmp 	isrSaveState
@@ -130,7 +129,7 @@ placeHolder:
 .globl divideError
 divideError:
 	cli
-	push 	$0x12345670	# Push dummy error code
+	push 	$0		# Push dummy error code
 	pushal
 	movl 	$doDivideError, %eax
 	jmp 	isrSaveState

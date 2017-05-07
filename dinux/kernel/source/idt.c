@@ -24,7 +24,7 @@ static void remapIrq()
 	// ICW3: tell Slave PIC its cascade identity (0000 0010)
 	outb(PIC_SLAVE_DATA, 0x02);
 
-	//
+	// ??
 	outb(PIC_MASTER_DATA, ICW4_8086);
 	outb(PIC_SLAVE_DATA, ICW4_8086);
 
@@ -298,82 +298,139 @@ asmlinkage void doVirtException(regs *registers)
 asmlinkage void doSystemTimer(regs *registers)
 {
 	printd("doSystemTimer(): %p, &registers: %p\n", doSystemTimer, registers);
+
+	// Tell the master PIC we are done servicing the interrupt.	
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq1(regs *registers)
 {
 	printd("doIrq1(): %p, &registers: %p\n", doIrq1, registers);
+	
+	// Tell the master PIC we are done servicing the interrupt.
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq2(regs *registers)
 {
 	printd("doIrq2(): %p, &registers: %p\n", doIrq2, registers);
+
+	// Tell the master PIC we are done servicing the interrupt.	
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq3(regs *registers)
 {
 	printd("doIrq3(): %p, &registers: %p\n", doIrq3, registers);
+
+	// Tell the master PIC we are done servicing the interrupt.
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq4(regs *registers)
 {
 	printd("doIrq4(): %p, &registers: %p\n", doIrq4, registers);
+
+	// Tell the master PIC we are done servicing the interrupt.
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq5(regs *registers)
 {
 	printd("doIrq5(): %p, &registers: %p\n", doIrq5, registers);
+
+	// Tell the master PIC we are done servicing the interrupt.	
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq6(regs *registers)
 {
 	printd("doIrq6(): %p, &registers: %p\n", doIrq6, registers);
+	
+	// Tell the master PIC we are done servicing the interrupt.
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq7(regs *registers)
 {
 	printd("doIrq7(): %p, &registers: %p\n", doIrq7, registers);
+
+	// Tell the master PIC we are done servicing the interrupt.	
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq8(regs *registers)
 {
 	printd("doIrq8(): %p, &registers: %p\n", doIrq8, registers);
+
+	// Tell master and slave PICs we are finished servicing the interrupt.	
+	outb(PIC_SLAVE_COMMAND, 0x20);
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq9(regs *registers)
 {
 	printd("doIrq9(): %p, &registers: %p\n", doIrq9, registers);
+	
+	// Tell master and slave PICs we are finished servicing the interrupt.		
+	outb(PIC_SLAVE_COMMAND, 0x20);
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq10(regs *registers)
 {
 	printd("doIrq10(): %p, &registers: %p\n", doIrq10, registers);
+	
+	// Tell master and slave PICs we are finished servicing the interrupt.	
+	outb(PIC_SLAVE_COMMAND, 0x20);
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq11(regs *registers)
 {
 	printd("doIrq11(): %p, &registers: %p\n", doIrq11, registers);
+	
+	// Tell master and slave PICs we are finished servicing the interrupt.	
+	outb(PIC_SLAVE_COMMAND, 0x20);
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq12(regs *registers)
 {
 	printd("doIrq12(): %p, &registers: %p\n", doIrq12, registers);
+
+	// Tell master and slave PICs we are finished servicing the interrupt.	
+	outb(PIC_SLAVE_COMMAND, 0x20);
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq13(regs *registers)
 {
 	printd("doIrq13(): %p, &registers: %p\n", doIrq13, registers);
+
+	// Tell master and slave PICs we are finished servicing the interrupt.	
+	outb(PIC_SLAVE_COMMAND, 0x20);
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq14(regs *registers)
 {
 	printd("doIrq14(): %p, &registers: %p\n", doIrq14, registers);
+
+	// Tell master and slave PICs we are finished servicing the interrupt.	
+	outb(PIC_SLAVE_COMMAND, 0x20);
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq15(regs *registers)
 {
 	printd("doIrq15(): %p, &registers: %p\n", doIrq15, registers);
+
+	// Tell master and slave PICs we are finished servicing the interrupt.	
+	outb(PIC_SLAVE_COMMAND, 0x20);
+	outb(PIC_MASTER_COMMAND, 0x20);
 }
+	
 
 asmlinkage void doSystemCall(regs *registers)
 {
