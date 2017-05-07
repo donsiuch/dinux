@@ -4,12 +4,14 @@
 
 void kernel_main() {
 	/* Initialize terminal interface */
+	
 	terminal_initialize();
+	
+	printd("In the main loop\n");
 
-	//printd("In the main loop %p\n", x);
-
-	while (1)
+	while (1) 
 	{
 		
+
 	}
 }

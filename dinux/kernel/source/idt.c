@@ -1,17 +1,36 @@
 
 #include "../include/idt.h"
+#include "../include/system.h"
 #include "../../utility/include/io.h"
 #include "../../utility/include/memoryOperations.h"
 
-/*
- * Function: handleFault
- *
- *
- */
-void handleFault(regs registers, unsigned int errorCode)
+static void remapIrq()
 {
-	printd("handleFault, %p %p\n", registers.eax, errorCode);
-	__asm__("hlt");
+	// Start initialization sequence
+	outb(PIC_MASTER_COMMAND, ICW1_INIT+ICW1_ICW4);
+	outb(PIC_SLAVE_COMMAND, ICW1_INIT+ICW1_ICW4);
+
+	// Master PIC offset... 32
+	// vectors on the master become offset1..offset1+7
+	outb(PIC_MASTER_DATA, 0x20);
+
+	// Slave PIC offset 2... 40	
+	// same for slave PIC: offset2..offset2+7
+	outb(PIC_SLAVE_DATA, 0x28);
+
+	// ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+	outb(PIC_MASTER_DATA, 0x04);
+
+	// ICW3: tell Slave PIC its cascade identity (0000 0010)
+	outb(PIC_SLAVE_DATA, 0x02);
+
+	//
+	outb(PIC_MASTER_DATA, ICW4_8086);
+	outb(PIC_SLAVE_DATA, ICW4_8086);
+
+	// ?? 
+	outb(PIC_MASTER_DATA, 0x0);
+	outb(PIC_SLAVE_DATA, 0x0);
 }
 
 /*
@@ -38,6 +57,8 @@ void populateIdt()
 	unsigned short index = 0;
 
 	memset(idt, 0, sizeof(idt));
+
+	remapIrq();
 
 	// to-do: re-purpose loop for the IRQs and the rest of the IDT
 	while ( index < MAX_IDT_ENTRIES ) 
@@ -68,7 +89,21 @@ void populateIdt()
 	setGate(18, (unsigned long)virtException, KERNEL_CS, TRAP_GATE);
 	// ... ?
 	setGate(32, (unsigned long)systemTimer, KERNEL_CS, INTERRUPT_GATE);
-
+	setGate(33, (unsigned long)irq1, KERNEL_CS, INTERRUPT_GATE);
+	setGate(34, (unsigned long)irq2, KERNEL_CS, INTERRUPT_GATE);
+	setGate(35, (unsigned long)irq3, KERNEL_CS, INTERRUPT_GATE);
+	setGate(36, (unsigned long)irq4, KERNEL_CS, INTERRUPT_GATE);
+	setGate(37, (unsigned long)irq5, KERNEL_CS, INTERRUPT_GATE);
+	setGate(38, (unsigned long)irq6, KERNEL_CS, INTERRUPT_GATE);
+	setGate(39, (unsigned long)irq7, KERNEL_CS, INTERRUPT_GATE);
+	setGate(40, (unsigned long)irq8, KERNEL_CS, INTERRUPT_GATE);
+	setGate(41, (unsigned long)irq9, KERNEL_CS, INTERRUPT_GATE);
+	setGate(42, (unsigned long)irq10, KERNEL_CS, INTERRUPT_GATE);
+	setGate(43, (unsigned long)irq11, KERNEL_CS, INTERRUPT_GATE);
+	setGate(44, (unsigned long)irq12, KERNEL_CS, INTERRUPT_GATE);
+	setGate(45, (unsigned long)irq13, KERNEL_CS, INTERRUPT_GATE);
+	setGate(46, (unsigned long)irq14, KERNEL_CS, INTERRUPT_GATE);
+	setGate(47, (unsigned long)irq15, KERNEL_CS, INTERRUPT_GATE);
 }
 
 // Traps v Interrupts: http://stackoverflow.com/questions/3425085/the-difference-between-call-gate-interrupt-gate-trap-gate 
@@ -108,6 +143,18 @@ void populateIdt()
 //
 
 /*
+ * Function: handleFault
+ * Description: Default handler
+ *
+ *
+ */
+void handleFault(regs registers, unsigned int errorCode)
+{
+	printd("handleFault, %p %p\n", registers.eax, errorCode);
+	__asm__("hlt");
+}
+
+/*
  * Function: doDivideError
  * Exception class: Fault
  * Vector: #0
@@ -115,9 +162,9 @@ void populateIdt()
  * Stack: A dummy error code was pushed for this case in the assembly caller. It is not needed though.
  *
  */
-asmlinkage void doDivideError(regs registers)
+asmlinkage void doDivideError(regs *registers)
 {
-	printd("doDivideError(): %p, &registers: %p\n", doDivideError, &registers);
+	printd("doDivideError(): %p, &registers: %p\n", doDivideError, registers);
 
 	// to-do:
 	//	1. Kill current
@@ -129,135 +176,229 @@ asmlinkage void doDivideError(regs registers)
 		
 }
 
-asmlinkage void doDebug(regs registers)
+asmlinkage void doDebug(regs *registers)
 {
-	printd("doDebug(): %p, &registers: %p\n", doDebug, &registers);
-
+	printd("doDebug(): %p, &registers: %p\n", doDebug, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doNmi(regs registers)
+asmlinkage void doNmi(regs *registers)
 {
-	printd("doNmi(): %p, &registers: %p\n", doNmi, &registers);
+	printd("doNmi(): %p, &registers: %p\n", doNmi, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doBreakPoint(regs registers)
+asmlinkage void doBreakPoint(regs *registers)
 {
-	printd("doBreakPoint(): %p, &registers: %p\n", doBreakPoint, &registers);
+	printd("doBreakPoint(): %p, &registers: %p\n", doBreakPoint, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doOverflow(regs registers)
+asmlinkage void doOverflow(regs *registers)
 {
-	printd("doOverflow(): %p, &registers: %p\n", doOverflow, &registers);
+	printd("doOverflow(): %p, &registers: %p\n", doOverflow, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doBoundaryVerification(regs registers)
+asmlinkage void doBoundaryVerification(regs *registers)
 {
-	printd("doBoundaryVerification(): %p, &registers: %p\n", doBoundaryVerification, &registers);
+	printd("doBoundaryVerification(): %p, &registers: %p\n", doBoundaryVerification, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doInvalidOpcode(regs registers)
+asmlinkage void doInvalidOpcode(regs *registers)
 {
-	printd("doInvalidOpcode(): %p, &registers: %p\n", doInvalidOpcode, &registers);
+	printd("doInvalidOpcode(): %p, &registers: %p\n", doInvalidOpcode, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doDeviceNotAvail(regs registers)
+asmlinkage void doDeviceNotAvail(regs *registers)
 {
-	printd("doDeviceNotAvail(): %p, &registers: %p\n", doDeviceNotAvail, &registers);
+	printd("doDeviceNotAvail(): %p, &registers: %p\n", doDeviceNotAvail, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doDoubleFault(regs registers, unsigned int errorCode)
+asmlinkage void doDoubleFault(regs *registers)
 {
-	int x = 0x77777777;
-	printd("doDoubleFault(): %p, errorCode: %p, &registers: %p\n", doDoubleFault, errorCode, &registers);
-	dumpBytes(&x, 128);
-
+	printd("doDoubleFault(): %p, &registers: %p\n", doDoubleFault, registers);
+	//dumpBytes(&registers, 128);
+	//dumpRegisters(registers);
 	// Automatically aborts (hlts)
 }
 
-asmlinkage void doCoProcSegOverrun(regs registers)
+asmlinkage void doCoProcSegOverrun(regs *registers)
 {
-	printd("doCoProcSegOverrun(): %p, &registers: %p\n", doCoProcSegOverrun, &registers);
+	printd("doCoProcSegOverrun(): %p, &registers: %p\n", doCoProcSegOverrun, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doInvalTss(regs registers, unsigned int errorCode)
+asmlinkage void doInvalTss(regs *registers)
 {
-	printd("doInvalTss(): %p, errorCode: %p, &registers: %p\n", doInvalTss, errorCode, &registers);
+	printd("doInvalTss(): %p, errorCode: %p, &registers: %p\n", doInvalTss, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doSegNotPresent(regs registers, unsigned int errorCode)
+asmlinkage void doSegNotPresent(regs *registers)
 {
-	printd("doSegNotPresent(): %p, errorCode: %p, &registers: %p\n", doSegNotPresent, errorCode, &registers);
+	printd("doSegNotPresent(): %p, errorCode: %p, &registers: %p\n", doSegNotPresent, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
 // Seg fault
-asmlinkage void doStackException(regs registers, unsigned int errorCode)
+asmlinkage void doStackException(regs *registers)
 {
-	printd("doStackException(): %p, errorCode: %p, &registers: %p\n", doStackException, errorCode, &registers);
+	printd("doStackException(): %p, errorCode: %p, &registers: %p\n", doStackException, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doGeneralProtection(regs registers, unsigned int errorCode)
+asmlinkage void doGeneralProtection(regs *registers)
 {
-	printd("doGeneralProtection(): %p, errorCode: %p, &registers: %p\n", doGeneralProtection, errorCode, &registers);
+	printd("doGeneralProtection(): %p, &registers: %p\n", doGeneralProtection, registers);
+	//dumpBytes(&x, 128);
+	//dumpRegisters(registers);
+	//__asm__("hlt");
+}
+
+asmlinkage void doPageFault(regs *registers)
+{
+	printd("doPageFault(): %p, errorCode: %p, &registers: %p\n", doPageFault, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doPageFault(regs registers, unsigned int errorCode)
+asmlinkage void doFloatError(regs *registers)
 {
-	printd("doPageFault(): %p, errorCode: %p, &registers: %p\n", doPageFault, errorCode, &registers);
+	printd("doFloatError(): %p, &registers: %p\n", doFloatError, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doFloatError(regs registers)
+asmlinkage void doAlignmentCheck(regs *registers)
 {
-	printd("doFloatError(): %p, &registers: %p\n", doFloatError, &registers);
+	printd("doAlignmentCheck(): %p, errorCode: %p, &registers: %p\n", doAlignmentCheck, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doAlignmentCheck(regs registers, unsigned int errorCode)
+asmlinkage void doMachineCheck(regs *registers)
 {
-	printd("doAlignmentCheck(): %p, errorCode: %p, &registers: %p\n", doAlignmentCheck, errorCode, &registers);
+	printd("doMachineCheck(): %p, &registers: %p\n", doMachineCheck, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doMachineCheck(regs registers)
+asmlinkage void doSIMDFloatException(regs *registers)
 {
-	printd("doMachineCheck(): %p, &registers: %p\n", doMachineCheck, &registers);
+	printd("doSIMDFloatException(): %p, &registers: %p\n", doSIMDFloatException, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doSIMDFloatException(regs registers)
+asmlinkage void doVirtException(regs *registers)
 {
-	printd("doSIMDFloatException(): %p, &registers: %p\n", doSIMDFloatException, &registers);
+	printd("doVirtException(): %p, &registers: %p\n", doVirtException, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doVirtException(regs registers)
+asmlinkage void doSystemTimer(regs *registers)
 {
-	printd("doVirtException(): %p, &registers: %p\n", doVirtException, &registers);
+	printd("doSystemTimer(): %p, &registers: %p\n", doSystemTimer, registers);
+}
+
+asmlinkage void doIrq1(regs *registers)
+{
+	printd("doIrq1(): %p, &registers: %p\n", doIrq1, registers);
+}
+
+asmlinkage void doIrq2(regs *registers)
+{
+	printd("doIrq2(): %p, &registers: %p\n", doIrq2, registers);
+}
+
+asmlinkage void doIrq3(regs *registers)
+{
+	printd("doIrq3(): %p, &registers: %p\n", doIrq3, registers);
+}
+
+asmlinkage void doIrq4(regs *registers)
+{
+	printd("doIrq4(): %p, &registers: %p\n", doIrq4, registers);
+}
+
+asmlinkage void doIrq5(regs *registers)
+{
+	printd("doIrq5(): %p, &registers: %p\n", doIrq5, registers);
+}
+
+asmlinkage void doIrq6(regs *registers)
+{
+	printd("doIrq6(): %p, &registers: %p\n", doIrq6, registers);
+}
+
+asmlinkage void doIrq7(regs *registers)
+{
+	printd("doIrq7(): %p, &registers: %p\n", doIrq7, registers);
+}
+
+asmlinkage void doIrq8(regs *registers)
+{
+	printd("doIrq8(): %p, &registers: %p\n", doIrq8, registers);
+}
+
+asmlinkage void doIrq9(regs *registers)
+{
+	printd("doIrq9(): %p, &registers: %p\n", doIrq9, registers);
+}
+
+asmlinkage void doIrq10(regs *registers)
+{
+	printd("doIrq10(): %p, &registers: %p\n", doIrq10, registers);
+}
+
+asmlinkage void doIrq11(regs *registers)
+{
+	printd("doIrq11(): %p, &registers: %p\n", doIrq11, registers);
+}
+
+asmlinkage void doIrq12(regs *registers)
+{
+	printd("doIrq12(): %p, &registers: %p\n", doIrq12, registers);
+}
+
+asmlinkage void doIrq13(regs *registers)
+{
+	printd("doIrq13(): %p, &registers: %p\n", doIrq13, registers);
+}
+
+asmlinkage void doIrq14(regs *registers)
+{
+	printd("doIrq14(): %p, &registers: %p\n", doIrq14, registers);
+}
+
+asmlinkage void doIrq15(regs *registers)
+{
+	printd("doIrq15(): %p, &registers: %p\n", doIrq15, registers);
+}
+
+asmlinkage void doSystemCall(regs *registers)
+{
+	printd("doSystemCall(): %p, &registers: %p\n", doSystemCall, registers);
 	__asm__("hlt");
 }
 
-asmlinkage void doSystemTimer(regs registers)
+static void dumpRegisters(regs *registers)
 {
-	printd("doSystemTimer(): %p, &registers: %p\n", doSystemCall, &registers);
-	__asm__("hlt");
+        printd("gs: %x, ", registers->gs);
+        printd("fs: %x, ", registers->fs);
+        printd("es: %x, ", registers->es);
+        printd("ds: %x\n", registers->ds);
+        printd("edi: %p, ", registers->edi);
+        printd("esi: %p, ", registers->esi);
+        printd("ebp: %p, ", registers->ebp);
+        printd("esp: %p\n", registers->esp);
+        printd("ebx: %p, ", registers->ebx);
+        printd("edx: %p, ", registers->edx);
+        printd("ecx: %p, ", registers->ecx);
+        printd("eax: %p\n", registers->eax);
+	printd("errorCode: %p\n", registers->errorCode);
+	printd("eip: %p\n", registers->eip);
+	printd("cs: %p, ", registers->cs);
+	printd("eflags: %p, ",registers->eflags);
+	printd("useresp: %p, ", registers->useresp);
+	printd("ss: %p\n", registers->ss);
 }
-
-asmlinkage void doSystemCall(regs registers)
-{
-	printd("doSystemCall(): %p, &registers: %p\n", doSystemCall, &registers);
-	__asm__("hlt");
-}
-
-
