@@ -1,8 +1,8 @@
 
 #include "../include/idt.h"
 #include "../include/system.h"
-#include "../../utility/include/io.h"
-#include "../../utility/include/memoryOperations.h"
+#include "../../../generic/include/io.h"
+#include "../../../generic/include/memoryOperations.h"
 
 static void remapIrq()
 {

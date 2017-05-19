@@ -1,6 +1,6 @@
  
-#include "../../utility/include/io.h"
-#include "../../utility/include/memoryOperations.h"
+#include "../include/io.h"
+#include "../include/memoryOperations.h"
 
 void kernel_main() {
 	/* Initialize terminal interface */
