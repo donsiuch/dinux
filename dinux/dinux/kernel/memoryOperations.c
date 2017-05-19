@@ -1,5 +1,5 @@
 
-#include "../include/memoryOperations.h"
+#include "../inc/memoryOperations.h"
 
 /*
  * Function:	void *memset

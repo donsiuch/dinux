@@ -1,4 +1,8 @@
 
+# IF THERE ARE ISSUES BUILDING, DISABLE THE -s FLAG!!!
+# Silence all makefile output except errors.
+MAKEFLAGS += -s 
+
 MAKE_DIR	= $(PWD)
 
 ARCH_DIR	:= arch
@@ -6,19 +10,22 @@ ARCH_DIR	:= arch
 # Generate this value
 MARCH		:= x86
 
+MARCH_DIR	:= $(MAKE_DIR)/$(ARCH_DIR)/$(MARCH)
 BOOT_DIR	:= $(MAKE_DIR)/$(ARCH_DIR)/$(MARCH)/boot
 ARCH_KERNEL_DIR	:= $(MAKE_DIR)/$(ARCH_DIR)/$(MARCH)/kernel
-GENERIC_DIR	:= $(MAKE_DIR)/generic
-GENERIC_KERNEL_DIR := $(GENERIC_DIR)/kernel
+DINUX_DIR	:= $(MAKE_DIR)/dinux
+DINUX_KERNEL_DIR := $(DINUX_DIR)/kernel
 DRIVERS_DIR	:= $(MAKE_DIR)/drivers
 VGA_DIR		:= $(DRIVERS_DIR)/vga
 VGA_SRC_DIR	:= $(VGA_DIR)/src
 
-ARCH_INCLUDE	:= $(ARCH_DIR)/$(MARCH)/include
+ARCH_INCLUDE	:= $(MAKE_DIR)/$(ARCH_DIR)/$(MARCH)/inc
+DINUX_INCLUDE	:= $(DINUX_DIR)/inc
 
+# This allows getting rid of absolute (or relative) #include's in the source code files
 INC_SRCH_PATH	:=
-INC_SRCH_PATH	+= -I$(ARCH_INCLUDE)
-INC_SRCH_PATH	+= -I$(GENERIC_DIR)/include
+INC_SRCH_PATH	:= -I$(MAKE_DIR)
+INC_SRCH_PATH	+= -I$(MAKE_DIR)/$(ARCH_DIR)
 
 CC		= gcc
 LD		= ld
@@ -37,9 +44,9 @@ all: myos.bin
 myos.bin: objects
 	$(CC) $(LDFLAGS) linker.ld -o myos.bin \
 	$(VGA_DIR)/obj/vga.o \
-	$(GENERIC_DIR)/obj/io.o \
-	$(GENERIC_DIR)/obj/memoryOperations.o \
-	$(GENERIC_DIR)/obj/main.o \
+	$(DINUX_DIR)/obj/io.o \
+	$(DINUX_DIR)/obj/memoryOperations.o \
+	$(DINUX_DIR)/obj/main.o \
 	$(MAKE_DIR)/arch/x86/obj/system.o \
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
 	$(MAKE_DIR)/arch/x86/obj/setup_32.o \
@@ -48,17 +55,17 @@ myos.bin: objects
 objects: 
 	@$(MAKE) -C $(BOOT_DIR) -f Makefile
 	@$(MAKE) -C $(ARCH_KERNEL_DIR) -f Makefile
-	@$(MAKE) -C $(GENERIC_KERNEL_DIR) -f Makefile
+	@$(MAKE) -C $(DINUX_KERNEL_DIR) -f Makefile
 	@$(MAKE) -C $(VGA_SRC_DIR) -f Makefile
 
 .PHONY: clean
 clean:
-	rm -f grub.cfg
-	rm -rf isodir 
-	rm -f *.bin
-	rm -f *.iso
+	$(RM) -f grub.cfg
+	$(RM) -rf isodir 
+	$(RM) -f *.bin
+	$(RM) -f *.iso
 	@$(MAKE) -C $(BOOT_DIR) -f Makefile clean
 	@$(MAKE) -C $(ARCH_KERNEL_DIR) -f Makefile clean
-	@$(MAKE) -C $(GENERIC_KERNEL_DIR) -f Makefile clean
+	@$(MAKE) -C $(DINUX_KERNEL_DIR) -f Makefile clean
 	@$(MAKE) -C $(VGA_SRC_DIR) -f Makefile clean
 	

@@ -2,7 +2,7 @@
 // TO-DO:
 // 1. Currently this is tied to the VGA driver. Have a generic API? 
 
-#include "../include/io.h"
+#include "../inc/io.h"
 
 void printHexChar(const unsigned long hexChar)
 {
