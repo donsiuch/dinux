@@ -11,7 +11,7 @@
 
 #include <stdarg.h>
 
-#include "../../drivers/vga/inc/vga.h"
+#include "vga/inc/vga.h"
 
 void printHexChar(const unsigned long);
 void printFormalHexLong(const unsigned long);
