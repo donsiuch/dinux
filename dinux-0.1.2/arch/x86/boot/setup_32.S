@@ -103,7 +103,7 @@ isrSaveState:
 
 	call 	*%eax		# %eax is populated with the service routine
 	
-	addl	$4, %esp	# Pop the register pointer from the stack	
+	addl	$4, %esp	# Pop register pointer from the stack	
 
 	popl	%gs
 	popl	%fs
@@ -111,7 +111,7 @@ isrSaveState:
 	popl	%ds
 	popal
 
-	addl	$4, %esp	# Pop interrupt number, then error code 
+	addl	$4, %esp	# Pop error code 
 
 	sti
 	

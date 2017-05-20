@@ -39,3 +39,18 @@ xorriso 1.2.9 or later ( sudo apt-get install xorisso )
 execute the following two commands exactly (for Debian based OS'):
 	sudo apt-get install libx32gcc-4.8-dev
 	sudo apt-get install libc6-dev-i386
+
+###################################
+# Dinux version number convention
+###################################
+
+dinux-w.y.z
+
+w: 	I plan to increment this number to 1 when this project becomes a working operating system. 
+	From there after, this number will only ever increase for major features or collections of features.
+
+y:	This number increases for a large change such as a single new feature or groups of functions.
+
+z:	This number increases by 1 for each push to the public repo.
+	Pushes occur after bug and typo fixes.
+
