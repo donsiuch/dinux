@@ -1,5 +1,5 @@
 
-# include "../inc/system.h"
+# include "x86/inc/system.h"
 
 // Read from I/O
 unsigned char inb (unsigned short _port)

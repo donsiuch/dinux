@@ -24,8 +24,9 @@ DINUX_INCLUDE	:= $(DINUX_DIR)/inc
 
 # This allows getting rid of absolute (or relative) #include's in the source code files
 INC_SRCH_PATH	:=
-INC_SRCH_PATH	:= -I$(MAKE_DIR)
+INC_SRCH_PATH	+= -I$(MAKE_DIR)
 INC_SRCH_PATH	+= -I$(MAKE_DIR)/$(ARCH_DIR)
+INC_SRCH_PATH	+= -I$(DRIVERS_DIR)
 
 CC		= gcc
 LD		= ld
