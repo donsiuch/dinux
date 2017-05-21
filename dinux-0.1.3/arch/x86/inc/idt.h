@@ -4,25 +4,6 @@
 
 #include "./kernel_defs.h"
 
-// PIC Master I/0 Command/Data Base Addresses
-#define PIC_MASTER		0x20
-#define PIC_MASTER_COMMAND	PIC_MASTER
-#define PIC_MASTER_DATA		PIC_MASTER + 1
-
-// PIC Slave I/0 Command/Data Base Addresses
-#define PIC_SLAVE		0xA0
-#define PIC_SLAVE_COMMAND	PIC_SLAVE
-#define	PIC_SLAVE_DATA		PIC_SLAVE + 1
-
-// Initialization
-#define ICW1_INIT		0x10
-
-// ICW4 needed
-#define ICW1_ICW4		0x01
-
-// 8086/88 mode
-#define ICW4_8086		0x01
-
 #define MAX_IDT_ENTRIES 256
 
 #define TRAP_GATE		0x8F
@@ -73,10 +54,7 @@ idtDescriptor idt[MAX_IDT_ENTRIES];
 
 int idtSize = MAX_IDT_ENTRIES*sizeof(idtDescriptor);
 
-static void dumpRegisters(regs *);
-static void remapIrq(void);
-
-extern void placeHolder(void);
+extern void unknownFault(void);
 extern void divideError(void);
 extern void debug(void);
 extern void nmi(void);
@@ -115,6 +93,7 @@ extern void irq14(void);
 extern void irq15(void);
 extern void systemCall(void);
 
+asmlinkage void doUnknownFault(regs *);
 asmlinkage void doDivideError(regs *);
 asmlinkage void doDebug(regs *);
 asmlinkage void doNmi(regs *);
@@ -153,6 +132,8 @@ asmlinkage void doIrq13(regs *);
 asmlinkage void doIrq14(regs *);
 asmlinkage void doIrq15(regs *);
 asmlinkage void doSystemCall(regs *);
+
+static void dumpRegisters(regs *);
 
 #endif
 

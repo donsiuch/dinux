@@ -54,3 +54,14 @@ y:	This number increases for a large change such as a single new feature or grou
 z:	This number increases by 1 for each push to the public repo.
 	Pushes occur after bug and typo fixes.
 
+Links/Sources:
+https://software.intel.com/sites/default/files/managed/a4/60/325384-sdm-vol-3abcd.pdf
+http://www.plantation-productions.com/Webster/www.artofasm.com/DOS/pdf/ch17.pdf
+http://wiki.osdev.org/Interrupt_Descriptor_Table
+https://geeksww.com/tutorials/operating_systems/linux/tips_and_tricks/some_tricks_used_by_the_linux_kernel.php
+
+OS Tutorials:
+http://www.osdever.net/tutorials/
+http://www.osdever.net/bkerndev/index.php
+http://www.jamesmolloy.co.uk/tutorial_html/
+http://www.brokenthorn.com/Resources/OSDevIndex.html

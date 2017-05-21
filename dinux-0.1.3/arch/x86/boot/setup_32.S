@@ -44,8 +44,8 @@ idt_info:
 	.word	0x0000
 	.word	0x0000
 
-.globl setup_32
 .text
+.globl setup_32
 setup_32:
 	
 	call populateIdt
@@ -117,12 +117,12 @@ isrSaveState:
 	
 	iret
 
-.globl placeHolder
-placeHolder:
+.globl unknownFault
+unknownFault:
 	cli
 	pushl	$0
 	pushal
-	movl 	$handleFault, %eax
+	movl 	$doUnknownFault, %eax
 	jmp 	isrSaveState
 
 # 0 	

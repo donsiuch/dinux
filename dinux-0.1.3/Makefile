@@ -50,6 +50,7 @@ myos.bin: objects
 	$(DINUX_DIR)/obj/main.o \
 	$(MAKE_DIR)/arch/x86/obj/system.o \
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
+	$(MAKE_DIR)/arch/x86/obj/pic.o \
 	$(MAKE_DIR)/arch/x86/obj/setup_32.o \
 	$(MAKE_DIR)/arch/x86/obj/boot.o
 
