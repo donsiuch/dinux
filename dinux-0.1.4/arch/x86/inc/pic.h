@@ -2,6 +2,8 @@
 #ifndef __PIC_HEADER__
 #define __PIC_HEADER__
 
+#include <stdint.h>
+
 // PIC Master I/0 Command/Data Base Addresses
 #define PIC_MASTER		0x20
 #define PIC_MASTER_COMMAND	PIC_MASTER
@@ -25,5 +27,8 @@
 #define PIC_READ_ISR		0x0b
 
 void remapIrq();
+
+uint16_t pic_get_irr(void);
+uint16_t pic_get_isr(void);
 
 #endif

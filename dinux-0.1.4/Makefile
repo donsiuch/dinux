@@ -3,6 +3,9 @@
 # Silence all makefile output except errors.
 MAKEFLAGS += -s 
 
+CC		= gcc
+LD		= ld
+
 MAKE_DIR	= $(PWD)
 
 ARCH_DIR	:= arch
@@ -28,15 +31,14 @@ INC_SRCH_PATH	+= -I$(MAKE_DIR)
 INC_SRCH_PATH	+= -I$(MAKE_DIR)/$(ARCH_DIR)
 INC_SRCH_PATH	+= -I$(DRIVERS_DIR)
 
-CC		= gcc
-LD		= ld
-
 CFLAGS		:=
 CFLAGS		+= $(INC_SRCH_PATH)
-CFLAGS		+= -c -m32 -Wall -Wextra -pedantic -std=c11 
+CFLAGS		+= -c -m32 -Wall -Wextra -pedantic -std=c99 -ffreestanding
 
+# nostdlib is causing issues with the multiboot header
+# we want use -nostartfiles in the meantime... but we really want nostdlib
 LDFLAGS		:=
-LDFLAGS		+= -m32 -nostartfiles -T
+LDFLAGS		+= -m32 -O2 -nostartfiles -lgcc  -ffreestanding -T
 
 export MAKE_DIR CC LD CFLAGS LDFLAGS INC_SRCH_PATH
 
@@ -52,7 +54,8 @@ myos.bin: objects
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
 	$(MAKE_DIR)/arch/x86/obj/pic.o \
 	$(MAKE_DIR)/arch/x86/obj/setup_32.o \
-	$(MAKE_DIR)/arch/x86/obj/boot.o
+	$(MAKE_DIR)/arch/x86/obj/boot.o 
+	
 
 objects: 
 	@$(MAKE) -C $(BOOT_DIR) -f Makefile

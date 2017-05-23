@@ -68,7 +68,7 @@ setup_32:
 	movw	$0x01,	%ax
 	lmsw	%ax
 
-	sti
+	sti	# Enable interrupts
 	
 	// Set the %cs register
 	jmp 	$0x10, $loadSegmentRegisters
@@ -96,10 +96,11 @@ isrSaveState:
 	pushl	%fs
 	pushl 	%gs
 
-	cld
-
 	movl	%esp, %edx	# Get a pointer to the registers pointer
 	pushl 	%edx		# push the register pointer onto the stack
+
+	cld			# I read somewhere that clearing the direction
+				# flag is the convention.
 
 	call 	*%eax		# %eax is populated with the service routine
 	

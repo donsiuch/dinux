@@ -160,3 +160,20 @@ void remapIrq()
 	outb(PIC_SLAVE_DATA, slaveMask);
 }
 
+static uint16_t __pic_get_irq_reg(int ocw3)
+{
+    outb(PIC_MASTER_COMMAND, ocw3);
+    outb(PIC_SLAVE_COMMAND, ocw3);
+    return (inb(PIC_SLAVE_COMMAND) << 8) | inb(PIC_MASTER_COMMAND);
+}
+ 
+uint16_t pic_get_irr(void)
+{
+    return __pic_get_irq_reg(PIC_READ_IRR);
+}
+ 
+uint16_t pic_get_isr(void)
+{
+    return __pic_get_irq_reg(PIC_READ_ISR);
+} 
+

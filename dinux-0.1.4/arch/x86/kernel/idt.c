@@ -1,7 +1,7 @@
 
+#include "x86/inc/pic.h"
 #include "x86/inc/idt.h"
 #include "x86/inc/system.h"
-#include "x86/inc/pic.h"
 #include "dinux/inc/io.h"
 #include "dinux/inc/memoryOperations.h"
 
@@ -284,15 +284,16 @@ asmlinkage void doVirtException(regs *registers)
 
 asmlinkage void doSystemTimer(regs *registers)
 {
-	printd("doSystemTimer(): %p, &registers: %p\n", doSystemTimer, registers);
-
+	//printd("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
+	//printd("Timer tick!\n");
+	
 	// Tell the master PIC we are done servicing the interrupt.	
 	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
 asmlinkage void doIrq1(regs *registers)
 {
-	printd("doIrq1(): %p, &registers: %p\n", doIrq1, registers);
+	printd("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
 	
 	// Tell the master PIC we are done servicing the interrupt.
 	outb(PIC_MASTER_COMMAND, 0x20);
@@ -300,7 +301,7 @@ asmlinkage void doIrq1(regs *registers)
 
 asmlinkage void doIrq2(regs *registers)
 {
-	printd("doIrq2(): %p, &registers: %p\n", doIrq2, registers);
+	//printd("doIrq2(): %p, &registers: %p\n", doIrq2, registers);
 
 	// Tell the master PIC we are done servicing the interrupt.	
 	outb(PIC_MASTER_COMMAND, 0x20);
@@ -342,7 +343,12 @@ asmlinkage void doIrq7(regs *registers)
 {
 	printd("doIrq7(): %p, &registers: %p\n", doIrq7, registers);
 
-	// Tell the master PIC we are done servicing the interrupt.	
+	if ( !(pic_get_isr() & 0x07) )
+	{
+		printd("Spurious IRQ detected in master PIC!\n");
+		return;
+	}
+
 	outb(PIC_MASTER_COMMAND, 0x20);
 }
 
@@ -413,7 +419,17 @@ asmlinkage void doIrq15(regs *registers)
 {
 	printd("doIrq15(): %p, &registers: %p\n", doIrq15, registers);
 
-	// Tell master and slave PICs we are finished servicing the interrupt.	
+	// If ISR is not 15 then we got a spurious IRQ.
+	// Send the EOI to the master
+	if ( !(pic_get_isr() & 0x0f) )
+	{
+		printd("Spurious IRQ detected in master PIC!\n");
+		outb(PIC_MASTER_COMMAND, 0x20);
+		return;
+	}
+
+	// Handle interrupt
+	
 	outb(PIC_SLAVE_COMMAND, 0x20);
 	outb(PIC_MASTER_COMMAND, 0x20);
 }
