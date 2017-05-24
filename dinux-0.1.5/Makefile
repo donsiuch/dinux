@@ -3,8 +3,8 @@
 # Silence all makefile output except errors.
 MAKEFLAGS += -s 
 
-CC		= gcc
-LD		= ld
+#CC		= gcc
+CC		= /home/donnie/compiler/bin/i686-pc-linux-gnu-gcc
 
 MAKE_DIR	= $(PWD)
 
@@ -38,7 +38,7 @@ CFLAGS		+= -c -m32 -Wall -Wextra -pedantic -std=c99 -ffreestanding
 # nostdlib is causing issues with the multiboot header
 # we want use -nostartfiles in the meantime... but we really want nostdlib
 LDFLAGS		:=
-LDFLAGS		+= -m32 -O2 -nostartfiles -lgcc  -ffreestanding -T
+LDFLAGS		+= -m32 -O2 -nostdlib -lgcc  -ffreestanding -T
 
 export MAKE_DIR CC LD CFLAGS LDFLAGS INC_SRCH_PATH
 
@@ -52,7 +52,9 @@ myos.bin: objects
 	$(DINUX_DIR)/obj/main.o \
 	$(MAKE_DIR)/arch/x86/obj/system.o \
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
+	$(MAKE_DIR)/arch/x86/obj/time.o \
 	$(MAKE_DIR)/arch/x86/obj/pic.o \
+	$(MAKE_DIR)/arch/x86/obj/pit.o \
 	$(MAKE_DIR)/arch/x86/obj/setup_32.o \
 	$(MAKE_DIR)/arch/x86/obj/boot.o 
 	

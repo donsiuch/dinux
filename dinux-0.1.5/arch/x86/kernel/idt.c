@@ -1,9 +1,11 @@
 
-#include "x86/inc/pic.h"
 #include "x86/inc/idt.h"
-#include "x86/inc/system.h"
 #include "dinux/inc/io.h"
 #include "dinux/inc/memoryOperations.h"
+#include "x86/inc/pic.h"
+#include "x86/inc/pit.h"
+#include "x86/inc/system.h"
+#include "x86/inc/time.h"
 
 /*
  * Function: setGate()
@@ -42,6 +44,10 @@ void populateIdt()
 
 	memset(idt, 0, sizeof(idt));
 
+	// Initialize the timer to 100Hz
+	initializePit(100);
+
+	// Map the IRQs to prevent overlapping with software interrupts
 	remapIrq();
 
 	// Fill the the IDT with the generic fault handler 
@@ -285,7 +291,12 @@ asmlinkage void doVirtException(regs *registers)
 asmlinkage void doSystemTimer(regs *registers)
 {
 	//printd("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
-	//printd("Timer tick!\n");
+	_G_TICK++;
+	if ( _G_TICK % 100 == 0 )
+	{
+		// Temporary test function
+		emitOneSecond();
+	}
 	
 	// Tell the master PIC we are done servicing the interrupt.	
 	outb(PIC_MASTER_COMMAND, 0x20);

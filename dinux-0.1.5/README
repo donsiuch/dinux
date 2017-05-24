@@ -17,22 +17,42 @@ To build the OS for bare metal via USB:
 # Required Tools
 ###################
 
-gcc (sudo apt-get install gcc )
-qemu ( sudo apt-get install qemu )
-make ( sudo apt-get install make )
-xorriso 1.2.9 or later ( sudo apt-get install xorisso )
+qemu 
+	sudo apt-get install qemu
+
+make 
+	sudo apt-get install make
+
+xorriso 1.2.9 or later 
+	sudo apt-get install xorisso
+
+i686-linux-gnu cross compiler
+	If an i686 cross compiler is not used an incorrect elf file may be produced given the compiler flags.
+	( see special note below )
 
 #########
 # Qemu 
 ########
 
-1. If qemu complains about the lack of a video device, modify the StartVM file by passing the parameter: -curses to the qemu binary. The problem may be experienced if using ssh ( or similar program ) to remotely connect and run StartVM.
+1. If qemu complains about the lack of a video device, modify the StartVM file by passing the parameter: -curses to 
+the qemu binary. The problem may be experienced if using ssh ( or similar program ) to remotely connect and run StartVM.
 
-###################################################
-# Compiling 32 bit programs on a 64 bit machine:
-###################################################
+#############
+# Compiling 
+#############
 
-1. The compiler is passed a flag -m32 indicating to gcc to generate a 32 bit binary. If an error occurs:
+An i686 cross compiler may be requuired to build the OS. This is the type of compiler used to develop and 
+test the OS. However, a non i686 compiler may be used with varying resuls. Following are some problems
+and work arounds that may work.
+
+1. If using a non i686 compiler and a message similar to the following is encountered:
+
+	[...] multiboot header cannot be found [...]
+
+In the top level directory Makefile, try replacing the linker flag -nostdlib with -nostartfiles.
+
+2. The compiler is passed a flag -m32 indicating to gcc to generate a 32 bit binary. If using a non i686 compiler and
+the following error occurs:
 		
 	/usr/include/features.h:xxx:xx: fatal error: sys/cdefs.h: No such file or directory
 	
@@ -63,5 +83,5 @@ https://geeksww.com/tutorials/operating_systems/linux/tips_and_tricks/some_trick
 OS Tutorials:
 http://www.osdever.net/tutorials/
 http://www.osdever.net/bkerndev/index.php
-http://www.jamesmolloy.co.uk/tutorial_html/
+http://www.jamesmolloy.co.uk/tutorial_html/ ( http://wiki.osdev.org/James_Molloy's_Tutorial_Known_Bugs )
 http://www.brokenthorn.com/Resources/OSDevIndex.html
