@@ -1,6 +1,6 @@
 
-#ifndef __PIC_HEADER__
-#define __PIC_HEADER__
+#ifndef __PIC_H__
+#define __PIC_H__
 
 #include <stdint.h>
 

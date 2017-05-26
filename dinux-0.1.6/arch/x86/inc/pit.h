@@ -1,6 +1,6 @@
 
-#ifndef __PIT_HEADER__
-#define __PIT_HEADER__
+#ifndef __PIT_H__
+#define __PIT_H__
 
 #include <stdint.h>
 

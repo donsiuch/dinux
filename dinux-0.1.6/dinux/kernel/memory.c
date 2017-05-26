@@ -1,5 +1,5 @@
 
-#include "dinux/inc/memoryOperations.h"
+#include "dinux/inc/memory.h"
 
 /*
  * Function:	void *memset

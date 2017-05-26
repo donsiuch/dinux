@@ -1,10 +1,10 @@
 
 # IF THERE ARE ISSUES BUILDING, DISABLE THE -s FLAG!!!
 # Silence all makefile output except errors.
-MAKEFLAGS += -s 
+MAKEFLAGS 	+= -s
 
 #CC		= gcc
-CC		= /home/donnie/compiler/bin/i686-pc-linux-gnu-gcc
+CC		= ~/x-tools/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-gcc
 
 MAKE_DIR	= $(PWD)
 
@@ -38,7 +38,7 @@ CFLAGS		+= -c -m32 -Wall -Wextra -pedantic -std=c99 -ffreestanding
 # nostdlib is causing issues with the multiboot header
 # we want use -nostartfiles in the meantime... but we really want nostdlib
 LDFLAGS		:=
-LDFLAGS		+= -m32 -O2 -nostdlib -lgcc  -ffreestanding -T
+LDFLAGS		+= -m32 -O2 -nostdlib -lgcc -ffreestanding -T
 
 export MAKE_DIR CC LD CFLAGS LDFLAGS INC_SRCH_PATH
 
@@ -48,7 +48,7 @@ myos.bin: objects
 	$(CC) $(LDFLAGS) linker.ld -o myos.bin \
 	$(VGA_DIR)/obj/vga.o \
 	$(DINUX_DIR)/obj/io.o \
-	$(DINUX_DIR)/obj/memoryOperations.o \
+	$(DINUX_DIR)/obj/memory.o \
 	$(DINUX_DIR)/obj/main.o \
 	$(MAKE_DIR)/arch/x86/obj/system.o \
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
@@ -59,7 +59,7 @@ myos.bin: objects
 	$(MAKE_DIR)/arch/x86/obj/boot.o 
 	
 
-objects: 
+objects:
 	@$(MAKE) -C $(BOOT_DIR) -f Makefile
 	@$(MAKE) -C $(ARCH_KERNEL_DIR) -f Makefile
 	@$(MAKE) -C $(DINUX_KERNEL_DIR) -f Makefile
@@ -75,4 +75,3 @@ clean:
 	@$(MAKE) -C $(ARCH_KERNEL_DIR) -f Makefile clean
 	@$(MAKE) -C $(DINUX_KERNEL_DIR) -f Makefile clean
 	@$(MAKE) -C $(VGA_SRC_DIR) -f Makefile clean
-	

@@ -1,6 +1,6 @@
 
-#ifndef __IDT_HEADER__
-#define __IDT_HEADER__
+#ifndef __IDT_H__
+#define __IDT_H__
 
 #include "./kernel_defs.h"
 

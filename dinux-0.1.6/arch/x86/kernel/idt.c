@@ -1,7 +1,7 @@
 
 #include "x86/inc/idt.h"
 #include "dinux/inc/io.h"
-#include "dinux/inc/memoryOperations.h"
+#include "dinux/inc/memory.h"
 #include "x86/inc/pic.h"
 #include "x86/inc/pit.h"
 #include "x86/inc/system.h"

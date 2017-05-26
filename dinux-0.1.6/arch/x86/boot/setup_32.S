@@ -114,13 +114,10 @@ isrSaveState:
 
 	addl	$4, %esp	# Pop error code 
 
-	sti
-	
 	iret
 
 .globl unknownFault
 unknownFault:
-	cli
 	pushl	$0
 	pushal
 	movl 	$doUnknownFault, %eax
@@ -129,7 +126,6 @@ unknownFault:
 # 0 	
 .globl divideError
 divideError:
-	cli
 	push 	$0		# Push dummy error code
 	pushal
 	movl 	$doDivideError, %eax
@@ -138,7 +134,6 @@ divideError:
 # 1 	
 .globl debug
 debug:
-	cli
 	push	$0
 	pushal
 	movl	$doDebug, %eax
@@ -147,7 +142,6 @@ debug:
 # 2
 .globl nmi
 nmi:
-	cli
 	push 	$0
 	pushal
 	movl	$doNmi, %eax
@@ -156,7 +150,6 @@ nmi:
 # 3
 .globl breakPoint
 breakPoint:
-	cli
 	push	$0
 	pushal
 	movl	$doBreakPoint, %eax
@@ -165,7 +158,6 @@ breakPoint:
 # 4
 .globl overflow
 overflow:
-	cli
 	push	$0
 	pushal
 	movl	$doOverflow, %eax
@@ -183,7 +175,6 @@ boundaryVerification:
 # 6
 .globl invalidOpcode
 invalidOpcode:
-	cli
 	push	$0
 	pushal
 	movl	$doInvalidOpcode, %eax
@@ -192,7 +183,6 @@ invalidOpcode:
 # 7
 .globl	deviceNotAvail
 deviceNotAvail:
-	cli
 	push	$0
 	pushal
 	movl	$doDeviceNotAvail, %eax
@@ -201,7 +191,6 @@ deviceNotAvail:
 # 8 
 .globl doubleFault
 doubleFault:
-	cli
 	pushal
 	movl	$doDoubleFault, %eax
 	jmp	isrSaveState
@@ -209,7 +198,6 @@ doubleFault:
 # 9
 .globl coProcSegOverrun
 coProcSegOverrun:
-	cli
 	push	$0
 	pushal
 	movl	$doCoProcSegOverrun, %eax
@@ -218,7 +206,6 @@ coProcSegOverrun:
 # 10
 .globl invalTss
 invalTss:
-	cli
 	pushal
 	movl	$doInvalTss, %eax
 	jmp	isrSaveState
@@ -226,7 +213,6 @@ invalTss:
 # 11
 .globl segNotPresent
 segNotPresent:
-	cli
 	pushal
 	movl	$doSegNotPresent, %eax
 	jmp	isrSaveState
@@ -234,7 +220,6 @@ segNotPresent:
 # 12
 .globl stackException
 stackException:
-	cli
 	pushal
 	movl	$doStackException, %eax
 	jmp	isrSaveState
@@ -242,7 +227,6 @@ stackException:
 # 13
 .globl generalProtection
 generalProtection:
-	cli
 	pushal
 	movl	$doGeneralProtection, %eax
 	jmp 	isrSaveState
@@ -250,7 +234,6 @@ generalProtection:
 # 14
 .globl pageFault
 pageFault:
-	cli
 	pushal
 	movl	$doPageFault, %eax
 	jmp	isrSaveState
@@ -260,7 +243,6 @@ pageFault:
 # 16
 .globl floatError
 floatError:
-	cli
 	push	$0
 	pushal
 	movl	$doFloatError, %eax
@@ -269,7 +251,6 @@ floatError:
 # 17
 .globl alignmentCheck
 alignmentCheck:
-	cli
 	pushal
 	movl	$doAlignmentCheck, %eax
 	jmp	isrSaveState
@@ -277,7 +258,6 @@ alignmentCheck:
 # 18
 .globl machineCheck
 machineCheck:
-	cli
 	push	$0
 	pushal
 	movl	$doMachineCheck, %eax
@@ -294,7 +274,6 @@ simdFloatException:
 # 20
 .globl virtException
 virtException:
-	cli
 	push	$0
 	pushal
 	movl	$doVirtException, %eax
@@ -303,7 +282,6 @@ virtException:
 # 32 - IRQ 0
 .globl systemTimer
 systemTimer:
-	cli
 	push	$0
 	pushal
 	movl	$doSystemTimer, %eax
@@ -312,7 +290,6 @@ systemTimer:
 # 33 - IRQ 1
 .globl irq1
 irq1:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq1, %eax
@@ -321,7 +298,6 @@ irq1:
 # 34 - IRQ 2
 .globl irq2
 irq2:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq2, %eax
@@ -330,7 +306,6 @@ irq2:
 # 35 - IRQ 3
 .globl irq3
 irq3:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq3, %eax
@@ -339,7 +314,6 @@ irq3:
 # 36 - IRQ 4
 .globl irq4
 irq4:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq4, %eax
@@ -348,7 +322,6 @@ irq4:
 # 37 - IRQ 5
 .globl irq5
 irq5:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq5, %eax
@@ -357,7 +330,6 @@ irq5:
 # 38 - IRQ 6
 .globl irq6
 irq6:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq6, %eax
@@ -366,7 +338,6 @@ irq6:
 # 39 - IRQ 7
 .globl irq7
 irq7:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq7, %eax
@@ -375,7 +346,6 @@ irq7:
 # 40 - IRQ 8
 .globl irq8
 irq8:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq8, %eax
@@ -384,7 +354,6 @@ irq8:
 # 41 - IRQ 9
 .globl irq9
 irq9:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq9, %eax
@@ -393,7 +362,6 @@ irq9:
 # 42 - IRQ 10
 .globl irq10
 irq10:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq10, %eax
@@ -402,7 +370,6 @@ irq10:
 # 43 - IRQ 11
 .globl irq11
 irq11:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq11, %eax
@@ -411,7 +378,6 @@ irq11:
 # 44 - IRQ 12
 .globl irq12
 irq12:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq12, %eax
@@ -420,7 +386,6 @@ irq12:
 # 45 - IRQ 13
 .globl irq13
 irq13:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq13, %eax
@@ -429,7 +394,6 @@ irq13:
 # 46 - IRQ 14
 .globl irq14
 irq14:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq14, %eax
@@ -438,7 +402,6 @@ irq14:
 # 47 - IRQ 15
 .globl irq15
 irq15:
-	cli
 	push	$0
 	pushal
 	movl	$doIrq15, %eax
@@ -446,7 +409,6 @@ irq15:
 
 .globl systemCall
 systemCall:
-	cli
 	push	$0
 	pushal
 	movl	$doSystemCall, %eax

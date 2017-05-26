@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef __IO_HEADER__
-#define __IO_HEADER__
+#ifndef __IO_H__
+#define __IO_H__
 
 #include <stdarg.h>
 
