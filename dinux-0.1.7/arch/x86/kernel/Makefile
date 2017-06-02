@@ -1,8 +1,11 @@
 
-all: idt.o pic.o pit.o time.o system.o
+all: idt.o mm.o pic.o pit.o time.o system.o
 
-idt.o: idt.c 
-	$(CC) $(CFLAGS) $(COMPILE_ONLY) idt.c -o ../obj/idt.o 
+idt.o: idt.c
+	$(CC) $(CFLAGS) $(COMPILE_ONLY) idt.c -o ../obj/idt.o
+
+mm.o: mm.c
+	$(CC) $(CFLAGS) $(COMPILE_ONLY) mm.c -o ../obj/mm.o
 
 pic.o: pic.c
 	$(CC) $(CFLAGS) $(COMPILE_ONLY) pic.c -o ../obj/pic.o
@@ -13,7 +16,7 @@ pit.o: pit.c
 time.o: time.c
 	$(CC) $(CFLAGS) $(COMPILE_ONLY) time.c -o ../obj/time.o
 
-system.o: system.c 
+system.o: system.c
 	$(CC) $(CFLAGS) $(COMPILE_ONLY) system.c -o ../obj/system.o
 
 clean:

@@ -52,12 +52,12 @@ myos.bin: objects
 	$(DINUX_DIR)/obj/main.o \
 	$(MAKE_DIR)/arch/x86/obj/system.o \
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
+	$(MAKE_DIR)/arch/x86/obj/mm.o \
 	$(MAKE_DIR)/arch/x86/obj/time.o \
 	$(MAKE_DIR)/arch/x86/obj/pic.o \
 	$(MAKE_DIR)/arch/x86/obj/pit.o \
 	$(MAKE_DIR)/arch/x86/obj/setup_32.o \
 	$(MAKE_DIR)/arch/x86/obj/boot.o 
-	
 
 objects:
 	@$(MAKE) -C $(BOOT_DIR) -f Makefile
