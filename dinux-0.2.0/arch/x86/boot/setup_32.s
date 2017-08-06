@@ -1,7 +1,8 @@
 
-.data 
-hello: 
-	.asciz "%esp: %p"
+#include "x86/inc/mm.h"
+
+string:
+	.asciz "%p\n"
 
 // This is currently the main global descriptor table.
 .align 16
@@ -83,8 +84,19 @@ loadSegmentRegisters:
 	movl	%eax, %es
 	movl	%eax, %ss
 
-	movl 	$0x00120000, %esp 	# Put the stack somewhere far away
-
+	#movl 	$0x00120000, %esp 	# Put the stack somewhere far away
+	// Paging POC
+	movl	$0x1a000, %esp
+	movl	$0x1a000, %ebp
+	
+	// Turn on paging
+	call	setupPaging
+	movl	kernel_pd, %eax
+	movl	%eax, %cr3
+	movl	%cr0, %eax
+	orl	$0x80000000, %eax
+	movl	%eax, %cr0 	
+	
 	call 	kernel_main
 
 	ret
