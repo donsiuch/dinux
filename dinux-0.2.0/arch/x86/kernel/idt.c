@@ -292,10 +292,11 @@ asmlinkage void doSystemTimer(regs *registers)
 {
 	//printd("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
 	_G_TICK++;
+
 	if ( _G_TICK % 100 == 0 )
 	{
 		// Temporary test function
-		emitOneSecond();
+		//emitOneSecond();
 	}
 	
 	// Tell the master PIC we are done servicing the interrupt.	

@@ -1,17 +1,35 @@
 
-#ifndef __MM_H__
-#define __MM_H__
+#ifndef __MM__
+#define __MM__
+
+/*
+ * Memory layout
+ * 0x00000000+---------------+
+ *           |  Identity     |
+ *           |   Mapped      |
+ * 0x0001e000|    Region     |
+ * 0x0001f000|               |
+ * 0x00020000+---------------+
+ *
+ */
 
 #include <stdint.h>
 
 #define	PAGE_SIZE	0x1000
 #define MEMORY_SIZE	0x1000000
-#define BITMAP_UNIT	uint8_t
+#define TOTAL_NUM_PAGES	(MEMORY_SIZE/PAGE_SIZE)
+
+// 1 Byte ( 8 bits ) will be the data type
+// for the array. Each Byte can track
+// 8 physical, contiguous frames
+#define BITMAP_UNIT		uint8_t
+#define PAGES_PER_BITMAP_UNIT	8
+#define PAGES_PER_UNIT		(1*PAGES_PER_BITMAP_UNIT)
+#define NUM_LEDGER_UNITS 	(TOTAL_NUM_PAGES/PAGES_PER_UNIT)
 
 // Proof of concept paging
 #define KERNEL_PD_ADDR	0x1e000
 #define	PT_IDENT_ADDR	0x1f000
-#define NUM_IDENT_PAGES	0x20
 
 // Page table entry
 typedef struct __attribute((packed)) {
@@ -64,13 +82,10 @@ typedef struct __attribute((packed)) {
 
 } pde;
 
-uint32_t *kernel_pd = NULL;
-uint32_t *pt_ident = NULL;
-
-// Bitmap that describes used/free physical page frames
-// 	mem_size/page_size/uint32_t/
-//BITMAP_UNIT frameLedger[MEMORY_SIZE/PAGE_SIZE/sizeof(BITMAP_UNIT)];
+uint32_t *kernel_pd;
+uint32_t *pt_ident;
 
 void	setupPaging();
+void * 	getFreeFrame();
 
 #endif

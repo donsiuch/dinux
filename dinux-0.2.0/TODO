@@ -7,3 +7,6 @@ Loader script
 3. Implement better format specifiers in printd 
 4. Implement itoa
 
+mm.h
+1. BITMAP_UNIT must be more generic such that number of bits in PAGES_PER_BYTE is not hardcoded as 8.
+

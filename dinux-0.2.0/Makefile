@@ -3,8 +3,8 @@
 # Silence all makefile output except errors.
 MAKEFLAGS 	+= -s
 
-CC		= gcc
-#CC		= ~/x-tools/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-gcc
+#CC		= gcc
+CC		= ~/x-tools/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-gcc
 
 MAKE_DIR	= $(PWD)
 
