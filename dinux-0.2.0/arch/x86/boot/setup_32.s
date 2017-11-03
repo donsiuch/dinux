@@ -7,28 +7,28 @@ string:
 // This is currently the main global descriptor table.
 .align 16
 gdt:
-	// Index 0x00
-	// Required dummy
+	# Index 0x00
+	# Required dummy
 	.quad	0x00
 
-	// 0x08
-	// Unused
+	# 0x08
+	# Unused
 	.quad	0x00
 
-	// 0x10
-	// code segment
-	// bit 63			bit 32
-	// 000000000000000 | 1001101000000000
-	// 000000000000000 | 1111111111111111 (limit)
-	// bit 31 (base)		bit 0
+	# 0x10
+	# code segment
+	# bit 63			bit 32
+	# 000000000000000 | 1001101000000000
+	# 000000000000000 | 1111111111111111 (limit)
+	# bit 31 (base)		bit 0
 	#.word	0xFFFF
 	#.word	0x0000
 	#.word	0x9A00	# 1001 1010 0000 0000
 	#.word	0x00CF	# 0000 0000 1100 1111
 	.quad 0x00cf9a000000ffff	
 
-	// 0x18
-	// data segment
+	# 0x18
+	# data segment
 	#.word	0xFFFF
 	#.word	0x0000
 	#.word	0x9200 # 1001 0010 0000 0000
@@ -48,35 +48,62 @@ idt_info:
 .text
 .globl setup_32
 setup_32:
-	
+
 	call populateIdt
 
-	// Return to real mode
+	# Return to real mode
 	movw	$0x00,	%ax
 	lmsw	%ax
-		
-	// Fix up idt and ldt info structures
-	// Load a new global descriptor table
-	movl	$gdt, (gdt_info + 2)	# Store address of GDT
+	
+	# Fix up idt and ldt info structures
+	# Load a new global descriptor table
+	#
+	# Store address of GDT
+	movl	$gdt, (gdt_info + 2)	
 	movl	$idtSize, idt_info
 	movl	$idt, (idt_info + 2)
 	cli
 	lgdt	gdt_info
 	lidt	idt_info
 
-	// Return to protected mode
-	xorw	%ax, %ax	# Clear register
+	# Enable interrupts for memory checking.
+	sti
+
+meme820:
+	xorl	%ebx, %ebx
+	movw 	$smapBuffer, %di
+	movl	$0x0000e820, %eax
+	movl 	$0x534D4150, %edx
+	movl	$20, %ecx
+
+	// What is the differences between each entry in the
+	// global descriptor table?
+	pushw	%ds
+	popw	%es	
+	int	$0x15
+	jmp	baile820
+
+	# Implement the rest of the memory checking!!!
+
+baile820:
+
+	# Disable interrupts
+	cli	
+
+	# Return to protected mode
+	xorw	%ax, %ax
 	movw	$0x01,	%ax
 	lmsw	%ax
 
-	sti	# Enable interrupts
+	# Enable interrupts
+	sti	
 	
-	// Set the %cs register
+	# Set the %cs register
 	jmp 	$0x10, $loadSegmentRegisters
 
 loadSegmentRegisters:
 
-	// Set all other segments to data registers
+	# Set all other segments to data registers
 	movl	$0x18, %eax
 	movl	%eax, %ds
 	movl	%eax, %gs
@@ -85,11 +112,11 @@ loadSegmentRegisters:
 	movl	%eax, %ss
 
 	#movl 	$0x00120000, %esp 	# Put the stack somewhere far away
-	// Paging POC
+	# Paging POC
 	movl	$0x1a000, %esp
 	movl	$0x1a000, %ebp
 	
-	// Turn on paging
+	# Turn on paging
 	call	setupPaging
 	movl	kernel_pd, %eax
 	movl	%eax, %cr3
@@ -108,15 +135,21 @@ isrSaveState:
 	pushl	%fs
 	pushl 	%gs
 
-	movl	%esp, %edx	# Get a pointer to the registers pointer
-	pushl 	%edx		# push the register pointer onto the stack
-
-	cld			# I read somewhere that clearing the direction
-				# flag is the convention.
-
-	call 	*%eax		# %eax is populated with the service routine
+	# Get a pointer to the registers pointer
+	movl	%esp, %edx	
 	
-	addl	$4, %esp	# Pop register pointer from the stack	
+	# push the register pointer onto the stack
+	pushl 	%edx		
+
+	# I read somewhere that clearing the direction
+	# flag is the convention.
+	cld			
+
+	# %eax is populated with the service routine
+	call 	*%eax		
+	
+	# Pop register pointer from the stack
+	addl	$4, %esp		
 
 	popl	%gs
 	popl	%fs
@@ -124,7 +157,8 @@ isrSaveState:
 	popl	%ds
 	popal
 
-	addl	$4, %esp	# Pop error code 
+	# Pop error code
+	addl	$4, %esp	 
 
 	iret
 
@@ -138,7 +172,8 @@ unknownFault:
 # 0 	
 .globl divideError
 divideError:
-	push 	$0		# Push dummy error code
+	# Push dummy error code
+	push 	$0		
 	pushal
 	movl 	$doDivideError, %eax
 	jmp 	isrSaveState

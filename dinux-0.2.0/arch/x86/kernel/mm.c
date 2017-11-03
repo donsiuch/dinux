@@ -8,6 +8,8 @@
 // a '1' means the frame is used. A '0' means frame is free.
 static BITMAP_UNIT frameLedger[NUM_LEDGER_UNITS];
 
+SMAP_entry_t smapBuffer[16];
+
 /*
  * Name: 	setFrameInUse
  *
@@ -87,7 +89,7 @@ int getFirstFreeIndex()
 void * getFreeFrame()
 {
 	getFirstFreeIndex();
-	return NULL;	
+	return NULL;
 }
 
 void setupPaging()
