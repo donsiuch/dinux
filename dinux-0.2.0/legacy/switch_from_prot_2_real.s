@@ -3,6 +3,11 @@
 # GDT is correct, the strategy to switch into real mode, execute code etc is correct
 # BIOS interrupts do not work. It is unclear if this is because the IDT is wrong,
 # an incorrect mixture of 32 bit and 16 bit code or that the IVT was wiped.
+#
+# Remember, if we implement this in the future and the PIC has already been remapped,
+# it must be set back to the original BIOS settings. Resources online claim this must
+# happen for other hardware too.
+#
 
 #include "x86/inc/mm.h"
 
