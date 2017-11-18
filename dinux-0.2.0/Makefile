@@ -33,7 +33,7 @@ INC_SRCH_PATH	+= -I$(DRIVERS_DIR)
 
 CFLAGS		:=
 CFLAGS		+= $(INC_SRCH_PATH)
-CFLAGS		+= -c -m32 -Wall -Wextra -pedantic -std=c99 -ffreestanding
+CFLAGS		+= -c -m32 -Wall -Wextra -pedantic -std=c99 -ffreestanding -g
 
 # nostdlib is causing issues with the multiboot header
 # we want use -nostartfiles in the meantime... but we really want nostdlib

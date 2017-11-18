@@ -1,60 +1,21 @@
 
 #include "x86/inc/mm.h"
 
-string:
-	.asciz "%p\n"
+# eax contains magic number 0x2BADB002
+# ebx contains Multiboot information structure
+# A20 gate is enabled
 
-// This is currently the main global descriptor table.
-.align 16
-gdt:
-	# Index 0x00
-	# Required dummy
-	.quad	0x00
-
-	# 0x08
-	# Unused
-	.quad	0x00
-
-	# 0x10
-	# code segment
-	# bit 63			bit 32
-	# 000000000000000 | 1001101000000000
-	# 000000000000000 | 1111111111111111 (limit)
-	# bit 31 (base)		bit 0
-	#.word	0xFFFF
-	#.word	0x0000
-	#.word	0x9A00	# 1001 1010 0000 0000
-	#.word	0x00CF	# 0000 0000 1100 1111
-	.quad 0x00cf9a000000ffff	
-
-	# 0x18
-	# data segment
-	#.word	0xFFFF
-	#.word	0x0000
-	#.word	0x9200 # 1001 0010 0000 0000
-	#.word	0x00CF # 0000 0000 1100 1111 
-	.quad 0x00cf92000000ffff	
-gdt_end:
-gdt_info:
-	.word	gdt_end - gdt - 1	# Size of GDT
-	.word	0x0000			# Upper 2 Bytes of GDT address.
-	.word	0x0000			# Lower 2 Bytes of GDT address.
-
-idt_info:
-	.word	0x0000
-	.word	0x0000
-	.word	0x0000
-
+.code32
 .text
 .globl setup_32
 setup_32:
 
+	# Setup a stack
+	movl	$0x9000, %esp
+	movl	%esp, %ebp
+	
 	call populateIdt
 
-	# Return to real mode
-	movw	$0x00,	%ax
-	lmsw	%ax
-	
 	# Fix up idt and ldt info structures
 	# Load a new global descriptor table
 	#
@@ -66,41 +27,11 @@ setup_32:
 	lgdt	gdt_info
 	lidt	idt_info
 
-	# Enable interrupts for memory checking.
-	sti
-
-meme820:
-	xorl	%ebx, %ebx
-	movw 	$smapBuffer, %di
-	movl	$0x0000e820, %eax
-	movl 	$0x534D4150, %edx
-	movl	$20, %ecx
-
-	// What is the differences between each entry in the
-	// global descriptor table?
-	pushw	%ds
-	popw	%es	
-	int	$0x15
-	jmp	baile820
-
-	# Implement the rest of the memory checking!!!
-
-baile820:
-
-	# Disable interrupts
-	cli	
-
-	# Return to protected mode
-	xorw	%ax, %ax
-	movw	$0x01,	%ax
-	lmsw	%ax
-
 	# Enable interrupts
 	sti	
 	
 	# Set the %cs register
 	jmp 	$0x10, $loadSegmentRegisters
-
 loadSegmentRegisters:
 
 	# Set all other segments to data registers
@@ -461,3 +392,47 @@ systemCall:
 	movl	$doSystemCall, %eax
 	jmp	isrSaveState
 
+.data
+string:
+	.asciz "%p\n"
+
+// This is currently the main global descriptor table.
+.align 16
+gdt:
+	# Index 0x00
+	# Required dummy
+	.quad	0x00
+
+	# 0x08
+	# Unused
+	.quad	0x00
+
+	# 0x10
+	# code segment
+	# bit 63			bit 32
+	# 000000000000000 | 1001101000000000
+	# 000000000000000 | 1111111111111111 (limit)
+	# bit 31 (base)		bit 0
+	#.word	0xFFFF
+	#.word	0x0000
+	#.word	0x9A00	# 1001 1010 0000 0000
+	#.word	0x00CF	# 0000 0000 1100 1111
+	.quad 0x00cf9a000000ffff	
+
+	# 0x18
+	# data segment
+	#.word	0xFFFF
+	#.word	0x0000
+	#.word	0x9200 # 1001 0010 0000 0000
+	#.word	0x00CF # 0000 0000 1100 1111 
+	.quad 0x00cf92000000ffff	
+gdt_end:
+gdt_info:
+	.word	gdt_end - gdt - 1	# Size of GDT
+	.word	0x0000			# Upper 2 Bytes of GDT address.
+	.word	0x0000			# Lower 2 Bytes of GDT address.
+
+idt_info:
+	.word	0x0000
+	.word	0x0000
+	.word	0x0000
