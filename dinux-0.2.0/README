@@ -60,6 +60,24 @@ execute the following two commands exactly (for Debian based OS'):
 	sudo apt-get install libx32gcc-4.8-dev
 	sudo apt-get install libc6-dev-i386
 
+######################
+# Debugging with GDB
+######################
+1. Compile with -g flag
+
+Window A:
+./BuildKernel
+objcopy --only-keep-debug myos.bin kernel.sym
+qemu-system-x86_64 -s -S -hda myos.iso
+
+Window B:
+gdb
+target remote localhost:1234
+symbol-file ~/Documents/dinux/dinux-0.2.0/kernel.sym
+b setup_32
+c
+Click to boot dinux
+
 ###################################
 # Dinux version number convention
 ###################################
