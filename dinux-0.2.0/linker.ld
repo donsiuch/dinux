@@ -1,10 +1,13 @@
 
 ENTRY(_start)
 
+PHYSICAL_BASE_ADDRESS = 0x00100000;
+REAL_BASE_ADDRESS = 0x1000;
+
 SECTIONS
 {
 	/* Begin putting sections here */
-	. = 0x100000;
+	. = PHYSICAL_BASE_ADDRESS;
 
 	/* First put the multiboot header followed by .text section. */
 	.text BLOCK(4K) : ALIGN(4K)
