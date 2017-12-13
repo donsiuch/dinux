@@ -296,7 +296,7 @@ asmlinkage void doSystemTimer(regs *registers)
 	if ( _G_TICK % 100 == 0 )
 	{
 		// Temporary test function
-		//emitOneSecond();
+		emitOneSecond();
 	}
 	
 	// Tell the master PIC we are done servicing the interrupt.	

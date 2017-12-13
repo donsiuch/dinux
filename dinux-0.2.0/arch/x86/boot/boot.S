@@ -13,15 +13,6 @@
 .long FLAGS
 .long CHECKSUM
 
-# Currently the stack pointer points at anything and using it may
-# cause massive harm. Instead, provide a new stack. Allocate
-# room for a small temporary stack by creating a symbol at the bottom of it,
-# then allocating 16384 bytes for it, and finally create a symbol at the top.
-.section .bootstrap_stack, "aw", @nobits
-stack_bottom:
-.skip 16384 # 16 KiB
-stack_top:
-
 # The linker script specifies _start as the entry point to the kernel and the
 # bootloader will jump to this position once the kernel has been loaded.
 .section .text
@@ -29,10 +20,7 @@ stack_top:
 .type _start, @function
 _start:
 	
-	# TO-DO: Is temporary stack even correct?
-	movl $stack_top, %esp
-
-	call setup_32
+    jmp setup_32
 
 	# Should never get here	
 	cli
@@ -40,6 +28,3 @@ _start:
 .Lhang:
 	jmp .Lhang
 
-# Set the size of the _start symbol to the current location '.' minus its start.
-# This is useful when debugging or when implementing call tracing.
-//.size _start, . - _start
