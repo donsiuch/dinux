@@ -97,7 +97,7 @@ setup_32:
     # Interrupts should already be disabled...
 	cli
 	lgdt	gdt_info
-
+/*
     # *********************
 	# Return to real mode *
 	# *********************
@@ -142,12 +142,11 @@ set_rm_segment_regs:
 	sti
 
 
-    # Not working    
-/*
-    movb    $0x0e, %ah
-    movb    $'a', %al
-    int     $0x10
-*/
+
+#    movb    $0x0e, %ah
+#    movb    $'a', %al
+#    int     $0x10
+
 
     # Working
 meme820:
@@ -173,6 +172,8 @@ bail820:
 
 	jmp	$0x10, $restoreGDT
 # This directive is required to go here.
+
+*/
 .code32
 restoreGDT:
 	movl	$0x18, %eax
