@@ -4,7 +4,7 @@ ENTRY(_start)
 SECTIONS
 {
 	/* Begin putting sections here */
-	. = 0x10000;
+	. = 0x100000;
 
 	/* First put the multiboot header followed by .text section. */
 	.text BLOCK(4K) : ALIGN(4K)

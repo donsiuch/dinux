@@ -38,7 +38,7 @@ CFLAGS		+= -c -m32 -Wall -Wextra -pedantic -std=c99 -ffreestanding -g
 # nostdlib is causing issues with the multiboot header
 # we want use -nostartfiles in the meantime... but we really want nostdlib
 LDFLAGS		:=
-LDFLAGS		+= -m32 -O2 -nostartfiles -lgcc -ffreestanding -T
+LDFLAGS		+= -m32 -O2 -nostdlib -lgcc -ffreestanding -T
 
 export MAKE_DIR CC LD CFLAGS LDFLAGS INC_SRCH_PATH
 
