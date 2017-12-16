@@ -65,6 +65,23 @@ set_rm_segment_regs:
 	# Enable interrupts for memory checking.
 #	sti
 
+    movb    $0x0e, %ah
+    movb    $'a', %al
+    int     $0x10
+
+
+    # Working
+meme820:
+	xorl	%ebx, %ebx
+	#movw 	$smapBuffer, %di
+    movw    $0x9000, %di
+    # Pick some address that I anticipate to work
+    #movw    $0x500, %es:(%di)
+	movl	$0x0000e820, %eax
+	movl 	$0x534D4150, %edx
+	movl	$20, %ecx
+	int	    $0x15
+bail820:
 
 #   <code>
     movw    $0xdead, %cx
