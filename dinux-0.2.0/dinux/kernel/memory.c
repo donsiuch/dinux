@@ -1,5 +1,8 @@
 
+#include <stdint.h>
+
 #include "dinux/inc/memory.h"
+
 
 /*
  * Function:	void *memset
@@ -23,4 +26,26 @@ void *memset(void *s, int c, unsigned int n)
 		*(((unsigned char *)s)+n) = c;
 	}
 	return s;
+}
+
+/*
+ * Function:	void *memcpy
+ *
+ * Description:	Copy source buffer to destination buffer for given size.
+ *
+ * Parameters:
+ *	s	source buffer
+ *	c   destination buffer	
+ *	n	size to copy
+ *
+ * Return:	Returns the destination buffer parameter address.
+ *
+*/
+void *memcpy( void *d, void *s, uint32_t n)
+{
+    while ( n-- > 0)
+    {
+        *(((unsigned char *)d)+n) = *(((unsigned char *)s)+n);
+    }
+    return d;
 }

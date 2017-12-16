@@ -77,12 +77,6 @@ idt_info:
 	.word	0x0000
 	.word	0x0000
 
-# IDT for real mode
-idt_real_info:
-	.word	0x03ff
-	.word	0x0000
-	.word	0x0000
-
 .code32
 .text
 .globl setup_32
@@ -174,7 +168,20 @@ bail820:
 # This directive is required to go here.
 
 */
-.code32
+
+    # Copy the real mode code to its final destination
+    
+    pushl   $__realmode_secsize
+    pushl   $__realmode_lma_start
+    pushl   $0x1000
+    call    memcpy
+    popl    %eax
+    popl    %eax
+    popl    %eax
+
+   call    0x1000
+
+#.code32
 restoreGDT:
 	movl	$0x18, %eax
 	movl	%eax, %ds
@@ -217,7 +224,7 @@ loadSegmentRegisters:
 	movl	kernel_pd, %eax
 	movl	%eax, %cr3
 	movl	%cr0, %eax
-	orl	$0x80000000, %eax
+	orl	    $0x80000000, %eax
 	movl	%eax, %cr0 	
 	
 	call 	kernel_main

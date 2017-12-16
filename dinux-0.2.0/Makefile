@@ -3,7 +3,6 @@
 # Silence all makefile output except errors.
 MAKEFLAGS 	+= -s
 
-#CC		= gcc
 CC		= ~/x-tools/i686-unknown-linux-gnu/bin/i686-unknown-linux-gnu-gcc
 
 MAKE_DIR	= $(PWD)
@@ -33,19 +32,17 @@ INC_SRCH_PATH	+= -I$(DRIVERS_DIR)
 
 CFLAGS		:=
 CFLAGS		+= $(INC_SRCH_PATH)
-CFLAGS		+= -c -m32 -Wall -Wextra -pedantic -std=c99 -ffreestanding -g
+CFLAGS		+= -std=c99 -m32 -O2 -c -Wall -Wextra -pedantic -nostdlib -ffreestanding -g
 
-# nostdlib is causing issues with the multiboot header
-# we want use -nostartfiles in the meantime... but we really want nostdlib
 LDFLAGS		:=
-LDFLAGS		+= -m32 -O2 -nostdlib -lgcc -ffreestanding -T
+LDFLAGS		+= -m32 -nostdlib -ffreestanding -lgcc -T 
 
 export MAKE_DIR CC LD CFLAGS LDFLAGS INC_SRCH_PATH
 
 all: myos.bin
 
 myos.bin: objects
-	$(CC) $(LDFLAGS) linker.ld -o myos.bin \
+	$(CC) $(LDFLAGS)linker.ld -o myos.bin \
 	$(VGA_DIR)/obj/vga.o \
 	$(DINUX_DIR)/obj/io.o \
 	$(DINUX_DIR)/obj/memory.o \
@@ -57,6 +54,7 @@ myos.bin: objects
 	$(MAKE_DIR)/arch/x86/obj/pic.o \
 	$(MAKE_DIR)/arch/x86/obj/pit.o \
 	$(MAKE_DIR)/arch/x86/obj/setup_32.o \
+	$(MAKE_DIR)/arch/x86/obj/real_mode.o \
 	$(MAKE_DIR)/arch/x86/obj/boot.o 
 
 objects:
