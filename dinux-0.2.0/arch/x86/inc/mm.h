@@ -28,8 +28,9 @@
 #define NUM_LEDGER_UNITS 	(TOTAL_NUM_PAGES/PAGES_PER_UNIT)
 
 // Proof of concept paging
-#define KERNEL_PD_ADDR	0x1e000
-#define	PT_IDENT_ADDR	0x1f000
+#define KERNEL_PD_ADDR	0x1d000
+#define	PT_IDENT_ADDR	0x1e000
+#define PT_KERNEL_ADDR  0x1f000 
 
 // Page table entry
 typedef struct __attribute((packed)) {
@@ -95,6 +96,7 @@ typedef struct SMAP_entry {
 
 uint32_t *kernel_pd;
 uint32_t *pt_ident;
+uint32_t *pt_kernel;
 
 void	setupPaging();
 void * 	getFreeFrame();

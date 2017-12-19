@@ -28,7 +28,7 @@ void printFormalHexLong(const unsigned long hexNumber)
 	}
 }
 
-static void vprintd(const char * string, va_list args)
+static void vprintd(const char *string, va_list args)
 {
 	// While we haven't hit the newline
 	while ( *string != 0 )
@@ -80,7 +80,7 @@ static void vprintd(const char * string, va_list args)
 // Prints an entire string
 // Changed the name because printf is reserved in gcc
 // https://www.gnu.org/software/libc/manual/html_node/Reserved-Names.html
-void printd(const char * string, ...)
+void printd(const char *string, ...)
 {
 	va_list args;
 	va_start(args, string); 

@@ -15,7 +15,7 @@
 
 # The linker script specifies _start as the entry point to the kernel and the
 # bootloader will jump to this position once the kernel has been loaded.
-.section .text
+.text
 .global _start
 .type _start, @function
 _start:

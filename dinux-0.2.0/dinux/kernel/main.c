@@ -8,9 +8,9 @@ void kernel_main() {
 	
 	terminal_initialize();
 	
-	//printd("In the main loop\n");
+	printd("In the main loop\n");
 
-	getFreeFrame();
+	//getFreeFrame();
 
 	while (1) 
 	{

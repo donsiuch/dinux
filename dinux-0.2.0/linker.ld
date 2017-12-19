@@ -13,7 +13,7 @@ SECTIONS
 	/* First put the multiboot header followed by .text section. */
 	.text BLOCK(4K) : ALIGN(4K)
 	{
-		*(.multiboot)
+        *(.multiboot)
 		*(.text)
 	}
 
