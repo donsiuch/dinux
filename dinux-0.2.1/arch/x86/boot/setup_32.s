@@ -1,102 +1,37 @@
 
 #include "x86/inc/mm.h"
 
-string:
-	.asciz "--> %p\n"
-
-// This is currently the main global descriptor table.
-.align 16
-gdt:
-	# Index 0x00
-	# Required dummy
-	.quad	0x00
-
-	# 0x08
-	# Unused
-	.quad	0x00
-
-	# 0x10
-	# protected mode code segment
-	# bit 63			bit 32
-	# 000000000000000 | 1001101000000000
-	# 000000000000000 | 1111111111111111 (limit)
-	# bit 31 (base)		bit 0
-	#.word	0xFFFF
-	#.word	0x0000
-	#.word	0x9A00	# 1001 1010 0000 0000
-	#.word	0x00CF	# 0000 0000 1100 1111
-	.quad 0x00cf9a000000ffff	
-
-	# 0x18
-	# protected mode data segment
-	#.word	0xFFFF
-	#.word	0x0000
-	#.word	0x9200 # 1001 0010 0000 0000
-	#.word	0x00CF # 0000 0000 1100 1111 
-	.quad 0x00cf92000000ffff	
-
-	# 0x20
-	# 16 bit code segment
-	#.word	0xFFFF 	limit (0-15)
-	#.word	0x0000	base (16-31)
-	#.byte	0x00	base (32-39)
-	#.byte	0x9a	access byte (40-47) - 10011010
-	#.byte	0x0f	flags + limit (48-55)
-	#.word	0x00	base (56-63)
-    .quad 0x00009a000000ffff
-
-	# 0x28
-	# 16 bit data segment    
-	#.word	0xFFFF 	limit (0-15)
-	#.word	0x0000	base (16-31)
-	#.byte	0x00	base (32-39)
-	#.byte	0x92	access byte (40-47) - 10010010
-	#.byte	0x0f	flags + limit (48-55)
-	#.word	0x00	base (56-63)
-    .quad 0x000092000000ffff
-
-gdt_end:
-gdt_info:
-	.word	gdt_end - gdt - 1	# Size of GDT
-	.word	0x0000			# Upper 2 Bytes of GDT address.
-	.word	0x0000			# Lower 2 Bytes of GDT address.
-
-# IDT for protected mode
-idt_info:
-	.word	0x0000
-	.word	0x0000
-	.word	0x0000
-
 .code32
 .text
 .globl setup_32
 setup_32:
+
 	# Setup stack.
 	movl	$0x00007000, %esp
 	movl	%esp, %ebp
 
-    # Set up GDT
+	# Set up GDT
 	movl	$gdt, (gdt_info + 2)
 
-    # Interrupts should already be disabled...
+	# Interrupts should already be disabled...
 	cli
 	lgdt	gdt_info
 
 do_bios_setup:
-    # Copy the real mode code to its final destination
-    pushl   $__realmode_secsize
-    pushl   $__realmode_lma_start
-    pushl   $0x1000
-    call    memcpy
-    popl    %eax
-    popl    %eax
-    popl    %eax
-    call    0x1000
+	# Copy the real mode code to its final destination
+	pushl   $__realmode_secsize
+	pushl   $__realmode_lma_start
+	pushl   $0x1000
+	call    memcpy
+	popl    %eax
+	popl    %eax
+	popl    %eax
+	call    0x1000
 
 	# Set %cs segment register to 32 bit code descriptor 
 	jmp 	$0x10, $loadSegmentRegisters
 
-    # Set all other segment registers to 32 bit data descriptor
+	# Set all other segment registers to 32 bit data descriptor
 loadSegmentRegisters:
 	movl	$0x18, %eax
 	movl	%eax, %ds
@@ -110,14 +45,14 @@ loadSegmentRegisters:
 	movl	kernel_pd, %eax
 	movl	%eax, %cr3
 	movl	%cr0, %eax
-	orl	    $0x80000000, %eax
+	orl	$0x80000000, %eax
 
 turn_on_paging:
 	movl	%eax, %cr0
-    jmp     ((fixup_idt - 0x100000) + 0xc0000000)
+	jmp     ((fixup_idt - 0x100000) + 0xc0000000)
 
 fixup_idt:
-    # Fix up idt and ldt info structures
+	# Fix up idt and ldt info structures
 	# Load a new global descriptor table
 	movl	$idtSize, idt_info
 	movl	$idt, (idt_info + 2)
@@ -126,7 +61,7 @@ fixup_idt:
 	lidt	idt_info
 
 	# Enable interrupts
-    sti	
+	sti	
 
 	call 	kernel_main
 
@@ -465,3 +400,69 @@ systemCall:
 	movl	$doSystemCall, %eax
 	jmp	isrSaveState
 
+.data
+string:
+	.asciz "--> %p\n"
+
+// This is currently the main global descriptor table.
+.align 16
+gdt:
+	# Index 0x00
+	# Required dummy
+	.quad	0x00
+
+	# 0x08
+	# Unused
+	.quad	0x00
+
+	# 0x10
+	# protected mode code segment
+	# bit 63			bit 32
+	# 000000000000000 | 1001101000000000
+	# 000000000000000 | 1111111111111111 (limit)
+	# bit 31 (base)		bit 0
+	#.word	0xFFFF
+	#.word	0x0000
+	#.word	0x9A00	# 1001 1010 0000 0000
+	#.word	0x00CF	# 0000 0000 1100 1111
+	.quad 0x00cf9a000000ffff	
+
+	# 0x18
+	# protected mode data segment
+	#.word	0xFFFF
+	#.word	0x0000
+	#.word	0x9200 # 1001 0010 0000 0000
+	#.word	0x00CF # 0000 0000 1100 1111 
+	.quad 0x00cf92000000ffff	
+
+	# 0x20
+	# 16 bit code segment
+	#.word	0xFFFF 	limit (0-15)
+	#.word	0x0000	base (16-31)
+	#.byte	0x00	base (32-39)
+	#.byte	0x9a	access byte (40-47) - 10011010
+	#.byte	0x0f	flags + limit (48-55)
+	#.word	0x00	base (56-63)
+    .quad 0x00009a000000ffff
+
+	# 0x28
+	# 16 bit data segment    
+	#.word	0xFFFF 	limit (0-15)
+	#.word	0x0000	base (16-31)
+	#.byte	0x00	base (32-39)
+	#.byte	0x92	access byte (40-47) - 10010010
+	#.byte	0x0f	flags + limit (48-55)
+	#.word	0x00	base (56-63)
+    .quad 0x000092000000ffff
+
+gdt_end:
+gdt_info:
+	.word	gdt_end - gdt - 1	# Size of GDT
+	.word	0x0000			# Upper 2 Bytes of GDT address.
+	.word	0x0000			# Lower 2 Bytes of GDT address.
+
+# IDT for protected mode
+idt_info:
+	.word	0x0000
+	.word	0x0000
+	.word	0x0000
