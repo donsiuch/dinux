@@ -10,19 +10,15 @@ SECTIONS
 	/* Begin putting sections here */
 	. = PHYSICAL_BASE_ADDRESS;
 
-	/* First put the multiboot header followed by .text section. */
-	.text BLOCK(4K) : ALIGN(4K)
-	{
-        *(.multiboot)
-		*(.text)
-	}
-
     /* Find the distance between 0x100000 - 0x1000 => 0xff000 */
     __physreal_diff = . - REAL_BASE_ADDRESS;
     
     /* Tell the linker that the .realmode section should have an addresses */
     /* generated at 0x1000, but is loaded here */
     .realmode REAL_BASE_ADDRESS : AT(ADDR(.realmode) + __physreal_diff) {
+    
+        *(.multiboot);
+
         /* The __realmode* values can be used by code to copy
          * the code/data from where it was placed in RAM
          * by the multiboot loader into lower memory at REAL_BASE
@@ -43,8 +39,11 @@ SECTIONS
     __realmode_lma_end   = __realmode_vma_start + __physreal_diff + __realmode_secsize;
 
     . += __physreal_diff;
-    /* .text ALIGN(4K): AT(ADDR(.text)) { */
-    /* *(.text); */
+
+    .text ALIGN(4K) : AT(ADDR(.text))
+	{
+		*(.text);
+	}
 
 	/* Read-only data. */
 	.rodata BLOCK(4K) : ALIGN(4K)
