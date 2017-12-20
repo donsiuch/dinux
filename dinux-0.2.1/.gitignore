@@ -20,3 +20,6 @@
 
 # gdb debug files
 *.debug
+
+# Symbol files
+*.sym
