@@ -1,0 +1,105 @@
+###############
+# How to run
+###############
+
+To build the OS and run on a VM:
+	1. Run BuildKernel
+	2. Run StartVM
+
+To build the OS for bare metal via USB:
+	1. Plug in USB
+	2. dmesg command to find the assigned device name
+	3. Modify the last line in BuildKernel and uncomment
+	4. Run BuildKernel
+	5. Boot from USB
+
+###################
+# Required Tools
+###################
+
+qemu 
+	sudo apt-get install qemu
+
+make 
+	sudo apt-get install make
+
+xorriso 1.2.9 or later 
+	sudo apt-get install xorisso
+
+i686-linux-gnu cross compiler
+	If an i686 cross compiler is not used an incorrect elf file may be produced given the compiler flags.
+	( see special note below )
+
+#########
+# Qemu 
+########
+
+1. If qemu complains about the lack of a video device, modify the StartVM file by passing the parameter: -curses to 
+the qemu binary. The problem may be experienced if using ssh ( or similar program ) to remotely connect and run StartVM.
+
+#############
+# Compiling 
+#############
+
+An i686 cross compiler may be requuired to build the OS. This is the type of compiler used to develop and 
+test the OS. However, a non i686 compiler may be used with varying resuls. Following are some problems
+and work arounds that may work.
+
+1. If using a non i686 compiler and a message similar to the following is encountered:
+
+	[...] multiboot header cannot be found [...]
+
+In the top level directory Makefile, try replacing the linker flag -nostdlib with -nostartfiles.
+
+2. The compiler is passed a flag -m32 indicating to gcc to generate a 32 bit binary. If using a non i686 compiler and
+the following error occurs:
+		
+	/usr/include/features.h:xxx:xx: fatal error: sys/cdefs.h: No such file or directory
+	
+execute the following two commands exactly (for Debian based OS'):
+	sudo apt-get install libx32gcc-4.8-dev
+	sudo apt-get install libc6-dev-i386
+
+######################
+# Debugging with GDB
+######################
+1. Compile with -g flag
+
+Window A:
+./BuildKernel
+objcopy --only-keep-debug myos.bin kernel.sym
+qemu-system-x86_64 -s -S -hda myos.iso
+
+Window B:
+gdb
+target remote localhost:1234
+symbol-file ~/Documents/dinux/dinux-0.2.0/kernel.sym
+b setup_32
+c
+Click to boot dinux
+
+###################################
+# Dinux version number convention
+###################################
+
+dinux-w.y.z
+
+w: 	I plan to increment this number to 1 when this project becomes a working operating system. 
+	From there after, this number will only ever increase for major features or collections of features.
+
+y:	This number increases for a large change such as a single new feature or groups of functions.
+
+z:	This number increases by 1 for each push to the public repo.
+	Pushes occur after bug and typo fixes.
+
+Links/Sources:
+https://software.intel.com/sites/default/files/managed/a4/60/325384-sdm-vol-3abcd.pdf
+http://www.plantation-productions.com/Webster/www.artofasm.com/DOS/pdf/ch17.pdf
+http://wiki.osdev.org/Interrupt_Descriptor_Table
+https://geeksww.com/tutorials/operating_systems/linux/tips_and_tricks/some_tricks_used_by_the_linux_kernel.php
+
+OS Tutorials:
+http://www.osdever.net/tutorials/
+http://www.osdever.net/bkerndev/index.php ( http://wiki.osdev.org/Bran's_Known_Bugs )
+http://www.jamesmolloy.co.uk/tutorial_html/ ( http://wiki.osdev.org/James_Molloy's_Tutorial_Known_Bugs )
+http://www.brokenthorn.com/Resources/OSDevIndex.html

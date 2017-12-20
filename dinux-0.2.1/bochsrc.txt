@@ -1,0 +1,21 @@
+# To run the bochs debugger, type:   bochs        at the command line
+
+#ve our system 32 Mb of RAM.
+megs: 32
+
+# This is the additional package we installed. We add it into our configuration.
+display_library: sdl
+
+# This emulates a physical device and loads our bootable IMG file into that device.
+#floppya: 1_44=/home/donnie/Documents/dinux/dinux-0.1.7/myos.iso, status=inserted    
+ata0-master: type=cdrom, path=/home/donnie/Documents/dinux/dinux-0.1.7/myos.iso, status=inserted
+
+# We specify to boot from floppya.
+#boot: a
+boot: cdrom
+
+# Logfile
+log: bochsout.txt
+
+# We don't need mouse emulation
+mouse: enabled=0
