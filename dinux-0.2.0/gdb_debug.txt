@@ -1,4 +1,0 @@
-target remote localhost:1234
-symbol-file kernel.sym
-break do_bios_setup
-break turn_on_paging 

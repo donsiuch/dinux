@@ -17,3 +17,6 @@
 
 # Grub config files
 *.cfg
+
+# gdb debug files
+*.debug
