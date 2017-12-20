@@ -92,15 +92,16 @@ setup_32:
 	cli
 	lgdt	gdt_info
 
+do_bios_setup:
     # Copy the real mode code to its final destination
-    #pushl   $__realmode_secsize
-    #pushl   $__realmode_lma_start
-    #pushl   $0x1000
-    #call    memcpy
-    #popl    %eax
-    #popl    %eax
-    #popl    %eax
-    #call    0x1000
+    pushl   $__realmode_secsize
+    pushl   $__realmode_lma_start
+    pushl   $0x1000
+    call    memcpy
+    popl    %eax
+    popl    %eax
+    popl    %eax
+    call    0x1000
 
 	# Set %cs segment register to 32 bit code descriptor 
 	jmp 	$0x10, $loadSegmentRegisters
@@ -122,8 +123,8 @@ loadSegmentRegisters:
 	orl	    $0x80000000, %eax
 
 turn_on_paging:
-	#movl	%eax, %cr0
-    #jmp     ((fixup_idt - 0x100000) + 0xc0000000)
+	movl	%eax, %cr0
+    jmp     ((fixup_idt - 0x100000) + 0xc0000000)
 
 fixup_idt:
     # Fix up idt and ldt info structures

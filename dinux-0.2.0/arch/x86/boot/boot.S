@@ -9,6 +9,7 @@
 # Declare a header as in the Multiboot Standard. Putting this in a special
 # section forces the header to be in the start of the final program.
 .section .multiboot
+
 .align 4
 .long MAGIC
 .long FLAGS

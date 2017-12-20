@@ -12,12 +12,10 @@ SECTIONS
 
     /* Find the distance between 0x100000 - 0x1000 => 0xff000 */
     __physreal_diff = . - REAL_BASE_ADDRESS;
-    
+
     /* Tell the linker that the .realmode section should have an addresses */
     /* generated at 0x1000, but is loaded here */
     .realmode REAL_BASE_ADDRESS : AT(ADDR(.realmode) + __physreal_diff) {
-    
-        *(.multiboot);
 
         /* The __realmode* values can be used by code to copy
          * the code/data from where it was placed in RAM
@@ -29,6 +27,7 @@ SECTIONS
         __realmode_lma_start = LOADADDR(.realmode);
         *(.text.realmode);
         *(.data.realmode);
+        *(.multiboot);
     }
     
     /* Align at 4 Bytes and define some new symbols in our image we can refernce */
