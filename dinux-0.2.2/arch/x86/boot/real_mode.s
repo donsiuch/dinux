@@ -1,4 +1,14 @@
 
+#
+# Filename: real_mode.s
+#
+# This code to this file is loaded with the kernel and then copied to 0x1000 (thanks to linker script)
+#
+# This code switches the processor to real mode such that BIOS routines become available.
+#
+# Donald Siuchninski (December 2017)
+#
+
 .section .data.realmode
 
 # IDT for real mode
@@ -17,7 +27,7 @@ switch_to_real_mode:
 	pushl   %ebp
     	movl    %esp, %ebp
 
-    	# Load a new segment with a limit of 0xffff 
+    	# Load a new code segment with a limit of 0xffff 
     	# This is the segment limit required in real-
     	# address mode.
 	jmp	$0x20, $loadRMSeg
@@ -32,13 +42,10 @@ loadRMSeg:
 	movl	%eax, %ss
 
     	lidt	idt_real_info
-remove_bp:
-	# Disable protected mode by disabling PE (0) bit
-	xorl	%ebx, %ebx
-	not	%ebx
-	andb	$0xfe, %bl
+
+	# Disable protected mode by disabling PE bit
 	movl	%cr0, %eax
-    	andl    $0xfffe, %eax
+    	andb    $0xfe, %al
 	movl	%eax, %cr0
 
 	jmp	$0x00, $set_rm_segment_regs
@@ -73,10 +80,10 @@ bail820:
 	# Disable interrupts
 	cli
 
-	# Return to protected mode
-	xorw	%ax, %ax
-	movw	$0x0001, %ax
-	lmsw	%ax
+	# Return to protected mode by setting PE bit
+	movl	%cr0, %eax	
+	orb	$0x01, %al
+	movl	%eax, %cr0
 
 	# Restore 32 bit code + data segment descriptors
 	jmp	$0x10, $load_data_segment_regs

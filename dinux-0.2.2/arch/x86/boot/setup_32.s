@@ -7,7 +7,7 @@
 setup_32:
 
 	# Setup stack.
-	movl	$0x00007000, %esp
+	movl	$0x7000, %esp
 	movl	%esp, %ebp
 
 	# Set up GDT
