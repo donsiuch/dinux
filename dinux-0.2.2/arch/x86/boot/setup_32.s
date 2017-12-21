@@ -18,7 +18,12 @@ setup_32:
 	lgdt	gdt_info
 
 do_bios_setup:
-	# Copy the real mode code to its final destination
+	
+	# Copy the real mode code to its final destination.
+	#
+	# 32 bit code and data segment descriptors are set
+	# in the realmode code.
+
 	pushl   $__realmode_secsize
 	pushl   $__realmode_lma_start
 	pushl   $0x1000
@@ -27,18 +32,6 @@ do_bios_setup:
 	popl    %eax
 	popl    %eax
 	call    0x1000
-
-	# Set %cs segment register to 32 bit code descriptor 
-	jmp 	$0x10, $loadSegmentRegisters
-
-	# Set all other segment registers to 32 bit data descriptor
-loadSegmentRegisters:
-	movl	$0x18, %eax
-	movl	%eax, %ds
-	movl	%eax, %gs
-	movl	%eax, %fs
-	movl	%eax, %es
-	movl	%eax, %ss
 
 	# Turn on paging
 	call	setupPaging

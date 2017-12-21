@@ -32,12 +32,12 @@ loadRMSeg:
 	movl	%eax, %ss
 
     	lidt	idt_real_info
-
-	# Preserve %cr0
+remove_bp:
+	# Disable protected mode by disabling PE (0) bit
+	xorl	%ebx, %ebx
+	not	%ebx
+	andb	$0xfe, %bl
 	movl	%cr0, %eax
-
-    	# This is temporary
-	#andl	$0xffffffffe, %eax
     	andl    $0xfffe, %eax
 	movl	%eax, %cr0
 
@@ -50,7 +50,10 @@ set_rm_segment_regs:
 	movw	%ax, %es
 	movw	%ax, %ss
 
-	# Enable interrupts for memory checking.
+	# Enable interrupts
+	#
+	# Note: Interrupts seem to be working whether or 
+	# not the interrupt flag is set...
 	sti
 
     	movb    $0x0e, %ah
@@ -67,6 +70,7 @@ meme820:
 	int	$0x15
 bail820:
 
+	# Disable interrupts
 	cli
 
 	# Return to protected mode
@@ -74,9 +78,10 @@ bail820:
 	movw	$0x0001, %ax
 	lmsw	%ax
 
-	jmp	$0x10, $restoreGDT
+	# Restore 32 bit code + data segment descriptors
+	jmp	$0x10, $load_data_segment_regs
 .code32
-restoreGDT:
+load_data_segment_regs:
 	movl	$0x18, %eax
 	movl	%eax, %ds
 	movl	%eax, %gs
