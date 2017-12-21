@@ -32,7 +32,7 @@ SECTIONS
 	__realmode_vma_end = .;
 	__realmode_secsize = ((__realmode_vma_end)-(__realmode_vma_start));
 
-	/* Set virtual address counter to 0x100000 */
+	/* Set virtual address for the rest of the sections beyond the real mode code */
 	. += __physreal_diff;
 
 	.text ALIGN(4K) : AT(ADDR(.text))
