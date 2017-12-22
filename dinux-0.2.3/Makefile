@@ -32,7 +32,7 @@ INC_SRCH_PATH	+= -I$(DRIVERS_DIR)
 
 CFLAGS		:=
 CFLAGS		+= $(INC_SRCH_PATH)
-CFLAGS		+= -std=c99 -m32 -O3 -c -Wall -Wextra -pedantic -nostdlib -ffreestanding -g
+CFLAGS		+= -std=c99 -m32 -O2 -c -Wall -Wextra -pedantic -nostdlib -ffreestanding -g
 
 LDFLAGS		:=
 LDFLAGS		+= -m32 -nostdlib -ffreestanding -lgcc -T 
