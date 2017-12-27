@@ -9,7 +9,11 @@ void kernel_main() {
 	
 	printd("In the main loop\n");
 
-	getFreeFrame();
+	char *blah_ptr = (char *)0xdeadbeef;
+
+	char blah = *blah_ptr;
+
+	printd("i--> %x", *blah_ptr);
 
 	while (1) 
 	{

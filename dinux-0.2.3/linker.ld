@@ -8,15 +8,15 @@ REAL_BASE_ADDRESS = 0x1000;
 
 SECTIONS
 {
-	/* Set the counter to 0x100000 */
+	/* Set the counter to 0xc0100000 */
 	. = VIRTUAL_OFFSET_ADDRESS;
 
 	/* Find the distance between 0x100000 - 0x1000 => 0xff000 */
 	__physreal_diff = . - REAL_BASE_ADDRESS;
 
-	/* Tell the linker that the .realmode section should have virtual addresses */
-	/* generated at 0x1000, but is loaded at 0x100000 */
-	.realmode REAL_BASE_ADDRESS : AT(ADDR(.realmode) + __physreal_diff - 0xc0000000) {
+	/* AT(ADDR(.realmode)) = 0x1000, (__physreal_diff = 0xc0100000 - 0x1000)
+	 	Load at -->  0x1000 + 0xc0100000 - 0x1000 --> 0xc0100000 */
+	.realmode REAL_BASE_ADDRESS : AT(ADDR(.realmode) + __physreal_diff ) {
 
 		__realmode_vma_start = .;
 
@@ -42,19 +42,19 @@ SECTIONS
 	}
 
 	/* Read-only data. */
-	.rodata BLOCK(4K) : ALIGN(4K)
+	.rodata BLOCK(4K) : AT(ADDR(.rodata) - 0xc0000000) 
 	{
 		*(.rodata)
 	}
 
 	/* Read-write data (initialized) */
-	.data BLOCK(4K) : ALIGN(4K)
+	.data BLOCK(4K) : AT(ADDR(.data) - 0xc0000000)
 	{
 		*(.data)
 	}
 
 	/* Read-write data (uninitialized) and stack */
-	.bss BLOCK(4K) : ALIGN(4K) 
+	.bss BLOCK(4K) : AT(ADDR(.bss) - 0xc0000000) 
 	{
 		*(COMMON)
 		*(.bss)
