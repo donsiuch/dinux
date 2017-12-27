@@ -94,9 +94,9 @@ typedef struct SMAP_entry {
  
 }__attribute__((packed)) SMAP_entry_t;
 
-uint32_t *kernel_pd;
-uint32_t *pt_ident;
-uint32_t *pt_kernel;
+//uint32_t *kernel_pd;
+//uint32_t *pt_ident;
+//uint32_t *pt_kernel;
 
 void	setupPaging();
 void * 	getFreeFrame();

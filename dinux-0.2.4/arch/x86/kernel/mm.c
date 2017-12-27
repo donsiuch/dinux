@@ -96,6 +96,9 @@ void setupPaging()
 {
 	int x = 0;
 	uint32_t frameAddress = 0x00000000;
+	uint32_t *kernel_pd;
+	uint32_t *pt_ident;
+	uint32_t *pt_kernel;
 
 	// Clear the frame bitmap
 	memset(frameLedger, 0, sizeof(frameLedger));
@@ -113,7 +116,7 @@ void setupPaging()
 	kernel_pd[0] |= 1;
 	kernel_pd[0] |= 2;
 
-	// Identy map the first 32 pages
+	// Identy map alot of the kernel: (0x0000 -> 0x1000000)
 	while ( x < 1024 ){
 
 		pt_ident[x] = (uint32_t)frameAddress;
@@ -124,23 +127,25 @@ void setupPaging()
 		x++;	
 	}	
 
-    // Clear page table for the kernel
-    pt_kernel = (uint32_t *)PT_KERNEL_ADDR;
-    memset(pt_kernel, 0, PAGE_SIZE);
+	// Clear page table for the kernel
+	pt_kernel = (uint32_t *)PT_KERNEL_ADDR;
+	memset(pt_kernel, 0, PAGE_SIZE);
 
-    // Start mapping pages at the 0xc0000000 page table
-    // 0xc0000000/(4096*1024) = 0x300 = 768
-    kernel_pd[768] = (uint32_t)pt_kernel;
-    kernel_pd[768] |= 1;
-    kernel_pd[768] |= 2;
+	// Start mapping pages at the 0xc0000000 page table
+	// 0xc0000000/(4096*1024) = 0x300 = 768
+	kernel_pd[768] = (uint32_t)pt_kernel;
+	kernel_pd[768] |= 1;
+	kernel_pd[768] |= 2;
 
-    x = 0;
-    frameAddress = 0x100000;
-    while (x < 1024){
-        pt_kernel[x] = (uint32_t)frameAddress;
-        pt_kernel[x] |= 1;
-        pt_kernel[x] |= 2;
-        frameAddress += PAGE_SIZE;
-        x++;
-    }
+	// 
+	x = 256;
+	frameAddress = 0x100000;
+	while (x < 1024){
+		pt_kernel[x] = (uint32_t)frameAddress;
+		pt_kernel[x] |= 1;
+		pt_kernel[x] |= 2;
+		frameAddress += PAGE_SIZE;
+		x++;
+	}
+
 }

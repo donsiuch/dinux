@@ -11,11 +11,13 @@ setup_32:
 	movl	%esp, %ebp
 
 	# Set up GDT
-	movl	$gdt, (gdt_info + 2)
+	#movl	$gdt, (gdt_info + 2)
+	#movl	$0x105020, (0x105052)
+	movl	$(gdt - 0xc0000000), (gdt_info - 0xc0000000 + 2)	
 
 	# Interrupts should already be disabled...
 	cli
-	lgdt	gdt_info
+	lgdt	(gdt_info - 0xc0000000)
 
 do_bios_setup:
 	
@@ -28,21 +30,23 @@ do_bios_setup:
 	pushl   $__realmode_lma_start
 	pushl   $0x1000
 	call    memcpy
-	popl    %eax
-	popl    %eax
-	popl    %eax
-	call    0x1000
+	subl	$0x0c, %esp
+	movl	$0x1000, %eax
+	call    *%eax
+	#call 	switch_to_real_mode
 
-	# Turn on paging
+setup_paging:
+	
 	call	setupPaging
-	movl	kernel_pd, %eax
+#	movl	kernel_pd, %eax
+	movl	$0x1d000, %eax
 	movl	%eax, %cr3
 	movl	%cr0, %eax
 	orl	$0x80000000, %eax
 
 turn_on_paging:
 	movl	%eax, %cr0
-	jmp     ((fixup_idt - 0x100000) + 0xc0000000)
+	jmp     (fixup_idt + 0xc0000000)
 
 fixup_idt:
 	# Fix up idt and ldt info structures
@@ -459,3 +463,4 @@ idt_info:
 	.word	0x0000
 	.word	0x0000
 	.word	0x0000
+
