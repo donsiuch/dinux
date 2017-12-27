@@ -35,16 +35,18 @@ do_bios_setup:
 	call    *%eax
 	#call 	switch_to_real_mode
 
-	# Turn on paging
+setup_paging:
+	
 	call	setupPaging
-	movl	kernel_pd, %eax
+#	movl	kernel_pd, %eax
+	movl	$0x1d000, %eax
 	movl	%eax, %cr3
 	movl	%cr0, %eax
 	orl	$0x80000000, %eax
 
 turn_on_paging:
 	movl	%eax, %cr0
-	jmp     ((fixup_idt - 0x100000) + 0xc0000000)
+	jmp     (fixup_idt + 0xc0000000)
 
 fixup_idt:
 	# Fix up idt and ldt info structures
