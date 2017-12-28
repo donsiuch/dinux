@@ -38,7 +38,6 @@ do_bios_setup:
 setup_paging:
 	
 	call	setupPaging
-#	movl	kernel_pd, %eax # 0xc0xxxxxx
 	movl	$KERNEL_PD_ADDR, %eax
 	movl	%eax, %cr3
 	movl	%cr0, %eax
@@ -46,14 +45,20 @@ setup_paging:
 
 turn_on_paging:
 	movl	%eax, %cr0
-	jmp     (fixup_idt + HIGH_MEM_START_ADDR)
 
-fixup_idt:
-	# Fix up idt and ldt info structures
-	# Load a new global descriptor table
+	# Paging is enabled at this point.
+
+	jmp     (final_setup + HIGH_MEM_START_ADDR)
+
+final_setup:
+
+	call finalize_memory_setup
+
+	# Setup OS interrupts
+	# Reprogram interrupt controller
+	# Reprogram interrupt timer
 	movl	$idtSize, idt_info
 	movl	$idt, (idt_info + 2)
-
 	call    populateIdt
 	lidt	idt_info
 
