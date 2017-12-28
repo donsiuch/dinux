@@ -91,17 +91,45 @@ void * getFreeFrame()
 	getFirstFreeIndex();
 	return NULL;
 }
+/*
 
+void do_memory_map()
+{
+
+}
+*/
+
+void finalize_memory_setup()
+{
+	
+
+	// Clear the frame bitmap
+	memset(frameLedger, 0, sizeof(frameLedger));
+
+	// Allocate frame for kernel's page directory
+	// mark 
+
+	// Allocate frame for identity table
+	// 
+
+
+}
+
+// This function is called from low memory identity mapped code
+// to help get into paging mode successfully. 
 void setupPaging()
 {
 	int x = 0;
 	uint32_t frameAddress = 0x00000000;
+
+	// These symbol names are also global but cannot be accessed
+	// because their virtual address is in high memory. 
+	//
+	// In the meantime, declare locally and use position independent,
+	// hard coded addresses to get us into paging mode. 
 	uint32_t *kernel_pd;
 	uint32_t *pt_ident;
 	uint32_t *pt_kernel;
-
-	// Clear the frame bitmap
-	memset(frameLedger, 0, sizeof(frameLedger));
 
 	// Create the kernel page directory and clear it
 	kernel_pd = (uint32_t *)KERNEL_PD_ADDR;

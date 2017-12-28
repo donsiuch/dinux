@@ -13,6 +13,8 @@
  *
  */
 
+#ifndef ASSEMBLY
+
 #include <stdint.h>
 
 #define	PAGE_SIZE	0x1000
@@ -26,11 +28,6 @@
 #define PAGES_PER_BITMAP_UNIT	8
 #define PAGES_PER_UNIT		(1*PAGES_PER_BITMAP_UNIT)
 #define NUM_LEDGER_UNITS 	(TOTAL_NUM_PAGES/PAGES_PER_UNIT)
-
-// Proof of concept paging
-#define KERNEL_PD_ADDR	0x1d000
-#define	PT_IDENT_ADDR	0x1e000
-#define PT_KERNEL_ADDR  0x1f000 
 
 // Page table entry
 typedef struct __attribute((packed)) {
@@ -101,4 +98,13 @@ typedef struct SMAP_entry {
 void	setupPaging();
 void * 	getFreeFrame();
 
-#endif
+#endif	// #ifndef ASSEMBLY
+
+// Proof of concept paging
+#define HIGH_MEM_START_ADDR 0xc0000000
+#define PAGING_BIT	0x80000000
+#define KERNEL_PD_ADDR	0x1d000
+#define	PT_IDENT_ADDR	0x1e000
+#define PT_KERNEL_ADDR  0x1f000 
+
+#endif	// __MM__
