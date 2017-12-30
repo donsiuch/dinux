@@ -291,6 +291,11 @@ asmlinkage void doVirtException(regs *registers)
 asmlinkage void doSystemTimer(regs *registers)
 {
 	//printd("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
+	
+	// delete -- making warnings go away.
+	uint32_t eax = registers->eax;
+	eax++;
+
 	_G_TICK++;
 
 	if ( _G_TICK % 100 == 0 )
@@ -306,6 +311,10 @@ asmlinkage void doSystemTimer(regs *registers)
 asmlinkage void doIrq1(regs *registers)
 {
 	printd("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
+
+	// Tell the master PIC we are done servicing the interrupt.
+	uint32_t eax = registers->eax;
+	eax++;
 	
 	// Tell the master PIC we are done servicing the interrupt.
 	outb(PIC_MASTER_COMMAND, 0x20);
@@ -313,7 +322,7 @@ asmlinkage void doIrq1(regs *registers)
 
 asmlinkage void doIrq2(regs *registers)
 {
-	//printd("doIrq2(): %p, &registers: %p\n", doIrq2, registers);
+	printd("doIrq2(): %p, &registers: %p\n", doIrq2, registers);
 
 	// Tell the master PIC we are done servicing the interrupt.	
 	outb(PIC_MASTER_COMMAND, 0x20);
