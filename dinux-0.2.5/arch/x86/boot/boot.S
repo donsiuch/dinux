@@ -1,27 +1,24 @@
 
-# Declare constants used for creating a multiboot header.
-.set ALIGN,    1<<0             # align loaded modules on page boundaries
-.set FLAGS,    ALIGN  		# this is the Multiboot 'flag' field
-.set MAGIC,    0x1BADB002       # 'magic number' lets bootloader find the header
-.set CHECKSUM, -(MAGIC + FLAGS) # checksum of above, to prove we are multiboot
+# File: boot.S
 
-# Declare a header as in the Multiboot Standard. Putting this in a special
-# section forces the header to be in the start of the final program.
+.set ALIGN,    1<<0             # Align loaded modules on page boundaries
+.set FLAGS,    ALIGN		# Turn on selected options.
+.set MAGIC,    0x1BADB002       # Magic number lets bootloader find this header.
+.set CHECKSUM, -(MAGIC + FLAGS) # Checksum of above, to prove we are multiboot.
+
 .section .multiboot
-
 .align 4
 .long MAGIC
 .long FLAGS
 .long CHECKSUM
 
-# The linker script specifies _start as the entry point to the kernel and the
-# bootloader will jump to this position once the kernel has been loaded.
+# Bootloader hands execution to _start
 .text
 .global _start
 .type _start, @function
 _start:
 	
-    jmp setup_32
+	jmp setup_32
 
 	# Should never get here	
 	cli
