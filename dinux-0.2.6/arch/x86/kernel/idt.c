@@ -254,7 +254,11 @@ asmlinkage void doGeneralProtection(regs *registers)
 
 asmlinkage void doPageFault(regs *registers)
 {
-	printd("doPageFault(): %p, errorCode: %p, &registers: %p\n", doPageFault, registers->errorCode, registers);
+	uint32_t faulting_address;
+
+	__asm__ volatile ("movl %%cr2, %0": "=r"(faulting_address) ::);
+
+	printd("doPageFault(): faulting address = %p, errorCode: %p, &registers: %p\n", faulting_address, registers->errorCode, registers);
 	__asm__("hlt");
 }
 

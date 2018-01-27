@@ -3,9 +3,6 @@
 3. Implement better format specifiers in printd 
 4. Implement itoa
 
-boot.S
-- Remove comments
-
 mm.c
 - move pic and pit code to setup_32.S:setup_32()
 
