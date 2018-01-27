@@ -1,0 +1,18 @@
+#!/bin/bash
+
+make -s
+
+# After gdb is opened, run the command: symbol-file <...rel_path>/kernel.sym
+objcopy --only-keep-debug myos.bin kernel.sym 
+
+echo "menuentry "myos" {
+	multiboot /boot/myos.bin
+}" > grub.cfg
+
+mkdir -p isodir/boot/grub
+cp myos.bin isodir/boot/myos.bin
+cp grub.cfg isodir/boot/grub/grub.cfg
+grub-mkrescue -o myos.iso isodir
+
+# The following line writes to the USB.
+#sudo dd if=myos.iso of=/dev/sdb && sync
