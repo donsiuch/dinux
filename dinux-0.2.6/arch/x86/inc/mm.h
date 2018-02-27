@@ -17,7 +17,12 @@
 
 #include <stdint.h>
 
+extern uint32_t __kernel_start;
+extern uint32_t __kernel_end;
+extern uint32_t __physical_load_address;
+
 #define	PAGE_SIZE	0x1000
+#define PAGE_SHIFT  12
 #define MEMORY_SIZE	0x1000000
 #define TOTAL_NUM_PAGES	(MEMORY_SIZE/PAGE_SIZE)
 
@@ -30,7 +35,7 @@
 #define NUM_LEDGER_UNITS 	(TOTAL_NUM_PAGES/PAGES_PER_UNIT)
 
 // Page table entry
-typedef struct __attribute((packed)) {
+typedef struct {
 	// Must be 1 to map a page
 	uint32_t present	: 1;
 
@@ -58,11 +63,13 @@ typedef struct __attribute((packed)) {
 	uint32_t unused0	: 3;
 
 	// Since the most significant 20 bits... 1000
-	uint32_t frameAddress	: 20;
-} pte;
+	uint32_t frame_addr	: 20;
+} 
+__attribute((packed)) 
+pte_t;
 
 // Page directory entry
-typedef struct __attribute((packed)) {
+typedef struct {
 	uint32_t present	: 1;
 	uint32_t rw		: 1;
 	uint32_t user		: 1;
@@ -76,9 +83,11 @@ typedef struct __attribute((packed)) {
 	uint32_t unused0	: 4;
 
 	// Since the most significant 20 bits... 1000
-	uint32_t pageTableAddress : 20;
+	uint32_t pt_addr : 20;
 
-} pde;
+} 
+__attribute((packed)) 
+pde_t;
 
 typedef struct SMAP_entry {
  
@@ -97,6 +106,8 @@ typedef struct SMAP_entry {
 
 void	setupPaging();
 void * 	getFreeFrame();
+uint32_t get_pd_idx(uint32_t);
+uint32_t get_pt_idx(uint32_t);
 
 #endif	// #ifndef ASSEMBLY
 
@@ -106,5 +117,17 @@ void * 	getFreeFrame();
 #define KERNEL_PD_ADDR	0x1d000
 #define	PT_IDENT_ADDR	0x1e000
 #define PT_KERNEL_ADDR  0x1f000 
+
+// Page directory entry 
+#define PT_PRESENT  0x01
+// Read + write 
+#define PT_RW       0x02
+
+// Page table entry
+#define PAGE_PRESENT    0x01
+#define PAGE_RW         0x02
+
+#define PAGE_ALIGN(_x)(_x &= 0xfffff000)
+#define GET_FRAME_ADDR PAGE_ALIGN
 
 #endif	// __MM__

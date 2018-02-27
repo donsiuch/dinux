@@ -2,14 +2,16 @@
 OUTPUT_FORMAT("elf32-i386")
 ENTRY(_start)
 
-VIRTUAL_OFFSET_ADDRESS = 0xc0100000;
-PHYSICAL_BASE_ADDRESS = 0x00100000;
-REAL_BASE_ADDRESS = 0x1000;
+__kernel_virtual_start = 0xc0100000;
+__physical_load_address = 0x00100000;
+__real_mode_code_physical_address = 0x1000;
 
 SECTIONS
 {
 	/* Set the counter to 0xc0100000 */
-	. = VIRTUAL_OFFSET_ADDRESS; 
+	. = __kernel_virtual_start; 
+
+    __kernel_start = .;
 
 	.text ALIGN(4K) : AT(ADDR(.text) - 0xc0000000)
 	{
@@ -36,12 +38,14 @@ SECTIONS
 		*(.bss)
 	}
 
+    __kernel_end = .;
+
 	/* Find the distance between 0x100000 - 0x1000 => 0xff000 */
-	__physreal_diff = . - REAL_BASE_ADDRESS;
+	__physreal_diff = . - __real_mode_code_physical_address;
 
 	/* AT(ADDR(.realmode)) = 0x1000, (__physreal_diff = 0xc0100000 - 0x1000)
 	 	Load at -->  0x1000 + 0xc0100000 - 0x1000 --> 0xc0100000 */
-	.realmode REAL_BASE_ADDRESS : AT(ADDR(.realmode) + __physreal_diff - 0xc0000000) {
+	.realmode __real_mode_code_physical_address : AT(ADDR(.realmode) + __physreal_diff - 0xc0000000) {
 
 		__realmode_vma_start = .;
 

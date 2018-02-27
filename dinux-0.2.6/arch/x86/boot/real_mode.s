@@ -63,9 +63,9 @@ set_rm_segment_regs:
 	# not the interrupt flag is set...
 	sti
 
-    	movb    $0x0e, %ah
-    	movb    $'a', %al
-    	int     $0x10
+//    	movb    $0x0e, %ah
+//   	movb    $'a', %al
+//    	int     $0x10
 
 meme820:
 	xorl	%ebx, %ebx

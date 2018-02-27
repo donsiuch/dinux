@@ -15,9 +15,6 @@ void printFormalHexLong(const unsigned long hexNumber)
 	int index = 0;
 	unsigned char *ptr = 0;
 
-	terminal_putchar('0');
-	terminal_putchar('x');
-
 	while ( index < 4 )
 	{
 		// Get the last byte, then second to last, etc.

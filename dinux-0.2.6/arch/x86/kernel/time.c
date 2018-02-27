@@ -4,5 +4,5 @@
 
 void emitOneSecond(void)
 {
-	printd("A second passed\n");
+	//printd("A second passed\n");
 }
