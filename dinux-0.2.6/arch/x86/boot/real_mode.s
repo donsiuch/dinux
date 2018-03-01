@@ -25,11 +25,11 @@ idt_real_info:
 switch_to_real_mode:
     
 	pushl   %ebp
-    	movl    %esp, %ebp
+   	movl    %esp, %ebp
 
-    	# Load a new code segment with a limit of 0xffff 
-    	# This is the segment limit required in real-
-    	# address mode.
+   	# Load a new code segment with a limit of 0xffff 
+   	# This is the segment limit required in real-
+   	# address mode.
 	jmp	$0x20, $loadRMSeg
 
 .code16
@@ -41,11 +41,11 @@ loadRMSeg:
 	movl	%eax, %es
 	movl	%eax, %ss
 
-    	lidt	idt_real_info
+   	lidt	idt_real_info
 
 	# Disable protected mode by disabling PE bit
 	movl	%cr0, %eax
-    	andb    $0xfe, %al
+   	andb    $0xfe, %al
 	movl	%eax, %cr0
 
 	jmp	$0x00, $set_rm_segment_regs
@@ -70,7 +70,7 @@ set_rm_segment_regs:
 meme820:
 	xorl	%ebx, %ebx
 	#movw 	$smapBuffer, %di
-    	movw    $0x9000, %di
+   	movw    $0x9000, %di
 	movl	$0x0000e820, %eax
 	movl 	$0x534D4150, %edx
 	movl	$20, %ecx
@@ -82,7 +82,7 @@ bail820:
 
 	# Return to protected mode by setting PE bit
 	movl	%cr0, %eax	
-	orb	$0x01, %al
+	orb	    $0x01, %al
 	movl	%eax, %cr0
 
 	# Restore 32 bit code + data segment descriptors
@@ -96,8 +96,8 @@ load_data_segment_regs:
 	movl	%eax, %es
 	movl	%eax, %ss
 
-    	movl    %ebp, %esp
-    	popl    %ebp
+   	movl    %ebp, %esp
+   	popl    %ebp
     
 	ret
 
