@@ -26,7 +26,6 @@ void kernel_main() {
     printd("d:0x%p\n", get_pt_idx(0xC0100000));
     printd("e:0x%p\n", get_pt_idx(0xffffffff));
 */
-//	printd("In the main loop\n");
 /*
 	char *blah_ptr = (char *)0xdeadbeef;
 
@@ -35,7 +34,9 @@ void kernel_main() {
 	printd("i--> %x", *blah_ptr);
 */
 
-    alloc_page();
+    //alloc_page();
+
+    dumpBytes(0x9000, 100);
 
 	while (1) 
 	{

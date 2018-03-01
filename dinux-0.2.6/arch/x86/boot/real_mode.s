@@ -67,14 +67,39 @@ set_rm_segment_regs:
 //   	movb    $'a', %al
 //    	int     $0x10
 
-meme820:
-	xorl	%ebx, %ebx
-	#movw 	$smapBuffer, %di
-   	movw    $0x9000, %di
+    # E820 memory test - ask the BIOS for the memory map
+    # 
+    # Source: http://www.uruk.org/orig-grub/mem64mb.html
+    #
+    # 
+    xorl	%ebx, %ebx
+    movw    $0x9000, %di
+meme820:	
 	movl	$0x0000e820, %eax
 	movl 	$0x534D4150, %edx
 	movl	$20, %ecx
-	int	$0x15
+	int	    $0x15
+    
+    # Perform return codes
+    #
+    # Some BIOS's return a 0 carry as an end condition.
+    # Carry can also indicate an error. 
+    jc      bail820
+
+    # 0 in %ebx can also indicate the ending condition
+    cmp     $0, %ebx
+    je      bail820
+    
+    # 'SMAP' should be in %eax, else an error occured
+    cmp     $0x534D4150, %eax
+    jne     bail820
+
+    # Set the destination of the next 'get'
+    addw    $20, %di
+
+    # Run the test again
+    #jmp     meme820
+
 bail820:
 
 	# Disable interrupts
