@@ -94,11 +94,13 @@ meme820:
     cmp     $0x534D4150, %eax
     jne     bail820
 
+    # TODO: Add error checking
+
     # Set the destination of the next 'get'
     addw    $20, %di
 
     # Run the test again
-    #jmp     meme820
+    jmp     meme820
 
 bail820:
 
