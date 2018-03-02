@@ -104,10 +104,14 @@ typedef struct SMAP_entry {
 //uint32_t *pt_ident;
 //uint32_t *pt_kernel;
 
-void	setupPaging();
-void * 	getFreeFrame();
+void set_frame_in_use(BITMAP_UNIT *, uint32_t);
+int getFirstFreeIndex(void);
+unsigned long alloc_page(void);
+void	setupPaging(void);
+unsigned long 	get_free_frame(void);
 uint32_t get_pd_idx(uint32_t);
 uint32_t get_pt_idx(uint32_t);
+void setup_memory(void);
 
 #endif	// #ifndef ASSEMBLY
 

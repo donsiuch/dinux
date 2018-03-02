@@ -52,8 +52,6 @@ turn_on_paging:
 
 final_setup:
 
-	call finalize_memory_setup
-
 	# Setup OS interrupts
 	# Reprogram interrupt controller
 	# Reprogram interrupt timer

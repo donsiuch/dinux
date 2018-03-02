@@ -13,7 +13,7 @@ void kernel_main() {
 	
 	terminal_initialize();
     
-    
+    setup_memory();
 
 /*
     printd("__kernel_start = 0x%p\n", &__kernel_start);    
@@ -26,21 +26,6 @@ void kernel_main() {
     printd("d:0x%p\n", get_pt_idx(0xC0100000));
     printd("e:0x%p\n", get_pt_idx(0xffffffff));
 */
-/*
-	char *blah_ptr = (char *)0xdeadbeef;
 
-	char blah = *blah_ptr;
-
-	printd("i--> %x", *blah_ptr);
-*/
-
-    //alloc_page();
-
-    dumpBytes(0x9000, 100);
-
-	while (1) 
-	{
-		
-
-	}
+	while (1) {}
 }

@@ -1,6 +1,7 @@
 
 #include "dinux/inc/io.h"
 #include "dinux/inc/memory.h"
+#include "x86/inc/meme820.h"
 #include "x86/inc/mm.h"
 
 // Bitmap that describes used/free physical page frames
@@ -75,7 +76,7 @@ void set_frame_in_use(BITMAP_UNIT *f_ledger_ptr, uint32_t phys_addr)
  * more efficient algorithm to manage physical memory.
  *
  */
-int getFirstFreeIndex()
+int getFirstFreeIndex(void)
 {
 	int x = 0;
 	int y;
@@ -121,7 +122,7 @@ int getFirstFreeIndex()
  *		    Failure - ??? -- We probably need to die.
  *
  */
-void * get_free_frame()
+unsigned long get_free_frame(void)
 {
     int32_t idx = getFirstFreeIndex();
     if (idx < 0)
@@ -144,9 +145,9 @@ void * get_free_frame()
  *		    Failure - NULL
  *
  */
-uint32_t alloc_page(void)
+unsigned long alloc_page(void)
 {
-    uint32_t phys_addr = NULL;
+    unsigned long phys_addr = 0;
     int i;
 
     for (i = 0; i < 16; i++)
@@ -157,23 +158,51 @@ uint32_t alloc_page(void)
         printd("Frame ledger after: 0x%p \n", frameLedger[(i/8)]);
     }
 
-    return NULL;
+    return 0;
 }
 
-/*
-
-void do_memory_map()
+/* Name: sanitize_meme820_map 
+ *
+ * Description: Scan the meme820 results, format and
+ * organize them.
+ *
+ * Arguments:  void
+ *
+ * Returns:    void 
+ *
+ * TODO: Move to meme820.c file
+ *
+ */
+static void sanitize_meme820_map(void)
 {
+    int i;
+    int offset = 0;
+    struct meme820 raw;
 
+    printd("E820 Map:\n");
+
+    for (i = 0; i < 6; i++, offset += 20)
+    {
+        raw = *(struct meme820 *)(MEME820_ADDR + offset);
+        printd("%p %p %p %p %p ", raw.base_addr_low, raw.base_addr_high, raw.length_low, raw.length_high, raw.type);
+
+        if (raw.type == ADDR_RANGE_MEMORY)
+        {
+            printd("[ Available ]\n");
+            continue;
+        }
+        
+        printd("[ Reserved ]\n");
+    }
 }
-*/
 
-void finalize_memory_setup()
+void setup_memory(void)
 {
-	
-
 	// Clear the frame bitmap
 	memset(frameLedger, 0, sizeof(frameLedger));
+
+    // Organize and find out how much memory we have
+    sanitize_meme820_map();
 
 	// Allocate frame for kernel's page directory
 	// mark 
@@ -248,6 +277,7 @@ uint32_t get_pd_idx(uint32_t virt_addr)
  * Description: Create 
  *
  */
+/*
 uint8_t create_pte(pde_t *pgd_ptr, uint32_t virt_addr, uint32_t pg_phys_addr, uint32_t flags)
 {
     uint32_t pd_idx;
@@ -297,6 +327,7 @@ uint8_t create_pte(pde_t *pgd_ptr, uint32_t virt_addr, uint32_t pg_phys_addr, ui
     // TODO: Fix return
     return 0;    
 }
+*/
 
 // This function is called from low memory identity mapped code
 // to help get into paging mode successfully. 
