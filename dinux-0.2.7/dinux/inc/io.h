@@ -15,7 +15,7 @@
 
 void printHexChar(const unsigned long);
 void printFormalHexLong(const unsigned long);
-void printd(const char *, ...); 
+void printk(const char *, ...); 
 void dumpBytes(const unsigned char *, const unsigned long);
 
 #define	ALPHA_NUM(_d) (_d >= 0x3A && _d <= 0x3F ? _d + 0x07 : _d)

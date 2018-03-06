@@ -18,7 +18,7 @@ void sanitize_meme820_map(void)
     int upper_limit = 20;
     struct meme820 raw;
 
-    printd("E820 Map:\n");
+    printk("E820 Map:\n");
 
     for (i = 0; i < upper_limit; i++, offset += MEME820_RESULT_SIZE)
     {
@@ -28,14 +28,14 @@ void sanitize_meme820_map(void)
         if (raw.base_addr_low == MEME820_MAGIC_STOP)
             break;
 
-        printd("%p %p %p %p %p ", raw.base_addr_low, raw.base_addr_high, raw.length_low, raw.length_high, raw.type);
+        printk("%p %p %p %p %p ", raw.base_addr_low, raw.base_addr_high, raw.length_low, raw.length_high, raw.type);
 
         if (raw.type == ADDR_RANGE_MEMORY)
         {
-            printd("[ Available ]\n");
+            printk("[ Available ]\n");
             continue;
         }
         
-        printd("[ Reserved ]\n");
+        printk("[ Reserved ]\n");
     }
 }

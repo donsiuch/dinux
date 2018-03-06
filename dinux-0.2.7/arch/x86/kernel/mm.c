@@ -37,7 +37,7 @@ void set_frame_in_use(BITMAP_UNIT *f_ledger_ptr, uint32_t phys_addr)
 
     if (f_ledger_ptr == NULL)
     {
-        printd("%s(): f_ledger_ptr = 0x%p\n", __func__, f_ledger_ptr);
+        printk("%s(): f_ledger_ptr = 0x%p\n", __func__, f_ledger_ptr);
         kernel_bug(); 
     }
 
@@ -55,7 +55,7 @@ void set_frame_in_use(BITMAP_UNIT *f_ledger_ptr, uint32_t phys_addr)
     // Verify we are not overwriting a page.
     if (f_ledger_ptr[f_ledger_idx] & which_frame)
     {
-        printd("%s(): Frame in use! 0x%p, 0x%p, 0x%p\n", __func__, f_ledger_idx, f_offset_into_idx, which_frame);
+        printk("%s(): Frame in use! 0x%p, 0x%p, 0x%p\n", __func__, f_ledger_idx, f_offset_into_idx, which_frame);
         kernel_bug(); 
     }
 
@@ -93,12 +93,12 @@ int getFirstFreeIndex(void)
 
 			// Test the MSB -> LSB 
 			if (!(frameLedger[x] & testBit)){
-				printd("Found free frame. x = %p, y = %p\n", x, y);
+				printk("Found free frame. x = %p, y = %p\n", x, y);
 				return ((x*PAGES_PER_UNIT)+y);
 			}
 		
 			// Debugging	
-			//printd("Frame = %p, testBit = %p, result = %p\n", frameLedger[x], testBit, frameLedger[x] & testBit);
+			//printk("Frame = %p, testBit = %p, result = %p\n", frameLedger[x], testBit, frameLedger[x] & testBit);
 
 			testBit = testBit << 1;
 			y++;
@@ -106,7 +106,7 @@ int getFirstFreeIndex(void)
 		x++;
 	}	
 
-	printd("Failed to find free frame.\n");
+	printk("Failed to find free frame.\n");
 	
 	return -1;
 }
@@ -127,7 +127,7 @@ unsigned long get_free_frame(void)
     int32_t idx = getFirstFreeIndex();
     if (idx < 0)
     {
-        printd("%s(): Failed to find a free frame!\n", __func__);
+        printk("%s(): Failed to find a free frame!\n", __func__);
         kernel_bug();
     }
 
@@ -153,9 +153,9 @@ unsigned long alloc_page(void)
     for (i = 0; i < 16; i++)
     {
         phys_addr = get_free_frame();
-       // printd("Free adress: 0x%p ledger before = 0x%p\n", phys_addr, frameLedger[0]);
+       // printk("Free adress: 0x%p ledger before = 0x%p\n", phys_addr, frameLedger[0]);
         set_frame_in_use(frameLedger, phys_addr);
-        printd("Frame ledger after: 0x%p \n", frameLedger[(i/8)]);
+        printk("Frame ledger after: 0x%p \n", frameLedger[(i/8)]);
     }
 
     return 0;
@@ -278,7 +278,7 @@ uint8_t create_pte(pde_t *pgd_ptr, uint32_t virt_addr, uint32_t pg_phys_addr, ui
     PAGE_ALIGN(virt_addr);
 
     // When I do pgd_ptr[idx].pt_addr does it get 32 Bytes, 20?
-    //printd("---> %p\n", pgd_ptr[pd_idx]);
+    //printk("---> %p\n", pgd_ptr[pd_idx]);
         
     //pt_ptr = (pte_t *)(PAGE_ALIGN(pgd_ptr[pd_idx].pt_addr));
 

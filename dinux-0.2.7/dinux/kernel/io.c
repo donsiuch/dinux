@@ -25,7 +25,7 @@ void printFormalHexLong(const unsigned long hexNumber)
 	}
 }
 
-static void vprintd(const char *string, va_list args)
+static void vprintk(const char *string, va_list args)
 {
 	// While we haven't hit the newline
 	while ( *string != 0 )
@@ -77,11 +77,11 @@ static void vprintd(const char *string, va_list args)
 // Prints an entire string
 // Changed the name because printf is reserved in gcc
 // https://www.gnu.org/software/libc/manual/html_node/Reserved-Names.html
-void printd(const char *string, ...)
+void printk(const char *string, ...)
 {
 	va_list args;
 	va_start(args, string); 
-	vprintd(string, args);		
+	vprintk(string, args);		
 	va_end(args); 
 }
 
@@ -102,7 +102,7 @@ void dumpBytes( const unsigned char * buffer, const unsigned long size )
 {
 	unsigned int index = 0;
 
-	printd("\ndumpBytes @ %p:\n", buffer);
+	printk("\ndumpBytes @ %p:\n", buffer);
 
 	while ( index < size )
 	{
@@ -110,21 +110,21 @@ void dumpBytes( const unsigned char * buffer, const unsigned long size )
 		{
 			if ( index ) 
 			{ 
-				printd(" |");
+				printk(" |");
 			}
 		
-			printd("\n| %p: ", buffer+index);
+			printk("\n| %p: ", buffer+index);
 		}
 		else if ( index % 0x08 == 0 )
 		{
-			printd(" ");
+			printk(" ");
 		}
 
-		printd("%x", buffer[index]);	
+		printk("%x", buffer[index]);	
 
 		index ++;
 	}
 	
-	printd(" |\n\n");
+	printk(" |\n\n");
 }
 

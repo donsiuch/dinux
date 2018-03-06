@@ -146,7 +146,7 @@ void populateIdt()
  */
 asmlinkage void doUnknownFault(regs *registers)
 {
-	printd("Unknown exception! Halting!\n");
+	printk("Unknown exception! Halting!\n");
 	dumpRegisters(registers);
 	__asm__("hlt");
 }
@@ -161,7 +161,7 @@ asmlinkage void doUnknownFault(regs *registers)
  */
 asmlinkage void doDivideError(regs *registers)
 {
-	printd("doDivideError(): %p, &registers: %p\n", doDivideError, registers);
+	printk("doDivideError(): %p, &registers: %p\n", doDivideError, registers);
 
 	// to-do:
 	//	1. Kill current
@@ -175,81 +175,81 @@ asmlinkage void doDivideError(regs *registers)
 
 asmlinkage void doDebug(regs *registers)
 {
-	printd("doDebug(): %p, &registers: %p\n", doDebug, registers);
+	printk("doDebug(): %p, &registers: %p\n", doDebug, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doNmi(regs *registers)
 {
-	printd("doNmi(): %p, &registers: %p\n", doNmi, registers);
+	printk("doNmi(): %p, &registers: %p\n", doNmi, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doBreakPoint(regs *registers)
 {
-	printd("doBreakPoint(): %p, &registers: %p\n", doBreakPoint, registers);
+	printk("doBreakPoint(): %p, &registers: %p\n", doBreakPoint, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doOverflow(regs *registers)
 {
-	printd("doOverflow(): %p, &registers: %p\n", doOverflow, registers);
+	printk("doOverflow(): %p, &registers: %p\n", doOverflow, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doBoundaryVerification(regs *registers)
 {
-	printd("doBoundaryVerification(): %p, &registers: %p\n", doBoundaryVerification, registers);
+	printk("doBoundaryVerification(): %p, &registers: %p\n", doBoundaryVerification, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doInvalidOpcode(regs *registers)
 {
-	printd("doInvalidOpcode(): %p, &registers: %p\n", doInvalidOpcode, registers);
+	printk("doInvalidOpcode(): %p, &registers: %p\n", doInvalidOpcode, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doDeviceNotAvail(regs *registers)
 {
-	printd("doDeviceNotAvail(): %p, &registers: %p\n", doDeviceNotAvail, registers);
+	printk("doDeviceNotAvail(): %p, &registers: %p\n", doDeviceNotAvail, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doDoubleFault(regs *registers)
 {
-	printd("doDoubleFault(): %p, &registers: %p\n", doDoubleFault, registers);
+	printk("doDoubleFault(): %p, &registers: %p\n", doDoubleFault, registers);
 	
 	// Automatically halts
 }
 
 asmlinkage void doCoProcSegOverrun(regs *registers)
 {
-	printd("doCoProcSegOverrun(): %p, &registers: %p\n", doCoProcSegOverrun, registers);
+	printk("doCoProcSegOverrun(): %p, &registers: %p\n", doCoProcSegOverrun, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doInvalTss(regs *registers)
 {
-	printd("doInvalTss(): %p, errorCode: %p, &registers: %p\n", doInvalTss, registers->errorCode, registers);
+	printk("doInvalTss(): %p, errorCode: %p, &registers: %p\n", doInvalTss, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doSegNotPresent(regs *registers)
 {
-	printd("doSegNotPresent(): %p, errorCode: %p, &registers: %p\n", doSegNotPresent, registers->errorCode, registers);
+	printk("doSegNotPresent(): %p, errorCode: %p, &registers: %p\n", doSegNotPresent, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
 // Seg fault
 asmlinkage void doStackException(regs *registers)
 {
-	printd("doStackException(): %p, errorCode: %p, &registers: %p\n", doStackException, registers->errorCode, registers);
+	printk("doStackException(): %p, errorCode: %p, &registers: %p\n", doStackException, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doGeneralProtection(regs *registers)
 {
-	printd("doGeneralProtection(): %p, &registers: %p\n", doGeneralProtection, registers);
+	printk("doGeneralProtection(): %p, &registers: %p\n", doGeneralProtection, registers);
 }
 
 asmlinkage void doPageFault(regs *registers)
@@ -258,43 +258,43 @@ asmlinkage void doPageFault(regs *registers)
 
 	__asm__ volatile ("movl %%cr2, %0": "=r"(faulting_address) ::);
 
-	printd("doPageFault(): faulting address = %p, errorCode: %p, &registers: %p\n", faulting_address, registers->errorCode, registers);
+	printk("doPageFault(): faulting address = %p, errorCode: %p, &registers: %p\n", faulting_address, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doFloatError(regs *registers)
 {
-	printd("doFloatError(): %p, &registers: %p\n", doFloatError, registers);
+	printk("doFloatError(): %p, &registers: %p\n", doFloatError, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doAlignmentCheck(regs *registers)
 {
-	printd("doAlignmentCheck(): %p, errorCode: %p, &registers: %p\n", doAlignmentCheck, registers->errorCode, registers);
+	printk("doAlignmentCheck(): %p, errorCode: %p, &registers: %p\n", doAlignmentCheck, registers->errorCode, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doMachineCheck(regs *registers)
 {
-	printd("doMachineCheck(): %p, &registers: %p\n", doMachineCheck, registers);
+	printk("doMachineCheck(): %p, &registers: %p\n", doMachineCheck, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doSIMDFloatException(regs *registers)
 {
-	printd("doSIMDFloatException(): %p, &registers: %p\n", doSIMDFloatException, registers);
+	printk("doSIMDFloatException(): %p, &registers: %p\n", doSIMDFloatException, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doVirtException(regs *registers)
 {
-	printd("doVirtException(): %p, &registers: %p\n", doVirtException, registers);
+	printk("doVirtException(): %p, &registers: %p\n", doVirtException, registers);
 	__asm__("hlt");
 }
 
 asmlinkage void doSystemTimer(regs *registers)
 {
-	//printd("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
+	//printk("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
 	
 	// delete -- making warnings go away.
 	uint32_t eax = registers->eax;
@@ -314,7 +314,7 @@ asmlinkage void doSystemTimer(regs *registers)
 
 asmlinkage void doIrq1(regs *registers)
 {
-	printd("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
+	printk("isr: %p, irr: %p\n", pic_get_isr(), pic_get_irr());
 
 	// Tell the master PIC we are done servicing the interrupt.
 	uint32_t eax = registers->eax;
@@ -326,7 +326,7 @@ asmlinkage void doIrq1(regs *registers)
 
 asmlinkage void doIrq2(regs *registers)
 {
-	printd("doIrq2(): %p, &registers: %p\n", doIrq2, registers);
+	printk("doIrq2(): %p, &registers: %p\n", doIrq2, registers);
 
 	// Tell the master PIC we are done servicing the interrupt.	
 	outb(PIC_MASTER_COMMAND, 0x20);
@@ -334,7 +334,7 @@ asmlinkage void doIrq2(regs *registers)
 
 asmlinkage void doIrq3(regs *registers)
 {
-	printd("doIrq3(): %p, &registers: %p\n", doIrq3, registers);
+	printk("doIrq3(): %p, &registers: %p\n", doIrq3, registers);
 
 	// Tell the master PIC we are done servicing the interrupt.
 	outb(PIC_MASTER_COMMAND, 0x20);
@@ -342,7 +342,7 @@ asmlinkage void doIrq3(regs *registers)
 
 asmlinkage void doIrq4(regs *registers)
 {
-	printd("doIrq4(): %p, &registers: %p\n", doIrq4, registers);
+	printk("doIrq4(): %p, &registers: %p\n", doIrq4, registers);
 
 	// Tell the master PIC we are done servicing the interrupt.
 	outb(PIC_MASTER_COMMAND, 0x20);
@@ -350,7 +350,7 @@ asmlinkage void doIrq4(regs *registers)
 
 asmlinkage void doIrq5(regs *registers)
 {
-	printd("doIrq5(): %p, &registers: %p\n", doIrq5, registers);
+	printk("doIrq5(): %p, &registers: %p\n", doIrq5, registers);
 
 	// Tell the master PIC we are done servicing the interrupt.	
 	outb(PIC_MASTER_COMMAND, 0x20);
@@ -358,7 +358,7 @@ asmlinkage void doIrq5(regs *registers)
 
 asmlinkage void doIrq6(regs *registers)
 {
-	printd("doIrq6(): %p, &registers: %p\n", doIrq6, registers);
+	printk("doIrq6(): %p, &registers: %p\n", doIrq6, registers);
 	
 	// Tell the master PIC we are done servicing the interrupt.
 	outb(PIC_MASTER_COMMAND, 0x20);
@@ -366,11 +366,11 @@ asmlinkage void doIrq6(regs *registers)
 
 asmlinkage void doIrq7(regs *registers)
 {
-	printd("doIrq7(): %p, &registers: %p\n", doIrq7, registers);
+	printk("doIrq7(): %p, &registers: %p\n", doIrq7, registers);
 
 	if ( !(pic_get_isr() & 0x07) )
 	{
-		printd("Spurious IRQ detected in master PIC!\n");
+		printk("Spurious IRQ detected in master PIC!\n");
 		return;
 	}
 
@@ -379,7 +379,7 @@ asmlinkage void doIrq7(regs *registers)
 
 asmlinkage void doIrq8(regs *registers)
 {
-	printd("doIrq8(): %p, &registers: %p\n", doIrq8, registers);
+	printk("doIrq8(): %p, &registers: %p\n", doIrq8, registers);
 
 	// Tell master and slave PICs we are finished servicing the interrupt.	
 	outb(PIC_SLAVE_COMMAND, 0x20);
@@ -388,7 +388,7 @@ asmlinkage void doIrq8(regs *registers)
 
 asmlinkage void doIrq9(regs *registers)
 {
-	printd("doIrq9(): %p, &registers: %p\n", doIrq9, registers);
+	printk("doIrq9(): %p, &registers: %p\n", doIrq9, registers);
 	
 	// Tell master and slave PICs we are finished servicing the interrupt.		
 	outb(PIC_SLAVE_COMMAND, 0x20);
@@ -397,7 +397,7 @@ asmlinkage void doIrq9(regs *registers)
 
 asmlinkage void doIrq10(regs *registers)
 {
-	printd("doIrq10(): %p, &registers: %p\n", doIrq10, registers);
+	printk("doIrq10(): %p, &registers: %p\n", doIrq10, registers);
 	
 	// Tell master and slave PICs we are finished servicing the interrupt.	
 	outb(PIC_SLAVE_COMMAND, 0x20);
@@ -406,7 +406,7 @@ asmlinkage void doIrq10(regs *registers)
 
 asmlinkage void doIrq11(regs *registers)
 {
-	printd("doIrq11(): %p, &registers: %p\n", doIrq11, registers);
+	printk("doIrq11(): %p, &registers: %p\n", doIrq11, registers);
 	
 	// Tell master and slave PICs we are finished servicing the interrupt.	
 	outb(PIC_SLAVE_COMMAND, 0x20);
@@ -415,7 +415,7 @@ asmlinkage void doIrq11(regs *registers)
 
 asmlinkage void doIrq12(regs *registers)
 {
-	printd("doIrq12(): %p, &registers: %p\n", doIrq12, registers);
+	printk("doIrq12(): %p, &registers: %p\n", doIrq12, registers);
 
 	// Tell master and slave PICs we are finished servicing the interrupt.	
 	outb(PIC_SLAVE_COMMAND, 0x20);
@@ -424,7 +424,7 @@ asmlinkage void doIrq12(regs *registers)
 
 asmlinkage void doIrq13(regs *registers)
 {
-	printd("doIrq13(): %p, &registers: %p\n", doIrq13, registers);
+	printk("doIrq13(): %p, &registers: %p\n", doIrq13, registers);
 
 	// Tell master and slave PICs we are finished servicing the interrupt.	
 	outb(PIC_SLAVE_COMMAND, 0x20);
@@ -433,7 +433,7 @@ asmlinkage void doIrq13(regs *registers)
 
 asmlinkage void doIrq14(regs *registers)
 {
-	printd("doIrq14(): %p, &registers: %p\n", doIrq14, registers);
+	printk("doIrq14(): %p, &registers: %p\n", doIrq14, registers);
 
 	// Tell master and slave PICs we are finished servicing the interrupt.	
 	outb(PIC_SLAVE_COMMAND, 0x20);
@@ -442,13 +442,13 @@ asmlinkage void doIrq14(regs *registers)
 
 asmlinkage void doIrq15(regs *registers)
 {
-	printd("doIrq15(): %p, &registers: %p\n", doIrq15, registers);
+	printk("doIrq15(): %p, &registers: %p\n", doIrq15, registers);
 
 	// If ISR is not 15 then we got a spurious IRQ.
 	// Send the EOI to the master
 	if ( !(pic_get_isr() & 0x0f) )
 	{
-		printd("Spurious IRQ detected in master PIC!\n");
+		printk("Spurious IRQ detected in master PIC!\n");
 		outb(PIC_MASTER_COMMAND, 0x20);
 		return;
 	}
@@ -462,28 +462,28 @@ asmlinkage void doIrq15(regs *registers)
 
 asmlinkage void doSystemCall(regs *registers)
 {
-	printd("doSystemCall(): %p, &registers: %p\n", doSystemCall, registers);
+	printk("doSystemCall(): %p, &registers: %p\n", doSystemCall, registers);
 	__asm__("hlt");
 }
 
 static void dumpRegisters(regs *registers)
 {
-        printd("gs: %x, ", registers->gs);
-        printd("fs: %x, ", registers->fs);
-        printd("es: %x, ", registers->es);
-        printd("ds: %x\n", registers->ds);
-        printd("edi: %p, ", registers->edi);
-        printd("esi: %p, ", registers->esi);
-        printd("ebp: %p, ", registers->ebp);
-        printd("esp: %p\n", registers->esp);
-        printd("ebx: %p, ", registers->ebx);
-        printd("edx: %p, ", registers->edx);
-        printd("ecx: %p, ", registers->ecx);
-        printd("eax: %p\n", registers->eax);
-	printd("errorCode: %p\n", registers->errorCode);
-	printd("eip: %p\n", registers->eip);
-	printd("cs: %p, ", registers->cs);
-	printd("eflags: %p, ",registers->eflags);
-	printd("useresp: %p, ", registers->useresp);
-	printd("ss: %p\n", registers->ss);
+        printk("gs: %x, ", registers->gs);
+        printk("fs: %x, ", registers->fs);
+        printk("es: %x, ", registers->es);
+        printk("ds: %x\n", registers->ds);
+        printk("edi: %p, ", registers->edi);
+        printk("esi: %p, ", registers->esi);
+        printk("ebp: %p, ", registers->ebp);
+        printk("esp: %p\n", registers->esp);
+        printk("ebx: %p, ", registers->ebx);
+        printk("edx: %p, ", registers->edx);
+        printk("ecx: %p, ", registers->ecx);
+        printk("eax: %p\n", registers->eax);
+	printk("errorCode: %p\n", registers->errorCode);
+	printk("eip: %p\n", registers->eip);
+	printk("cs: %p, ", registers->cs);
+	printk("eflags: %p, ",registers->eflags);
+	printk("useresp: %p, ", registers->useresp);
+	printk("ss: %p\n", registers->ss);
 }
