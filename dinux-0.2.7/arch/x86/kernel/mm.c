@@ -161,41 +161,6 @@ unsigned long alloc_page(void)
     return 0;
 }
 
-/* Name: sanitize_meme820_map 
- *
- * Description: Scan the meme820 results, format and
- * organize them.
- *
- * Arguments:  void
- *
- * Returns:    void 
- *
- * TODO: Move to meme820.c file
- *
- */
-static void sanitize_meme820_map(void)
-{
-    int i;
-    int offset = 0;
-    struct meme820 raw;
-
-    printd("E820 Map:\n");
-
-    for (i = 0; i < 6; i++, offset += 20)
-    {
-        raw = *(struct meme820 *)(MEME820_ADDR + offset);
-        printd("%p %p %p %p %p ", raw.base_addr_low, raw.base_addr_high, raw.length_low, raw.length_high, raw.type);
-
-        if (raw.type == ADDR_RANGE_MEMORY)
-        {
-            printd("[ Available ]\n");
-            continue;
-        }
-        
-        printd("[ Reserved ]\n");
-    }
-}
-
 void setup_memory(void)
 {
 	// Clear the frame bitmap

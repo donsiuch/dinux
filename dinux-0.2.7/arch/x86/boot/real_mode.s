@@ -80,7 +80,7 @@ meme820:
 	movl	$20, %ecx
 	int	    $0x15
     
-    # Perform return codes
+    # Return code checks 
     #
     # Some BIOS's return a 0 carry as an end condition.
     # Carry can also indicate an error. 
@@ -103,6 +103,8 @@ meme820:
     jmp     meme820
 
 bail820:
+
+    movl    $0x11041985, (%edi)
 
 	# Disable interrupts
 	cli

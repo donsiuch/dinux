@@ -10,6 +10,11 @@
 // Reserved for the system (non OS use)
 #define ADDR_RANGE_RESERVED 2
 
+// Size of single result
+#define MEME820_RESULT_SIZE 20
+
+#define MEME820_MAGIC_STOP 0x11041985
+
 #ifndef ASSEMBLY
 
 struct meme820 {
@@ -19,6 +24,8 @@ struct meme820 {
     unsigned long length_high;
     unsigned long type;
 } __attribute((packed));
+
+void sanitize_meme820_map(void);
 
 #endif
 
