@@ -26,7 +26,9 @@ void sanitize_meme820_map(void)
     
         // Check stopping condition
         if (raw.base_addr_low == MEME820_MAGIC_STOP)
+        {
             break;
+        }
 
         printk("%p %p %p %p %p ", raw.base_addr_low, raw.base_addr_high, raw.length_low, raw.length_high, raw.type);
 
