@@ -1,0 +1,25 @@
+# Files being edited
+*~
+
+#######################
+# Make and build files
+#######################
+*.o
+
+# Executable file
+*.bin
+
+# Image file
+*.iso
+
+# Swap files
+*.swp
+
+# Grub config files
+*.cfg
+
+# gdb debug files
+*.debug
+
+# Symbol files
+*.sym
