@@ -1,6 +1,7 @@
 
 #include "dinux/inc/io.h"
 #include "x86/inc/meme820.h"
+#include "x86/inc/mm.h"
 
 /* Name: sanitize_meme820_map 
  *
@@ -30,7 +31,7 @@ void sanitize_meme820_map(void)
             break;
         }
 
-        printk("%p %p %p %p %p ", raw.base_addr_low, raw.base_addr_high, raw.length_low, raw.length_high, raw.type);
+        printk("0x%p%p 0x%p%p %p ", raw.base_addr_high, raw.base_addr_low, raw.length_high, raw.length_low, raw.type);
 
         if (raw.type == ADDR_RANGE_MEMORY)
         {
@@ -41,3 +42,4 @@ void sanitize_meme820_map(void)
         printk("[ Reserved ]\n");
     }
 }
+

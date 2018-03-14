@@ -95,20 +95,13 @@ typedef struct {
 __attribute((packed)) 
 pde_t;
 
-typedef struct SMAP_entry {
- 
-	uint32_t BaseL; // base address uint64_t
-	uint32_t BaseH;
-	uint32_t LengthL; // length uint64_t
-	uint32_t LengthH;
-	uint32_t Type; // entry Type
-	uint32_t ACPI; // extended
- 
-}__attribute__((packed)) SMAP_entry_t;
-
-//uint32_t *kernel_pd;
-//uint32_t *pt_ident;
-//uint32_t *pt_kernel;
+// Represents a region a physical memory
+struct mem_node {
+    struct mem_node *next;
+    unsigned long start_addr;
+    unsigned long end_addr;
+}
+__attribute((packed));
 
 void set_frame_in_use(BITMAP_UNIT *, uint32_t);
 int getFirstFreeIndex(void);

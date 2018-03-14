@@ -9,8 +9,10 @@
 // a '1' means the frame is used. A '0' means frame is free.
 static BITMAP_UNIT frameLedger[NUM_LEDGER_UNITS];
 
-SMAP_entry_t smapBuffer[16];
 static uint32_t total_num_pte_per_pt = PAGE_SIZE/sizeof(pte_t);
+
+// Physical memory map
+struct mem_node *mem_node_ptr = NULL;
 
 // Reference kernel page directory
 pde_t *ref_pgd;
