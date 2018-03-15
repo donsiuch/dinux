@@ -11,12 +11,14 @@
  *
  * Returns:    void 
  *
+ * Assumes there are 1024 or less e820 map entries. 
+ *
  */
 void sanitize_meme820_map(void)
 {
     int i;
     int offset = 0;
-    int upper_limit = 20;
+    int upper_limit = 1024;
     struct meme820 raw;
 
     printk("E820 Map:\n");

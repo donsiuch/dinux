@@ -15,4 +15,4 @@ cp grub.cfg isodir/boot/grub/grub.cfg
 grub-mkrescue -o myos.iso isodir
 
 # The following line writes to the USB.
-#sudo dd if=myos.iso of=/dev/sdb && sync
+sudo dd if=myos.iso of=/dev/sdb && sync

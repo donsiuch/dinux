@@ -84,15 +84,15 @@ meme820:
     #
     # Some BIOS's return a 0 carry as an end condition.
     # Carry can also indicate an error. 
-    jc      bail820
+    #jc      bail820
 
     # 0 in %ebx can also indicate the ending condition
     cmp     $0, %ebx
     je      bail820
     
     # 'SMAP' should be in %eax, else an error occured
-    cmp     $0x534D4150, %eax
-    jne     bail820
+    #cmp     $0x534D4150, %eax
+    #jne     bail820
 
     # TODO: Add error checking
 
