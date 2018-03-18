@@ -26,7 +26,7 @@ void sanitize_meme820_map(void)
     for (i = 0; i < upper_limit; i++, offset += MEME820_RESULT_SIZE)
     {
         raw = *(struct meme820 *)(MEME820_ADDR + offset);
-    
+
         // Check stopping condition
         if (raw.base_addr_low == MEME820_MAGIC_STOP)
         {
@@ -40,7 +40,7 @@ void sanitize_meme820_map(void)
             printk("[ Available ]\n");
             continue;
         }
-        
+
         printk("[ Reserved ]\n");
     }
 }
