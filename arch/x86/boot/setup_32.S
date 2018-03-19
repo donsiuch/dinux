@@ -1,5 +1,5 @@
 
-#include "x86/inc/mm.h"
+#include "x86/inc/arch_mm.h"
 
 .code32
 .text

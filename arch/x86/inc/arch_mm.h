@@ -1,6 +1,6 @@
 
-#ifndef __MM__
-#define __MM__
+#ifndef __ARCH_MM__
+#define __ARCH_MM__
 
 /*
  * Memory layout
@@ -133,4 +133,4 @@ void setup_memory(void);
 #define PAGE_ALIGN(_x)(_x &= 0xfffff000)
 #define GET_FRAME_ADDR PAGE_ALIGN
 
-#endif	// __MM__
+#endif	// __ARCH_MM__

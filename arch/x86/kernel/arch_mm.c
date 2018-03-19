@@ -2,7 +2,7 @@
 #include "dinux/inc/io.h"
 #include "dinux/inc/memory.h"
 #include "x86/inc/meme820.h"
-#include "x86/inc/mm.h"
+#include "x86/inc/arch_mm.h"
 
 // Bitmap that describes used/free physical page frames
 // Each bit of the BITMAP_UNIT represents a physical frame

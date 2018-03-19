@@ -1,7 +1,7 @@
  
 #include "dinux/inc/io.h"
 #include "dinux/inc/memory.h"
-#include "x86/inc/mm.h"
+#include "x86/inc/arch_mm.h"
 
 void kernel_bug(void)
 {

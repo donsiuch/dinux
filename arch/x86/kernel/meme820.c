@@ -1,7 +1,7 @@
 
 #include "dinux/inc/io.h"
 #include "x86/inc/meme820.h"
-#include "x86/inc/mm.h"
+#include "x86/inc/arch_mm.h"
 
 /* Name: sanitize_meme820_map 
  *
