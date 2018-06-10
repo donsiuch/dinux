@@ -38,13 +38,6 @@ static void dump_raw_region(struct meme820 *raw_ptr)
 
 }
 
-static unsigned long normalize_region(struct meme820 *mem_ptr, int i)
-{
-    dump_raw_region(mem_ptr);
-
-    return 0;
-}
-
 /* Name: sanitize_meme820_map 
  *
  * Description: Scan the meme820 results and store in kernel data. 
