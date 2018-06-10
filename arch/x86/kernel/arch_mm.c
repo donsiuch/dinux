@@ -17,6 +17,8 @@ struct mem_node *mem_node_ptr = NULL;
 // Reference kernel page directory
 pde_t *ref_pgd;
 
+extern void kernel_bug(void);
+
 /*
  * Name: 	    set_frame_in_use
  *
@@ -77,9 +79,17 @@ void set_frame_in_use(BITMAP_UNIT *f_ledger_ptr, uint32_t phys_addr)
  * TODO: This method is very slow and needs to be replaced with a
  * more efficient algorithm to manage physical memory.
  *
+ * TODO: This function starts scanning the physical frame ledger starting
+ * from __physical_load_address to reduce the complexity. Eventually this
+ * should scan after the meme820 map has been sanitized. Things to consider:
+ * this function should be able to find frames based on the type of memory:
+ * - Normal kmalloc() and similar
+ * - Memory that requires a specific region
+ *
  */
 int getFirstFreeIndex(void)
 {
+
 	int x = 0;
 	int y;
 	BITMAP_UNIT testBit;
