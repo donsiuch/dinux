@@ -4,9 +4,122 @@
 #include "x86/inc/arch_mm.h"
 
 extern unsigned long num_avail_pages;
-extern unsigned long num_used_pages;
 
 extern void kernel_bug(void);
+
+#if 0
+/*
+ * This is a test function.
+ */
+void build_map()
+{
+    struct meme820 *meme820_raw_ptr = (struct meme820 *)MEME820_ADDR;
+
+#if 0
+    // The two regions are merge together.
+    // Followed by magic stop
+    meme820_raw_ptr[0].base_addr_low = 0;
+    meme820_raw_ptr[0].length_low = 4096;
+    meme820_raw_ptr[0].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[1].base_addr_low = 4096;
+    meme820_raw_ptr[1].length_low = 4096;
+    meme820_raw_ptr[1].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[2].base_addr_low = MEME820_MAGIC_STOP;
+#endif
+
+#if 0
+    // The two regions are merged together.
+    // Followed by reserved than a stop.
+    meme820_raw_ptr[0].base_addr_low = 0;
+    meme820_raw_ptr[0].length_low = 4096;
+    meme820_raw_ptr[0].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[1].base_addr_low = 4096;
+    meme820_raw_ptr[1].length_low = 4096;
+    meme820_raw_ptr[1].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[2].base_addr_low = 8192;
+    meme820_raw_ptr[2].length_low = 777;
+    meme820_raw_ptr[2].type = ADDR_RANGE_RESERVED;
+    meme820_raw_ptr[3].base_addr_low = MEME820_MAGIC_STOP;
+#endif
+
+#if 0
+    // 6 regions: 
+    // 0-1: Available merges
+    // 2: Reserved
+    // 3-4: Available merges
+    // 5: Stop
+    meme820_raw_ptr[0].base_addr_low = 0;
+    meme820_raw_ptr[0].length_low = 4096;
+    meme820_raw_ptr[0].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[1].base_addr_low = 4096;
+    meme820_raw_ptr[1].length_low = 4096;
+    meme820_raw_ptr[1].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[2].base_addr_low = 8192;
+    meme820_raw_ptr[2].length_low = 4096;
+    meme820_raw_ptr[2].type = ADDR_RANGE_RESERVED;
+
+    meme820_raw_ptr[3].base_addr_low = 12288;
+    meme820_raw_ptr[3].length_low = 4096;
+    meme820_raw_ptr[3].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[4].base_addr_low = 16384;
+    meme820_raw_ptr[4].length_low = 4096;
+    meme820_raw_ptr[4].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[5].base_addr_low = MEME820_MAGIC_STOP;
+#endif
+
+#if 0
+    // 0-1: available regions
+    // 2: too small available region
+    // 3: Stop 
+    meme820_raw_ptr[0].base_addr_low = 0;
+    meme820_raw_ptr[0].length_low = 4096;
+    meme820_raw_ptr[0].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[1].base_addr_low = 4096;
+    meme820_raw_ptr[1].length_low = 4096;
+    meme820_raw_ptr[1].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[2].base_addr_low = 8192;
+    meme820_raw_ptr[2].length_low = 1012;
+    meme820_raw_ptr[2].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[3].base_addr_low = MEME820_MAGIC_STOP; 
+#endif
+
+#if 0
+    // 0-1: Available
+    // 2: Avialable too large
+    // 3: Stop
+    //
+    meme820_raw_ptr[0].base_addr_low = 0;
+    meme820_raw_ptr[0].length_low = 8192;
+    meme820_raw_ptr[0].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[1].base_addr_low = 8192;
+    meme820_raw_ptr[1].length_low = 4096;
+    meme820_raw_ptr[1].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[2].base_addr_low = 12288;
+    meme820_raw_ptr[2].length_low = 10000;
+    meme820_raw_ptr[2].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[3].base_addr_low = MEME820_MAGIC_STOP;
+#endif
+
+    // 0-1: Available
+    // 2: Reserved
+    // 3: Avialable too large
+    // 4: Stop
+    //
+    meme820_raw_ptr[0].base_addr_low = 0;
+    meme820_raw_ptr[0].length_low = 8192;
+    meme820_raw_ptr[0].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[1].base_addr_low = 8192;
+    meme820_raw_ptr[1].length_low = 4096;
+    meme820_raw_ptr[1].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[2].base_addr_low = 12288;
+    meme820_raw_ptr[2].length_low = 4096;
+    meme820_raw_ptr[2].type = ADDR_RANGE_RESERVED;
+    meme820_raw_ptr[3].base_addr_low = 16384;
+    meme820_raw_ptr[3].length_low = 10000;
+    meme820_raw_ptr[3].type = ADDR_RANGE_MEMORY;
+    meme820_raw_ptr[4].base_addr_low = MEME820_MAGIC_STOP;
+}
+#endif
 
 /* Name:        dump_raw_region 
  *
@@ -38,6 +151,18 @@ static void dump_raw_region(struct meme820 *raw_ptr)
 
 }
 
+void dump_all_regions(struct meme820 *raw_ptr)
+{
+    int i;
+
+    printk("E820 Full Map:\n");
+
+    for (i = 0; i < MEME820_MAX_NR && raw_ptr[i].base_addr_low != MEME820_MAGIC_STOP ; i++)
+    {
+        dump_raw_region(&raw_ptr[i]);
+    }
+}
+
 /* Name: sanitize_meme820_map 
  *
  * Description: Scan the meme820 results and store in kernel data. 
@@ -54,10 +179,12 @@ static void dump_raw_region(struct meme820 *raw_ptr)
  */
 void sanitize_meme820_map(void)
 {
-    int i, j;
+    int i, j, trimmed_bytes;
     struct meme820 *meme820_raw_ptr = (struct meme820 *)MEME820_ADDR;
 
-    printk("E820 Map:\n");
+    //dump_all_regions(meme820_raw_ptr);
+
+    //printk("E820 Map:\n");
 
     // i lags behind an points to the region we are merging
     // j looks ahead for the first unavailable region
@@ -103,6 +230,10 @@ void sanitize_meme820_map(void)
             //
             // Add the size of the next available region to this region.
             meme820_raw_ptr[i].length_low += meme820_raw_ptr[j].length_low; 
+
+            // Make the address range reserved so it
+            // can be ignored.
+            meme820_raw_ptr[j].type = ADDR_RANGE_RESERVED;
         }
 
         // At this point, i resides on a memory region. This region can be:
@@ -121,16 +252,34 @@ void sanitize_meme820_map(void)
         //  it a multiple of a PAGE_SIZE.
         if (meme820_raw_ptr[i].length_low%PAGE_SIZE != 0)
         {
+            trimmed_bytes = meme820_raw_ptr[i].length_low - PAGE_SIZE*(meme820_raw_ptr[i].length_low/PAGE_SIZE);
             meme820_raw_ptr[i].length_low = PAGE_SIZE*(meme820_raw_ptr[i].length_low/PAGE_SIZE);
+
+            // As long as the j region is not the end; it is on a reserved
+            // region.
+            // Subtract the start of the next region to account for the
+            // trimming above.
+            //
+            // This is not necessary because this is fixing up a reserved
+            // region which is currently unnacounted for. Nice for visual
+            // purposes.
+            if(meme820_raw_ptr[j].base_addr_low != MEME820_MAGIC_STOP)
+            {
+                meme820_raw_ptr[j].base_addr_low -= trimmed_bytes;
+                meme820_raw_ptr[j].length_low += trimmed_bytes;
+            }
         }
 
         // Region has been normalized.
 
-        //printk("[ Available ]\n");
         num_avail_pages += (meme820_raw_ptr[i].length_low/PAGE_SIZE);
 
         //printk("Fixed up region:\n");
         //dump_raw_region(&(meme820_raw_ptr[i]));
     }
+
+    dump_all_regions(meme820_raw_ptr);
+
+    printk("Number of available pages: 0x%p", num_avail_pages);
 }
 
