@@ -172,17 +172,44 @@ unsigned long alloc_page(void)
 
     return 0;
 }
-
+extern uint32_t __kernel_size;
+/*
+ *
+ * This is run in protected mode before
+ * paging is set up
+ *
+ */
 void setup_memory(void)
 {
+    int total_nr_pages = 0;
+
 	// Clear the frame bitmap
-	memset(frameLedger, 0, sizeof(frameLedger));
+	//memset(frameLedger, 0, sizeof(frameLedger));
 
     // Organize and find out how much memory we have
     sanitize_meme820_map();
 
-	// Allocate frame for kernel's page directory
-	// mark 
+    total_nr_pages = get_total_nr_pages();
+    if(total_nr_pages <= 0)
+    {
+        kernel_bug();
+    }
+
+    printk("Need to make an array = 0x%p Bytes long\n", total_nr_pages/8);
+
+	// Set the physical frame manager. 
+    printk("Start of kernel = 0x%p, End of kernel = 0x%p\n", &__kernel_start, &__kernel_end);
+    int x = (int)get_pt_idx((uint32_t)0xc0100000);
+    printk(">> %p\n", x);
+    uint32_t *pt_kernel = PT_KERNEL_ADDR; 
+    while (pt_kernel[x] != 0){
+        printk(">>> %p is populated!\n", pt_kernel[x]);
+        x++;
+    }
+
+    //uint32_t *ptr = (uint32_t *)((uint32_t)(&__physical_load_address) + (uint32_t)(&__kernel_size));
+    //*ptr = (uint32_t)0xdeadbeef;
+    //memset(0x0000, 0xaa, 4);
 
 	// Allocate frame for identity table
 	// 

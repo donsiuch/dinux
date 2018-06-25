@@ -4,6 +4,12 @@
 
 #include "dinux/inc/io.h"
 
+void printInt(const int intNr)
+{
+    // TODO: remove
+    return; 
+}
+
 void printHexChar(const unsigned long hexChar)
 {
 	terminal_putchar( ALPHA_NUM(UPPER_NIBBLE(hexChar)+48) );
@@ -41,7 +47,9 @@ static void vprintk(const char *string, va_list args)
 			switch (current)
 			{
 				// decimal
-				//case 'd': isDigit('x'); break;
+				case 'd':
+                    printInt(va_arg(args, int)); 
+                    break;
 		
 				// address
 				case 'p': 

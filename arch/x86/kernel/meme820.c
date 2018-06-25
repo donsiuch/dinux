@@ -163,6 +163,50 @@ void dump_all_regions(struct meme820 *raw_ptr)
     }
 }
 
+/*
+ * Name:        get_total_nr_pages 
+ *
+ * Description: Loop through the sanitized meme820 memory map and get
+ *              the total number of pages.
+ *
+ * Arguments:   void
+ *
+ * Returns:     Total number of memory pages 
+ *
+ */
+int get_total_nr_pages(void)
+{
+    int i;
+    int nr_pages_before_last_entry = 0;
+    int nr_last_entry_pages = 0;
+
+    struct meme820 *meme820_map_ptr = (struct meme820 *)MEME820_ADDR;
+   
+    // Locate the last entry. 
+    for (i = 0; i < MEME820_MAX_NR ; i++)
+    {
+        // Check stopping condition
+        if (meme820_map_ptr[i].base_addr_low == MEME820_MAGIC_STOP)
+        {
+            break;
+        }
+    }
+
+    // Check if the first entry is the stopping condition
+    if (i == 0)
+    {
+        return 0;
+    }
+
+    // Return the number of pages 
+    nr_pages_before_last_entry = meme820_map_ptr[i-1].base_addr_low/PAGE_SIZE;
+    nr_last_entry_pages = meme820_map_ptr[i-1].length_low/PAGE_SIZE; 
+
+    //printk("Size of memory = %p\n", nr_pages_before_last_entry + nr_last_entry_pages);
+
+    return nr_pages_before_last_entry + nr_last_entry_pages; 
+}
+
 /* Name: sanitize_meme820_map 
  *
  * Description: Scan the meme820 results and store in kernel data. 
@@ -278,8 +322,8 @@ void sanitize_meme820_map(void)
         //dump_raw_region(&(meme820_raw_ptr[i]));
     }
 
-    dump_all_regions(meme820_raw_ptr);
+    //dump_all_regions(meme820_raw_ptr);
 
-    printk("Number of available pages: 0x%p", num_avail_pages);
+    //printk("Number of available pages: 0x%p", num_avail_pages);
 }
 

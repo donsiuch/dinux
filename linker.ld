@@ -39,6 +39,7 @@ SECTIONS
 	}
 
     __kernel_end = .;
+    __kernel_size = __kernel_end - __kernel_start;
 
 	/* Find the distance between 0x100000 - 0x1000 => 0xff000 */
 	__physreal_diff = . - __real_mode_code_physical_address;

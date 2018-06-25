@@ -41,7 +41,7 @@ setup_paging:
 	movl	$KERNEL_PD_ADDR, %eax
 	movl	%eax, %cr3
 	movl	%cr0, %eax
-	orl	$PAGING_BIT, %eax
+	orl	    $PAGING_BIT, %eax
 
 turn_on_paging:
 	movl	%eax, %cr0

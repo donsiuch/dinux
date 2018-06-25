@@ -49,7 +49,7 @@ myos.bin: objects
 	$(DINUX_DIR)/obj/main.o \
 	$(MAKE_DIR)/arch/x86/obj/system.o \
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
-	$(MAKE_DIR)/arch/x86/obj/mm.o \
+	$(MAKE_DIR)/arch/x86/obj/arch_mm.o \
 	$(MAKE_DIR)/arch/x86/obj/meme820.o \
 	$(DINUX_DIR)/obj/mm.o \
 	$(MAKE_DIR)/arch/x86/obj/time.o \

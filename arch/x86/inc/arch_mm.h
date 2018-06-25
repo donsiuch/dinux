@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 
+extern uint32_t __kernel_virtual_start;
 extern uint32_t __kernel_start;
 extern uint32_t __kernel_end;
 extern uint32_t __physical_load_address;
