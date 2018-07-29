@@ -27,6 +27,7 @@ struct meme820 {
 #define MEME820_RESULT_SIZE sizeof(struct meme820)
 
 void sanitize_meme820_map(void);
+int get_total_nr_pages(void);
 
 #endif
 

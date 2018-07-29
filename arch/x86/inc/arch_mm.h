@@ -29,7 +29,7 @@ extern uint32_t __kernel_end;
 extern uint32_t __physical_load_address;
 
 #define	PAGE_SIZE	0x1000
-#define PAGE_SHIFT  12
+#define PAGE_SHIFT_SIZE  12
 #define MEMORY_SIZE	0x1000000
 #define TOTAL_NUM_PAGES	(MEMORY_SIZE/PAGE_SIZE)
 
@@ -104,6 +104,11 @@ struct mem_node {
 }
 __attribute((packed));
 
+struct page {
+    unsigned long count;
+}
+__attribute((packed));
+
 void set_frame_in_use(BITMAP_UNIT *, uint32_t);
 int getFirstFreeIndex(void);
 unsigned long alloc_page(void);
@@ -115,8 +120,14 @@ void setup_memory(void);
 
 #endif	// #ifndef ASSEMBLY
 
-// Proof of concept paging
 #define HIGH_MEM_START_ADDR 0xc0000000
+
+// These macros are most useful when dealing with
+// memory at HIGH_MEM_START_ADDR+
+#define VIRTUAL_OFFSET HIGH_MEM_START_ADDR
+#define VIRT_TO_PHYS(_x)(_x-VIRTUAL_OFFSET)
+#define PHYS_TO_VIRT(_x)(_x+VIRTUAL_OFFSET)
+
 #define PAGING_BIT	0x80000000
 #define KERNEL_PD_ADDR	0x1d000
 #define	PT_IDENT_ADDR	0x1e000
@@ -131,7 +142,11 @@ void setup_memory(void);
 #define PAGE_PRESENT    0x01
 #define PAGE_RW         0x02
 
+#define CREATE_PTE(_addr, _flags) (_addr | _flags)
+#define CREATE_PDE CREATE_PTE
+
 #define PAGE_ALIGN(_x)(_x &= 0xfffff000)
 #define GET_FRAME_ADDR PAGE_ALIGN
+#define PAGE_SHIFT(_x)(_x<<PAGE_SHIFT_SIZE)
 
 #endif	// __ARCH_MM__
