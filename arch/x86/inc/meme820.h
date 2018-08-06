@@ -26,9 +26,12 @@ struct meme820 {
 // Size of single result
 #define MEME820_RESULT_SIZE sizeof(struct meme820)
 
+// Forward declaration
+struct page;
+
 void sanitize_meme820_map(void);
 int get_total_nr_pages(void);
-
-#endif
+void reserve_meme820_pages();
+#endif // not assembly
 
 #endif

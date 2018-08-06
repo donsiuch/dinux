@@ -4,11 +4,13 @@
 
 #include "dinux/inc/io.h"
 
+/*
 void printInt(const int intNr)
 {
     // TODO: remove
     return; 
 }
+*/
 
 void printHexChar(const unsigned long hexChar)
 {
@@ -48,7 +50,7 @@ static void vprintk(const char *string, va_list args)
 			{
 				// decimal
 				case 'd':
-                    printInt(va_arg(args, int)); 
+                   // printInt(va_arg(args, int)); 
                     break;
 		
 				// address

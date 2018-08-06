@@ -117,6 +117,10 @@ unsigned long 	get_free_frame(void);
 uint32_t get_pd_idx(uint32_t);
 uint32_t get_pt_idx(uint32_t);
 void setup_memory(void);
+void mark_page_used(unsigned long);
+int is_page_mapped(pde_t *, uint32_t );
+int is_pt_present(pde_t *, uint32_t );
+int is_pg_present(pte_t *, uint32_t );
 
 #endif	// #ifndef ASSEMBLY
 

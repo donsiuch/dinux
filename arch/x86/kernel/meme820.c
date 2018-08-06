@@ -1,7 +1,7 @@
 
 #include "dinux/inc/io.h"
-#include "x86/inc/meme820.h"
 #include "x86/inc/arch_mm.h"
+#include "x86/inc/meme820.h"
 
 extern unsigned long num_avail_pages;
 
@@ -161,6 +161,79 @@ void dump_all_regions(struct meme820 *raw_ptr)
     {
         dump_raw_region(&raw_ptr[i]);
     }
+}
+
+/*
+ * Name:        reserve_meme820_pages 
+ *
+ * Description: Loop through the meme820 sanitized map and mark pages reserved. 
+ *              This function is called once when memory is being setup.
+ *
+ * Arguments:   physical_page_ledger_ptr 
+ *
+ * Returns:     void
+ *
+ */
+void reserve_meme820_pages()
+{
+    int i;
+    unsigned long limit_addr = 0;
+    unsigned long raw_page_ptr = 0x00;
+
+    struct meme820 *meme820_map_ptr = (struct meme820 *)MEME820_ADDR;
+
+    for (i = 0; i < MEME820_MAX_NR; i++)
+    {
+        // Check stopping condition
+        if (meme820_map_ptr[i].base_addr_low == MEME820_MAGIC_STOP)
+        {
+            break;
+        }
+
+        // If the memory region is not available, go to the next region.
+        if (meme820_map_ptr[i].type == ADDR_RANGE_MEMORY)
+        {
+            continue;
+        }
+  
+        //
+        // Evaluating a used region!
+        //
+
+        // Get the starting address
+        raw_page_ptr = meme820_map_ptr[i].base_addr_low; 
+      
+        // Find the address of the first page outside of the region (the
+        // stopping condition. 
+        limit_addr = (unsigned long)raw_page_ptr + meme820_map_ptr[i].length_low;
+
+        // Starting at the second region, try to detect gaps
+        // to mark as used.
+        if (i > 0)
+        {
+            // If the start of the region currently being evaluated is not
+            // equal to the end address of the last region, we detected a gap.
+            //
+            // Since the current region is "used," and the previous immediate
+            // x numver of pages are a gap (also "used"), set the starting
+            // point to that earlier address.
+            if (raw_page_ptr > meme820_map_ptr[i-1].base_addr_low + meme820_map_ptr[i-1].length_low)
+            {
+                //printk("%s: Detected gap! = %p, %p, %p\n", __func__, raw_page_ptr, meme820_map_ptr[i-1].base_addr_low + meme820_map_ptr[i-1].length_low, i);
+                raw_page_ptr =  meme820_map_ptr[i-1].base_addr_low + meme820_map_ptr[i-1].length_low;
+            }
+        }
+
+        //printk("%s: Mapping range = %p to %p\n", __func__, raw_page_ptr, limit_addr );
+
+        // While we are evaluating a page within the region
+        while (raw_page_ptr < limit_addr)
+        {
+            mark_page_used(raw_page_ptr); 
+            raw_page_ptr += PAGE_SIZE;
+        }
+    }
+
 }
 
 /*

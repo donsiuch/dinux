@@ -11,10 +11,12 @@
 static BITMAP_UNIT frameLedger[NUM_LEDGER_UNITS];
 
 // Array of struct pages that describe each page of physical memory
-static struct page *physical_page_ledger;
+static struct page *physical_page_ledger_ptr = NULL;
 
 // Beginning of allocatable memory pool.
-static uint8_t *memory_pool_ptr = NULL;
+// TODO: This is after the page array?
+// Maybe delete
+//static uint8_t *memory_pool_ptr = NULL;
 
 static uint32_t total_num_pte_per_pt = PAGE_SIZE/sizeof(pte_t);
 
@@ -24,6 +26,8 @@ static uint32_t total_num_pte_per_pt = PAGE_SIZE/sizeof(pte_t);
 
 // Reference kernel page directory
 pde_t *ref_pgd;
+
+static const int NUM_IDENTITY_PAGES = 1024;
 
 extern void kernel_bug(void);
 
@@ -192,9 +196,8 @@ void setup_memory(void)
     int i = 0;
     int total_nr_pages = 0;
     uint32_t kernel_end;
-    uint32_t physical_page_ledger_addr = 0;
     uint32_t size_of_ledger = 0;
-    pde_t *kernel_pd = (uint32_t *)KERNEL_PD_ADDR;
+    //pde_t *kernel_pd = (pde_t *)KERNEL_PD_ADDR;
 
 	// Clear the frame bitmap
 	//memset(frameLedger, 0, sizeof(frameLedger));
@@ -211,10 +214,10 @@ void setup_memory(void)
 	// Set the physical frame manager. 
     // TODO: Remove this debug information
     i = (int)get_pt_idx((uint32_t)0xc0100000);
-    printk(">> %p\n", i);
-    uint32_t *pt_kernel = PT_KERNEL_ADDR; 
+    //printk(">> %p\n", i);
+    uint32_t *pt_kernel = (uint32_t *)PT_KERNEL_ADDR; 
     while (pt_kernel[i] != 0){
-        printk(">>> %p is populated!\n", pt_kernel[i]);
+        //printk(">>> %p is populated!\n", pt_kernel[i]);
         i++;
     }
 
@@ -227,14 +230,23 @@ void setup_memory(void)
     // This is a virtual address
     kernel_end = (uint32_t)(&__kernel_end);
     kernel_end += PAGE_SIZE;
-    physical_page_ledger_addr = (uint32_t)PAGE_ALIGN(kernel_end);
+    physical_page_ledger_ptr = (struct page *)PAGE_ALIGN(kernel_end);
 
     // TODO: HIGH PRIORITY
     size_of_ledger = total_nr_pages*sizeof(struct page);
-    printk("Address of allocatable memory = %p\n", physical_page_ledger_addr+size_of_ledger);
-    is_page_mapped(kernel_pd, 0x00400000 );
+    //printk("Address of allocatable memory = %p\n", physical_page_ledger_ptr+size_of_ledger);
+    //is_page_mapped(kernel_pd, 0x00400000 );
     //kernel_pd[get_pd_idx(physical_page_ledger+size_of_ledger)];
     //pt_kernel[x] = CREATE_PTE(, PAGE_PRESENT | PAGE_RW);
+   
+    // Offically reserve meme820 map
+    reserve_meme820_pages();
+
+    // Offically reserve the identity page table
+    for (i = 0; i < NUM_IDENTITY_PAGES; i++)
+    {
+        
+    }
 
     // If using the folloiwng print statement need to extern the __kernel_size
     //uint32_t *ptr = (uint32_t *)((uint32_t)(&__physical_load_address) + (uint32_t)(&__kernel_size));
@@ -247,6 +259,48 @@ void setup_memory(void)
 
 }
 
+/*
+ * Name:         virt_to_ledger_idx
+ *
+ * Description:
+ *
+ * Arguments:
+ *
+ * Return:
+ *
+ */
+static int virt_to_ledger_idx(const unsigned long virt_addr)
+{
+    return PAGE_ALIGN(virt_addr)/PAGE_SIZE;
+}
+
+/*
+ * Name:         mark_page_used
+ *
+ * Description:
+ *
+ * Arguments:
+ *
+ * Return:
+ *
+ *
+void mark_page_used(unsigned long page_addr)
+{
+    printk("%s: Marking page used = %p\n", __func__, page_addr);
+
+
+}
+
+/*
+ * Name:        is_page_mapped
+ *
+ * Description:
+ *
+ * Arguments:
+ *
+ * Return:
+ *
+ */
 int is_page_mapped(pde_t *pd_ptr, uint32_t virt_addr)
 {
     int i;
@@ -267,7 +321,7 @@ int is_page_mapped(pde_t *pd_ptr, uint32_t virt_addr)
     // When referencing pt_addr, the value must be shifted
     // to get a real physical address. Physical address works
     // due to the identity mapping.
-    if(is_pg_present(PAGE_SHIFT(pd_ptr[i].pt_addr),virt_addr) != 1)
+    if(is_pg_present((pte_t *)PAGE_SHIFT(pd_ptr[i].pt_addr),virt_addr) != 1)
     {
         printk("%s: Page not mapped!\n", __func__);
         return 0;
@@ -277,7 +331,16 @@ int is_page_mapped(pde_t *pd_ptr, uint32_t virt_addr)
     return 1;
 }
 
-
+/*
+ * Name:        is_pt_present 
+ *
+ * Description:
+ *
+ * Arguments:
+ *
+ * Return:
+ *
+ */
 int is_pt_present(pde_t *pd_ptr, uint32_t virt_addr)
 {
     uint16_t pd_idx = 0;
@@ -292,6 +355,16 @@ int is_pt_present(pde_t *pd_ptr, uint32_t virt_addr)
     return (pd_ptr[pd_idx].present & PT_PRESENT); 
 }
 
+/*
+ * Name:        is_pg_present
+ *
+ * Description:
+ *
+ * Arguments:
+ *
+ * Return:
+ *
+ */
 int is_pg_present(pte_t *pt_ptr, uint32_t virt_addr)
 {
     uint16_t pt_idx = 0;
@@ -484,7 +557,7 @@ void setupPaging()
 	// Identy map alot of the kernel: (0x00000000 -> 0x00400000)
     // TODO: This can probably be reduced.
     x = 0;
-	while ( x < 1024 ){
+	while ( x < NUM_IDENTITY_PAGES ){
         pt_ident[x] = CREATE_PTE(frameAddress, PAGE_PRESENT | PAGE_RW);
 
 		frameAddress += PAGE_SIZE;
