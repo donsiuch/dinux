@@ -1,4 +1,5 @@
 
+#include "x86/inc/arch_mm.h"
 #include "x86/inc/idt.h"
 #include "dinux/inc/io.h"
 #include "dinux/inc/memory.h"
@@ -254,12 +255,17 @@ asmlinkage void doGeneralProtection(regs *registers)
 
 asmlinkage void doPageFault(regs *registers)
 {
-	uint32_t faulting_address;
+	uint32_t faulting_address = 0;
+    uint32_t new_virt_addr = 0;
 
 	__asm__ volatile ("movl %%cr2, %0": "=r"(faulting_address) ::);
 
 	printk("doPageFault(): faulting address = %p, errorCode: %p, &registers: %p\n", faulting_address, registers->errorCode, registers);
-	__asm__("hlt");
+
+    new_virt_addr = alloc_page();
+
+    printk("%s: new_virt_addr = %p\n", __func__, new_virt_addr);
+
 }
 
 asmlinkage void doFloatError(regs *registers)

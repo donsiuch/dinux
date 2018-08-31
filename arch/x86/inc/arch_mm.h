@@ -104,6 +104,9 @@ struct mem_node {
 }
 __attribute((packed));
 
+// The size of struct page must always divide evenly into PAGE_SIZE. This is
+// because certain boot functions assume an even division when setting up page
+// tables and mapping in the physical frame ledger.
 struct page {
     unsigned long count;
 }

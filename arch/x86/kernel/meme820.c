@@ -190,7 +190,7 @@ void reserve_meme820_pages()
             break;
         }
 
-        // If the memory region is not available, go to the next region.
+        // If the memory region is available, go to the next region.
         if (meme820_map_ptr[i].type == ADDR_RANGE_MEMORY)
         {
             continue;
@@ -229,6 +229,7 @@ void reserve_meme820_pages()
         // While we are evaluating a page within the region
         while (raw_page_ptr < limit_addr)
         {
+            printk("Marking = %p as used\n", raw_page_ptr);
             mark_page_used(raw_page_ptr); 
             raw_page_ptr += PAGE_SIZE;
         }
