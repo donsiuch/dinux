@@ -270,15 +270,19 @@ int x = 0;
         {
             printk("%s: Page table missing for %p\n", __func__, (unsigned long)page_ptr);
        
-            // We will go back later to mark this newly allocated page as used
-            // at its corresponding position in the ledger. (this simplifies
-            // everything)
+            // Allocate a page table. 
             kernel_pd_ptr[i] = CREATE_PDE(VIRT_TO_PHYS((uint32_t)memory_pool_ptr), PT_PRESENT|PT_RW);
-            memset(memory_pool_ptr, 0, PAGE_SIZE);
+
+            printk("is page table present? = %p\n", is_pt_present(pgd_ptr, (unsigned long)page_ptr));
+
+            printk("kernel_pd_ptr [%p] >> %p\n", i, kernel_pd_ptr[i]);
+
             memory_pool_ptr += PAGE_SIZE;
+
+            printk("B >> \n");
         }
 
-//printk("%s kernel_pd_ptr[%p] = %p\n", __func__, i, kernel_pd_ptr[i]);
+//printk("%s kernel_pd_ptr[%p] = %p for virtual adress = %p\n", __func__, i, kernel_pd_ptr[i], page_ptr);
 
         if(is_pg_present((pte_t *)PAGE_SHIFT(pgd_ptr[i].pt_addr), (uint32_t)page_ptr) != 1)
         {
@@ -303,9 +307,11 @@ int x = 0;
         page_ptr += sizeof(struct page); 
 x++;
     }
-    
-printk("size of ledger = %p (versus global = %p) uses %p pages of ram\n", x*4, ledger_size, (x*4)/PAGE_SIZE);
-    
+
+//printk("size of ledger = %p B (versus global = %p B) uses %p pages of ram\n", x*4, ledger_size, (x*4)/PAGE_SIZE);
+
+    memset(physical_page_ledger_ptr, 0, ledger_size);
+
     // Starting from physical page ledger and until memory_pool_ptr, for
     // each page, mark the associated page as 'in use.'
     //
@@ -313,6 +319,7 @@ printk("size of ledger = %p (versus global = %p) uses %p pages of ram\n", x*4, l
 x = 0;
     while ((unsigned long)page_ptr < (unsigned long)memory_pool_ptr)
     {
+        // Clear the entire page
 
 //printk("virt to phys = %p to %p\n", page_ptr, VIRT_TO_PHYS(page_ptr));
         i = phys_to_ledger_idx(VIRT_TO_PHYS((uint32_t)page_ptr));
@@ -322,10 +329,10 @@ x = 0;
         physical_page_ledger_ptr[i].count += 1;
 
         page_ptr += PAGE_SIZE;
-        x++;
+x++;
     }
-    printk("pd index = %p\n",get_pd_idx((uint32_t)page_ptr));
-    while (1){}
+printk("pd index = %p\n",get_pd_idx((uint32_t)page_ptr));
+//while (1){}
 }
 
 /*

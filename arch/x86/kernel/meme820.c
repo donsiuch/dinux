@@ -229,7 +229,7 @@ void reserve_meme820_pages()
         // While we are evaluating a page within the region
         while (raw_page_ptr < limit_addr)
         {
-            printk("Marking = %p as used\n", raw_page_ptr);
+            //printk("Marking = %p as used\n", raw_page_ptr);
             mark_page_used(raw_page_ptr); 
             raw_page_ptr += PAGE_SIZE;
         }
