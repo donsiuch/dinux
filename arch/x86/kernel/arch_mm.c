@@ -16,10 +16,8 @@ static struct page *physical_page_ledger_ptr = NULL;
 static unsigned long ledger_size = 0;
 static unsigned long nr_mem_pages = 0;
 
-unsigned long nr_ledger_indices = 0;
-
-// Beginning of allocatable memory pool.
-static uint8_t *memory_pool_ptr = NULL;
+// Beginning of allocatable unused high memory kernel virtual addresses.
+static uint8_t *unused_kernel_virt_addresses_ptr = NULL;
 
 static uint32_t total_num_pte_per_pt = PAGE_SIZE/sizeof(pte_t);
 
@@ -164,12 +162,38 @@ unsigned long get_free_frame(void)
 unsigned long derive_new_virt_addr(void)
 {
     // allocate a free page
-    unsigned long virt_addr = (unsigned long)memory_pool_ptr;
+    unsigned long virt_addr = (unsigned long)unused_kernel_virt_addresses_ptr;
 
     // Set the next free page
-    memory_pool_ptr += PAGE_SIZE;
+    unused_kernel_virt_addresses_ptr += PAGE_SIZE;
 
     return virt_addr;
+}
+
+/*
+ * Name:        pmm_get_free_frame
+ *
+ * Description: Allocate the available physical frame
+ *
+ * Arguments:   void
+ *
+ * Returns:     Success: Physical address of free frame
+ *              Failure: 0
+ *
+ */
+unsigned long pmm_get_free_frame()
+{
+    unsigned int i;
+
+    for (i = 0; i < nr_mem_pages; i++)
+    {
+        if (physical_page_ledger_ptr[i].count == 0)
+        {
+            return i*PAGE_SIZE;
+        }
+    }
+
+    return 0;
 }
 
 /*
@@ -183,7 +207,7 @@ unsigned long derive_new_virt_addr(void)
  *		    Failure - NULL
  *
  */
-unsigned long alloc_page(void)
+unsigned long alloc_page(unsigned long flags)
 {
     unsigned long physical_addr = 0;
     unsigned long new_virt_addr = 0;
@@ -191,20 +215,21 @@ unsigned long alloc_page(void)
     //int pd_idx = 0;
     //pde_t *kernel_pd = (pde_t *)KERNEL_PD_ADDR;
 
-    // TODO: Make this function different for boot and post boot
-    new_virt_addr = derive_new_virt_addr();
-
-    physical_addr = VIRT_TO_PHYS(new_virt_addr);
+    physical_addr = pmm_get_free_frame();
+    printk("%s: Found a free physical frame = %p\n", __func__, physical_addr);
 
     // TODO: If this fails, don't go any further.
-    map_virt_to_phys((pde_t *)KERNEL_PD_ADDR, new_virt_addr, physical_addr, PAGE_PRESENT|PAGE_RW);
+    if (flags & GFP_KERNEL)
+    {
+        map_virt_to_phys((pde_t *)KERNEL_PD_ADDR, new_virt_addr, physical_addr, PAGE_PRESENT|PAGE_RW);
+    }
    
     // Get the index into the ledger so we can mark as used
     ledger_idx = phys_to_ledger_idx(VIRT_TO_PHYS(new_virt_addr));
 
     // Mark that the page is being used.
     physical_page_ledger_ptr[ledger_idx].count++;
-printk(">> %p --> %p\n", new_virt_addr, physical_addr); while(1){} 
+    
     printk("%s: Allocated page = %p\n", __func__, new_virt_addr);
 
     return new_virt_addr;
@@ -244,7 +269,8 @@ int x = 0;
     uint32_t *pt_ptr = NULL;
     uint32_t *kernel_pd_ptr = (uint32_t *)pgd_ptr;
     struct page *page_ptr = physical_page_ledger_ptr;
-    unsigned long limit = (unsigned long)(memory_pool_ptr);
+    unsigned char *free_physical_memory_ptr = (unsigned char *)VIRT_TO_PHYS((unused_kernel_virt_addresses_ptr));
+    unsigned long limit = (unsigned long)unused_kernel_virt_addresses_ptr;
 
     if (pgd_ptr == NULL)
     {
@@ -261,23 +287,23 @@ int x = 0;
     {
         i = get_pd_idx((uint32_t)page_ptr);
 
-        // Check if there is a page table present that contains the address of
+        // Check if there is a page table present that map the virtual address of
         // the current page. If not:
         // + Allocate a page but do not officially mark it yet. The page is
-        //  "allocated" based on incrementing the memory_pool_ptr.
+        //  "allocated" based on incrementing the free_physical_memory_ptr.
         // 
         if(is_pt_present(pgd_ptr, (unsigned long)page_ptr) != 1)
         {
             printk("%s: Page table missing for %p\n", __func__, (unsigned long)page_ptr);
        
             // Allocate a page table. 
-            kernel_pd_ptr[i] = CREATE_PDE(VIRT_TO_PHYS((uint32_t)memory_pool_ptr), PT_PRESENT|PT_RW);
+            kernel_pd_ptr[i] = CREATE_PDE((uint32_t)free_physical_memory_ptr, PT_PRESENT|PT_RW);
 
             printk("is page table present? = %p\n", is_pt_present(pgd_ptr, (unsigned long)page_ptr));
 
             printk("kernel_pd_ptr [%p] >> %p\n", i, kernel_pd_ptr[i]);
 
-            memory_pool_ptr += PAGE_SIZE;
+            free_physical_memory_ptr += PAGE_SIZE;
 
             printk("B >> \n");
         }
@@ -312,12 +338,12 @@ x++;
 
     memset(physical_page_ledger_ptr, 0, ledger_size);
 
-    // Starting from physical page ledger and until memory_pool_ptr, for
-    // each page, mark the associated page as 'in use.'
+    // 
+    // Mark every physical page that is used for the page ledger as in use.
     //
     page_ptr = physical_page_ledger_ptr;
 x = 0;
-    while ((unsigned long)page_ptr < (unsigned long)memory_pool_ptr)
+    while ((unsigned long)page_ptr < (unsigned long)unused_kernel_virt_addresses_ptr)
     {
         // Clear the entire page
 
@@ -331,7 +357,19 @@ x = 0;
         page_ptr += PAGE_SIZE;
 x++;
     }
-printk("pd index = %p\n",get_pd_idx((uint32_t)page_ptr));
+
+    // Finally, mark every new page table that we allocated in this function as
+    // 'in use.' Obviously, this code won't execute if no new page tables were
+    // allocated.
+    unsigned long addr = (unsigned long)VIRT_TO_PHYS(unused_kernel_virt_addresses_ptr);
+    while (addr < (unsigned long)free_physical_memory_ptr)
+    {
+        i = phys_to_ledger_idx((uint32_t)addr);
+        physical_page_ledger_ptr[i].count += 1;
+        addr += PAGE_SIZE;
+    }
+
+//printk("pd index = %p\n",get_pd_idx((uint32_t)page_ptr));
 //while (1){}
 }
 
@@ -348,6 +386,7 @@ void setup_memory(void)
     uint32_t kernel_end;
     uint32_t size_of_ledger = 0;
     uint32_t addr = 0;
+    uint32_t identity_addr_ptr = 0;
     //pde_t *kernel_pd = (pde_t *)KERNEL_PD_ADDR;
 
 	// Clear the frame bitmap
@@ -391,13 +430,13 @@ void setup_memory(void)
     ledger_size = size_of_ledger;
     nr_mem_pages = total_nr_pages;
 
-    // Set pointer to the allocatable memory pool
-    memory_pool_ptr =(uint8_t *)(physical_page_ledger_ptr + size_of_ledger);
+    // Set pointer to the allocatable unused high memory kernel virtual addresses
+    unused_kernel_virt_addresses_ptr =(uint8_t *)(physical_page_ledger_ptr + size_of_ledger);
 
-    // If the memory pool does not align flush on a page boundary add
+    // If the unused high memory kernel virtual addresses does not align flush on a page boundary add
     // a page and align.
     //
-    // if memory pool starts a bit into A, add a page then page align...
+    // if unused high memory kernel virtual addresses starts a bit into A, add a page then page align...
     // --------------           -------------------------
     // |            |           |           |           | 
     // |    A       |   ==>     |   A       |   B       |
@@ -408,11 +447,11 @@ void setup_memory(void)
     // adding a page moves the marker to * , then PAGE_ALIGNing aligns to the
     // boundary between A and B.
     //
-    if (((unsigned long)memory_pool_ptr%(unsigned long)PAGE_SIZE) != 0)
+    if (((unsigned long)unused_kernel_virt_addresses_ptr%(unsigned long)PAGE_SIZE) != 0)
     {
-        memory_pool_ptr += PAGE_SIZE;
-        addr = (uint32_t)memory_pool_ptr;
-        memory_pool_ptr = (uint8_t *)PAGE_ALIGN(addr);
+        unused_kernel_virt_addresses_ptr += PAGE_SIZE;
+        addr = (uint32_t)unused_kernel_virt_addresses_ptr;
+        unused_kernel_virt_addresses_ptr = (uint8_t *)PAGE_ALIGN(addr);
     }
 
     boot_map_physical_page_ledger_ptr((pde_t *)KERNEL_PD_ADDR);
@@ -424,30 +463,25 @@ void setup_memory(void)
    
     // Offically reserve meme820 map
     reserve_meme820_pages();
-    
-    //printk("Start of frame ledger = %p\n", physical_page_ledger_ptr);
+
     // Offically reserve the identity page table
-    for (i = 0; i < NUM_IDENTITY_PAGES; i++)
+    for (i = 0; i < NUM_IDENTITY_PAGES; identity_addr_ptr += PAGE_SIZE, i++)
     {
-        if (is_page_mapped((pde_t *)KERNEL_PD_ADDR, (uint32_t)&(physical_page_ledger_ptr[0])) == 0)
+        // All pages should be mapped...
+        if (is_page_mapped((pde_t *)KERNEL_PD_ADDR, identity_addr_ptr) == 1)
         {
-            break;
+            if (physical_page_ledger_ptr[i].count == 0)
+            {
+                physical_page_ledger_ptr[i].count += 1;
+                //printk("%s: identity address = %p is in use = %p\n", __func__, identity_addr_ptr, physical_page_ledger_ptr[i].count);
+            }
+            continue;
+        }
+        else{
+            printk("%s: Identity mapping does not exist for virtual address = %p\n", __func__, identity_addr_ptr);
+            kernel_bug();
         }
     }
-    //physical_page_ledger_ptr[0].count ++;
-    // mark_page_used( 
-    
-    
-
-    // If using the folloiwng print statement need to extern the __kernel_size
-    //uint32_t *ptr = (uint32_t *)((uint32_t)(&__physical_load_address) + (uint32_t)(&__kernel_size));
-    //*ptr = (uint32_t)0xdeadbeef;
-    //memset(0x0000, 0xaa, 4);
-
-	// Allocate frame for identity table
-	// 
-
-
 }
 
 /*
@@ -480,9 +514,9 @@ void mark_page_used(unsigned long phys_addr)
 {
     int ledger_idx = phys_to_ledger_idx(phys_addr);
 
-    printk("%s: Marking page used = %p at ledger idx = %p\n", __func__, phys_addr, ledger_idx);
+    //printk("%s: Marking page used = %p at ledger idx = %p\n", __func__, phys_addr, ledger_idx);
 
-    //physical_page_ledger_ptr[ledger_idx].count++;
+    physical_page_ledger_ptr[ledger_idx].count++;
 }
 
 /*
@@ -524,7 +558,7 @@ int is_page_mapped(pde_t *pd_ptr, uint32_t virt_addr)
         return 0;
     }
 
-    printk("Page mapping exists for virtual address = 0x%p\n", virt_addr);
+    //printk("Page mapping exists for virtual address = 0x%p\n", virt_addr);
     return 1;
 }
 
@@ -667,7 +701,9 @@ uint8_t map_virt_to_phys(pde_t *pgd_ptr, uint32_t virt_addr, uint32_t phys_addr,
 
     if (is_pt_present(pgd_ptr, virt_addr) == 0)
     {
-        //alloc_page();
+        
+        // get a free frame from the physical page manager.
+
         printk("Allocating page for page directory!\n");
 
         // TODO: Remove the bug and handle this case

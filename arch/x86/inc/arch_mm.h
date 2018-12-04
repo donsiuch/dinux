@@ -114,7 +114,7 @@ __attribute((packed));
 
 void set_frame_in_use(BITMAP_UNIT *, uint32_t);
 int getFirstFreeIndex(void);
-unsigned long alloc_page(void);
+unsigned long alloc_page(unsigned long);
 void	setupPaging(void);
 unsigned long 	get_free_frame(void);
 uint32_t get_pd_idx(uint32_t);
@@ -155,5 +155,9 @@ int is_pg_present(pte_t *, uint32_t );
 #define PAGE_ALIGN(_x)(_x &= 0xfffff000)
 #define GET_FRAME_ADDR PAGE_ALIGN
 #define PAGE_SHIFT(_x)(_x<<PAGE_SHIFT_SIZE)
+
+// "Get free page" -- for allocating pages
+#define GFP_KERNEL  0x00000001
+#define GFP_USER    0x00000020
 
 #endif	// __ARCH_MM__

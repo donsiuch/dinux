@@ -262,7 +262,7 @@ asmlinkage void doPageFault(regs *registers)
 
 	printk("doPageFault(): faulting address = %p, errorCode: %p, &registers: %p\n", faulting_address, registers->errorCode, registers);
 
-    new_virt_addr = alloc_page();
+    //new_virt_addr = alloc_page();
 
     printk("%s: new_virt_addr = %p\n", __func__, new_virt_addr);
 

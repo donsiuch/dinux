@@ -17,6 +17,8 @@ void kernel_main() {
 
     setup_memory();
 
+    alloc_page(GFP_KERNEL);
+
     //memset(0x100000, 0xff, 4);
     //dumpBytes(0xc0105a88, 64);
     //dumpBytes(0x00, 64);
