@@ -90,7 +90,7 @@ typedef struct {
 	uint32_t unused0	: 4;
 
 	// Since the most significant 20 bits... 1000
-	uint32_t pt_addr : 20;
+	uint32_t pt_phys_addr : 20;
 
 } 
 __attribute((packed)) 

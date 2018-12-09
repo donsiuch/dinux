@@ -1,14 +1,29 @@
 
+/*
+ * Where am I at?
+ * In function boot_map_physical_page_ledger_ptr(), I added a while(1) to
+ * investigate how many times the loop iterates. When I incrmement page_ptr
+ * by PAGE_SIZE, I boot. I figured I want to increment by PAGE_SIZE b/c all
+ * mappings I make will be at that cadence which would be less iterations than
+ * if I incremented by sizeof(struct page); there are many sizeof(struct page)
+ * increments in a single PAGE_SIZE
+ *
+ *
+ * Problems:
+ * 0. The page directory/table traversal function is using physical addresses
+ *    like virtual addresses. I may get away with this now, but I won't be
+ *    able to in the future. James Molloy has a strategy for traversing the
+ *    page tables.
+ *
+ * 1. How do I track virtual addresses?
+ *
+ *
+ */
+
 #include "dinux/inc/io.h"
 #include "dinux/inc/memory.h"
 #include "x86/inc/meme820.h"
 #include "x86/inc/arch_mm.h"
-
-// Bitmap that describes used/free physical page frames
-// Each bit of the BITMAP_UNIT represents a physical frame
-// a '1' means the frame is used. A '0' means frame is free.
-// TODO: Remove all traces of the frame ledger.
-static BITMAP_UNIT frameLedger[NUM_LEDGER_UNITS];
 
 // Array of struct pages that describe each page of physical memory
 static struct page *physical_page_ledger_ptr = NULL;
@@ -21,154 +36,12 @@ static uint8_t *unused_kernel_virt_addresses_ptr = NULL;
 
 static uint32_t total_num_pte_per_pt = PAGE_SIZE/sizeof(pte_t);
 
-// Reference kernel page directory
-pde_t *ref_pgd;
-
 static const int NUM_IDENTITY_PAGES = 1024;
 
 extern void kernel_bug(void);
 
 static int phys_to_ledger_idx(unsigned long);
 uint8_t map_virt_to_phys(pde_t *, uint32_t, uint32_t, uint32_t);
-
-/*
- * Name: 	    set_frame_in_use
- *
- * Abstract: 	Given frame index, mark in use by setting bit to 1.
- *              
- *              TODO: Die appropriately if things go wrong in this function.
- *
- * Arguments: 	Frame index	
- *
- * Return:	    void
- *
- */
-void set_frame_in_use(BITMAP_UNIT *f_ledger_ptr, uint32_t phys_addr)
-{
-    uint32_t f_ledger_idx;
-    uint32_t f_offset_into_idx;
-
-    // Start with the LSB 
-    uint8_t which_frame = 0x01;
-
-    if (f_ledger_ptr == NULL)
-    {
-        printk("%s(): f_ledger_ptr = 0x%p\n", __func__, f_ledger_ptr);
-        kernel_bug(); 
-    }
-
-    // Which ledger indice
-    f_ledger_idx = phys_addr/(PAGES_PER_BITMAP_UNIT * PAGE_SIZE);
-
-    // Which bit
-    f_offset_into_idx = (phys_addr >> PAGE_SHIFT_SIZE)%PAGES_PER_BITMAP_UNIT;
-
-    if (f_offset_into_idx > 0)
-    {
-        which_frame <<= f_offset_into_idx;
-    }
-
-    // Verify we are not overwriting a page.
-    if (f_ledger_ptr[f_ledger_idx] & which_frame)
-    {
-        printk("%s(): Frame in use! 0x%p, 0x%p, 0x%p\n", __func__, f_ledger_idx, f_offset_into_idx, which_frame);
-        kernel_bug(); 
-    }
-
-    f_ledger_ptr[f_ledger_idx] |= which_frame;
-}
-
-/*
- * Name: 	getFirstFreeIndex()
- *
- * Abstract: 	Scan the frame ledger for the first non-set bit.
- *
- * Arguments: 	void	
- *
- * Return:	Success	Index of the first 0 bit (corresponds to free frame)
- *		    Failure -1
- *
- * TODO: This method is very slow and needs to be replaced with a
- * more efficient algorithm to manage physical memory.
- *
- * TODO: This function starts scanning the physical frame ledger starting
- * from __physical_load_address to reduce the complexity. Eventually this
- * should scan after the meme820 map has been sanitized. Things to consider:
- * this function should be able to find frames based on the type of memory:
- * - Normal kmalloc() and similar
- * - Memory that requires a specific region
- *
- */
-int getFirstFreeIndex(void)
-{
-
-	int x = 0;
-	int y;
-	BITMAP_UNIT testBit;
-
-	// Scan every page frame(LSB -> MSB), testing each bit of the ledger
-	// for a free frame. If a 0 is found, the frame is free.
-	while (x < NUM_LEDGER_UNITS){
-
-		y = 0;
-		testBit = 0x01;	
-
-		while (y < PAGES_PER_UNIT){
-
-			// Test the MSB -> LSB 
-			if (!(frameLedger[x] & testBit)){
-				printk("Found free frame. x = %p, y = %p\n", x, y);
-				return ((x*PAGES_PER_UNIT)+y);
-			}
-		
-			// Debugging	
-			//printk("Frame = %p, testBit = %p, result = %p\n", frameLedger[x], testBit, frameLedger[x] & testBit);
-
-			testBit = testBit << 1;
-			y++;
-		}
-		x++;
-	}	
-
-	printk("Failed to find free frame.\n");
-	
-	return -1;
-}
-
-/*
- * Name: 	getFreeFrame
- *
- * Abstract: 	Returns physical address of frame
- *
- * Arguments: 	void
- *
- * Return:	Success - Address of physical frame
- *		    Failure - ??? -- We probably need to die.
- *
- */
-unsigned long get_free_frame(void)
-{
-    int32_t idx = getFirstFreeIndex();
-    if (idx < 0)
-    {
-        printk("%s(): Failed to find a free frame!\n", __func__);
-        kernel_bug();
-    }
-
-    return (idx*PAGE_SIZE);
-}
-
-// TODO: Derive a new address based on flags?
-unsigned long derive_new_virt_addr(void)
-{
-    // allocate a free page
-    unsigned long virt_addr = (unsigned long)unused_kernel_virt_addresses_ptr;
-
-    // Set the next free page
-    unused_kernel_virt_addresses_ptr += PAGE_SIZE;
-
-    return virt_addr;
-}
 
 /*
  * Name:        pmm_get_free_frame
@@ -236,255 +109,6 @@ unsigned long alloc_page(unsigned long flags)
 }
 
 /*
- * Name:        boot_map_physical_page_ledger_ptr 
- *
- * Description: Create page table entries for the 'struct page' ledger array.
- *
- * Arguments: 	pgd_ptr - Page directory
- *
- * Return:      void	
- *
- * Virtual Address space:
- * 0xc0100000       0xc010#000          0xc010$000
- * |--------------------|-----------------------|--------------
- * | KERNEL             | phys page ledger      | Free memory
- * |--------------------|-----------------------|--------------
- * Physical Adress space:
- * 0x00100000       0x0010#000          0x0010$000
- *
- * The kernel's virtual address space is mapped to a backing physical address.
- * However, most of the physical page ledger has not been mapped yet.
- *
- * For each 'struct page' index of the physical page ledger, check if that
- * virtual address is mapped in a page table, if not map it. Create any page
- * tables that are necessary.
- *
- * 
- *
- */
-void boot_map_physical_page_ledger_ptr(pde_t *pgd_ptr)
-{
-    int i;
-int x = 0;
-    uint32_t *pt_ptr = NULL;
-    uint32_t *kernel_pd_ptr = (uint32_t *)pgd_ptr;
-    struct page *page_ptr = physical_page_ledger_ptr;
-    unsigned char *free_physical_memory_ptr = (unsigned char *)VIRT_TO_PHYS((unused_kernel_virt_addresses_ptr));
-    unsigned long limit = (unsigned long)unused_kernel_virt_addresses_ptr;
-
-    if (pgd_ptr == NULL)
-    {
-        printk("%s: pgd_ptr = %p\n", __func__, pgd_ptr);
-        kernel_bug();
-    }
-
-    // TODO: Optimization: Don't need to check every index, check by page
-    // frame!
-    //
-    // For each index in the frame ledger, check to see if that index is page
-    // table mapped and accessible. If not, create the page table entry.
-    while (((unsigned long)page_ptr) < limit)
-    {
-        i = get_pd_idx((uint32_t)page_ptr);
-
-        // Check if there is a page table present that map the virtual address of
-        // the current page. If not:
-        // + Allocate a page but do not officially mark it yet. The page is
-        //  "allocated" based on incrementing the free_physical_memory_ptr.
-        // 
-        if(is_pt_present(pgd_ptr, (unsigned long)page_ptr) != 1)
-        {
-            printk("%s: Page table missing for %p\n", __func__, (unsigned long)page_ptr);
-       
-            // Allocate a page table. 
-            kernel_pd_ptr[i] = CREATE_PDE((uint32_t)free_physical_memory_ptr, PT_PRESENT|PT_RW);
-
-            printk("is page table present? = %p\n", is_pt_present(pgd_ptr, (unsigned long)page_ptr));
-
-            printk("kernel_pd_ptr [%p] >> %p\n", i, kernel_pd_ptr[i]);
-
-            free_physical_memory_ptr += PAGE_SIZE;
-
-            printk("B >> \n");
-        }
-
-//printk("%s kernel_pd_ptr[%p] = %p for virtual adress = %p\n", __func__, i, kernel_pd_ptr[i], page_ptr);
-
-        if(is_pg_present((pte_t *)PAGE_SHIFT(pgd_ptr[i].pt_addr), (uint32_t)page_ptr) != 1)
-        {
-            pt_ptr = (uint32_t *)PAGE_SHIFT(pgd_ptr[i].pt_addr);
-
-//            printk("%s: Page not mapped for %p\n", __func__, page_ptr);
-            
-            // 0. Get index of pte in a page table
-            i = get_pt_idx((uint32_t)page_ptr);
-
-//printk("PT index = %p\n", i);
-//printk("%s pte = %p\n", __func__, pt_ptr[i]);
-            // 1. Create a new pte for the next 4096 Bytes (bunch of struct
-            //    pages)  in the ledger.
-            pt_ptr[i] = CREATE_PTE((uint32_t)VIRT_TO_PHYS((uint32_t)page_ptr), PAGE_PRESENT | PAGE_RW);
-
-//printk("%s pte = %p\n", __func__, pt_ptr[i]);
-        }
-//printk("%s pte = %p\n", __func__, ((pte_t *)PAGE_SHIFT((uint32_t)(pgd_ptr[i].pt_addr)))[i]);
-//printk("%s: %p is mapped? = %p\n", __func__, page_ptr, is_page_mapped(pgd_ptr, (uint32_t)page_ptr));
-
-        page_ptr += sizeof(struct page); 
-x++;
-    }
-
-//printk("size of ledger = %p B (versus global = %p B) uses %p pages of ram\n", x*4, ledger_size, (x*4)/PAGE_SIZE);
-
-    memset(physical_page_ledger_ptr, 0, ledger_size);
-
-    // 
-    // Mark every physical page that is used for the page ledger as in use.
-    //
-    page_ptr = physical_page_ledger_ptr;
-x = 0;
-    while ((unsigned long)page_ptr < (unsigned long)unused_kernel_virt_addresses_ptr)
-    {
-        // Clear the entire page
-
-//printk("virt to phys = %p to %p\n", page_ptr, VIRT_TO_PHYS(page_ptr));
-        i = phys_to_ledger_idx(VIRT_TO_PHYS((uint32_t)page_ptr));
-
-        // The xth PAGE_SIZE page of the physical ledger (containing
-        // PAGE_SIZE/sizeof(struct page) indices) is now officially in use!
-        physical_page_ledger_ptr[i].count += 1;
-
-        page_ptr += PAGE_SIZE;
-x++;
-    }
-
-    // Finally, mark every new page table that we allocated in this function as
-    // 'in use.' Obviously, this code won't execute if no new page tables were
-    // allocated.
-    unsigned long addr = (unsigned long)VIRT_TO_PHYS(unused_kernel_virt_addresses_ptr);
-    while (addr < (unsigned long)free_physical_memory_ptr)
-    {
-        i = phys_to_ledger_idx((uint32_t)addr);
-        physical_page_ledger_ptr[i].count += 1;
-        addr += PAGE_SIZE;
-    }
-
-//printk("pd index = %p\n",get_pd_idx((uint32_t)page_ptr));
-//while (1){}
-}
-
-/*
- *
- * This is run in protected mode before
- * paging is set up
- *
- */
-void setup_memory(void)
-{
-    int i = 0;
-    int total_nr_pages = 0;
-    uint32_t kernel_end;
-    uint32_t size_of_ledger = 0;
-    uint32_t addr = 0;
-    uint32_t identity_addr_ptr = 0;
-    //pde_t *kernel_pd = (pde_t *)KERNEL_PD_ADDR;
-
-	// Clear the frame bitmap
-	//memset(frameLedger, 0, sizeof(frameLedger));
-
-    // Organize and find out how much memory we have
-    sanitize_meme820_map();
-
-    total_nr_pages = get_total_nr_pages();
-    if(total_nr_pages <= 0)
-    {
-        kernel_bug();
-    }
-
-	// Set the physical frame manager. 
-    // TODO: Remove this debug information
-    i = (int)get_pt_idx((uint32_t)0xc0100000);
-    //printk(">> %p\n", i);
-    uint32_t *pt_kernel = (uint32_t *)PT_KERNEL_ADDR; 
-    while (pt_kernel[i] != 0){
-        //printk(">>> %p is populated!\n", pt_kernel[i]);
-        i++;
-    }
-
-    // TODO: Priority LOW
-    // Add function in meme820 code that can query the memory map to verify
-    // that there is in fact enough available memory for the memory map.
-
-    // The starting address of the pages will be at the first page aligned
-    // address after the kernel's end
-    // This is a virtual address
-    kernel_end = (uint32_t)(&__kernel_end);
-    kernel_end += PAGE_SIZE;
-    physical_page_ledger_ptr = (struct page *)PAGE_ALIGN(kernel_end);
-
-    // Calclulate the size of the array of struct pages
-    size_of_ledger = total_nr_pages*sizeof(struct page);
-    
-    // TODO: Remove?
-    // These are global values used for testing
-    ledger_size = size_of_ledger;
-    nr_mem_pages = total_nr_pages;
-
-    // Set pointer to the allocatable unused high memory kernel virtual addresses
-    unused_kernel_virt_addresses_ptr =(uint8_t *)(physical_page_ledger_ptr + size_of_ledger);
-
-    // If the unused high memory kernel virtual addresses does not align flush on a page boundary add
-    // a page and align.
-    //
-    // if unused high memory kernel virtual addresses starts a bit into A, add a page then page align...
-    // --------------           -------------------------
-    // |            |           |           |           | 
-    // |    A       |   ==>     |   A       |   B       |
-    // |            |           |           |           |
-    // --^-----------           ------------^--*---------
-    //   |                                  |
-    //
-    // adding a page moves the marker to * , then PAGE_ALIGNing aligns to the
-    // boundary between A and B.
-    //
-    if (((unsigned long)unused_kernel_virt_addresses_ptr%(unsigned long)PAGE_SIZE) != 0)
-    {
-        unused_kernel_virt_addresses_ptr += PAGE_SIZE;
-        addr = (uint32_t)unused_kernel_virt_addresses_ptr;
-        unused_kernel_virt_addresses_ptr = (uint8_t *)PAGE_ALIGN(addr);
-    }
-
-    boot_map_physical_page_ledger_ptr((pde_t *)KERNEL_PD_ADDR);
-
-    //printk("Address of allocatable memory = %p\n", physical_page_ledger_ptr+size_of_ledger);
-    //is_page_mapped(kernel_pd, 0x00400000 );
-    //kernel_pd[get_pd_idx(physical_page_ledger+size_of_ledger)];
-    //pt_kernel[x] = CREATE_PTE(, PAGE_PRESENT | PAGE_RW);
-   
-    // Offically reserve meme820 map
-    reserve_meme820_pages();
-
-    // Offically reserve the identity page table
-    for (i = 0; i < NUM_IDENTITY_PAGES; identity_addr_ptr += PAGE_SIZE, i++)
-    {
-        // All pages should be mapped...
-        if (is_page_mapped((pde_t *)KERNEL_PD_ADDR, identity_addr_ptr) == 1)
-        {
-            if (physical_page_ledger_ptr[i].count == 0)
-            {
-                physical_page_ledger_ptr[i].count += 1;
-                //printk("%s: identity address = %p is in use = %p\n", __func__, identity_addr_ptr, physical_page_ledger_ptr[i].count);
-            }
-            continue;
-        }
-        else{
-            printk("%s: Identity mapping does not exist for virtual address = %p\n", __func__, identity_addr_ptr);
-            kernel_bug();
-        }
-    }
-}
-
-/*
  * Name:        phys_to_ledger_idx
  *
  * Description: Given a physical address find the index into the frame ledger.
@@ -549,10 +173,10 @@ int is_page_mapped(pde_t *pd_ptr, uint32_t virt_addr)
 
     i = get_pd_idx(virt_addr) ;
 
-    // When referencing pt_addr, the value must be shifted
+    // When referencing pt_phys_addr, the value must be shifted
     // to get a real physical address. Physical address works
     // due to the identity mapping.
-    if(is_pg_present((pte_t *)PAGE_SHIFT(pd_ptr[i].pt_addr),virt_addr) != 1)
+    if(is_pg_present((pte_t *)PAGE_SHIFT(pd_ptr[i].pt_phys_addr),virt_addr) != 1)
     {
         printk("%s: Page not mapped for %p (pde_t = %p)\n", __func__, virt_addr, pd_ptr[i]);
         return 0;
@@ -727,9 +351,9 @@ uint8_t map_virt_to_phys(pde_t *pgd_ptr, uint32_t virt_addr, uint32_t phys_addr,
     // Get a pointer to the page table that has the virtual address
     // entry for the virtual address
     //
-    // Casting isn't clean. pt_addr is 20 Bytes only. Casting in the following
+    // Casting isn't clean. pt_phys_addr is 20 Bytes only. Casting in the following
     // manner allows the compiler warnings to go away
-    pt_ptr = ((uint32_t *)(unsigned long)pgd_ptr[get_pd_idx(virt_addr)].pt_addr);
+    pt_ptr = ((uint32_t *)(unsigned long)pgd_ptr[get_pd_idx(virt_addr)].pt_phys_addr);
 
     // Create a page table entry (mapping of virtual address to physical
     // address) for a page table.
@@ -741,13 +365,241 @@ uint8_t map_virt_to_phys(pde_t *pgd_ptr, uint32_t virt_addr, uint32_t phys_addr,
     return 0;    
 }
 
+/*
+ * Name:        boot_map_physical_page_ledger_ptr 
+ *
+ * Description: Create page table entries for the 'struct page' ledger array.
+ *
+ * Arguments: 	pgd_ptr - Page directory
+ *
+ * Return:      void	
+ *
+ * Virtual Address space:
+ * 0xc0100000       0xc010#000          0xc010$000
+ * |--------------------|-----------------------|--------------
+ * | KERNEL             | phys page ledger      | Free memory
+ * |--------------------|-----------------------|--------------
+ * Physical Adress space:
+ * 0x00100000       0x0010#000          0x0010$000
+ *
+ * The kernel's virtual address space is mapped to a backing physical address.
+ * However, most of the physical page ledger has not been mapped yet.
+ *
+ * For each 'struct page' index of the physical page ledger, check if that
+ * virtual address is mapped in a page table, if not map it. Create any page
+ * tables that are necessary.
+ *
+ * 
+ *
+ */
+void boot_map_physical_page_ledger_ptr(pde_t *pgd_ptr)
+{
+    int i;
+    uint32_t *pt_ptr = NULL;
+    uint32_t *kernel_pd_ptr = (uint32_t *)pgd_ptr;
+    struct page *page_ptr = NULL;
+    unsigned char *free_physical_memory_ptr = (unsigned char *)VIRT_TO_PHYS((unused_kernel_virt_addresses_ptr));
+    unsigned long limit = 0;
+
+    if (pgd_ptr == NULL)
+    {
+        printk("%s: pgd_ptr = %p\n", __func__, pgd_ptr);
+        kernel_bug();
+    }
+
+    // For each index in the frame ledger, check to see if that index is page
+    // table mapped and accessible. If not, create the page table entry.
+    page_ptr = physical_page_ledger_ptr;
+    limit = (unsigned long)unused_kernel_virt_addresses_ptr;
+    while (((unsigned long)page_ptr) < limit)
+    {
+        i = get_pd_idx((uint32_t)page_ptr);
+
+        //
+        // Check if there is a page table present that map the virtual address of
+        // the current page. If not:
+        // + Allocate a page but do not officially mark it yet. The page is
+        //  "allocated" based on incrementing the free_physical_memory_ptr.
+        // 
+        if(is_pt_present(pgd_ptr, (unsigned long)page_ptr) != 1)
+        {
+            printk("%s: Page table missing for %p\n", __func__, (unsigned long)page_ptr);
+       
+            // Allocate a page table. 
+            kernel_pd_ptr[i] = CREATE_PDE((uint32_t)free_physical_memory_ptr, PT_PRESENT|PT_RW);
+
+            printk("is page table present? = %p\n", is_pt_present(pgd_ptr, (unsigned long)page_ptr));
+
+            printk("kernel_pd_ptr [%p] >> %p\n", i, kernel_pd_ptr[i]);
+
+            free_physical_memory_ptr += PAGE_SIZE;
+        }
+
+        // If the virtual address does not have a mapping in the page table,
+        // make a mapping.
+        if(is_pg_present((pte_t *)PAGE_SHIFT(pgd_ptr[i].pt_phys_addr), (uint32_t)page_ptr) != 1)
+        {
+            pt_ptr = (uint32_t *)PAGE_SHIFT(pgd_ptr[i].pt_phys_addr);
+
+            // 0. Get index of pte in a page table
+            i = get_pt_idx((uint32_t)page_ptr);
+
+            // 1. Create a new pte for the next 4096 Bytes (bunch of struct
+            //    pages)  in the ledger.
+            pt_ptr[i] = CREATE_PTE((uint32_t)VIRT_TO_PHYS((uint32_t)page_ptr), PAGE_PRESENT | PAGE_RW);
+
+//printk("Created a mapping for %p, i = %p\n", page_ptr, i);
+        }
+   
+        // Increment the page_ptr by 1x full page 
+        page_ptr = (struct page *)((unsigned char *)(page_ptr) + PAGE_SIZE); 
+    }
+
+    // Clear the entire ledger for the physical pages.
+    memset(physical_page_ledger_ptr, 0, ledger_size);
+
+    // 
+    // Mark every physical page that is used for the page ledger 'in use'
+    //
+    page_ptr = physical_page_ledger_ptr;
+    while ((unsigned long)page_ptr < (unsigned long)unused_kernel_virt_addresses_ptr)
+    {
+        i = phys_to_ledger_idx(VIRT_TO_PHYS((uint32_t)page_ptr));
+
+        // The xth PAGE_SIZE page of the physical ledger (containing
+        // PAGE_SIZE/sizeof(struct page) indices) is now officially in use!
+        physical_page_ledger_ptr[i].count += 1;
+
+        page_ptr += PAGE_SIZE;
+    }
+
+    //
+    // Finally, mark every new page table that we allocated in this function as
+    // 'in use,' if we allocated any.
+    // //
+    unsigned long addr = (unsigned long)VIRT_TO_PHYS(unused_kernel_virt_addresses_ptr);
+    while (addr < (unsigned long)free_physical_memory_ptr)
+    {
+        i = phys_to_ledger_idx((uint32_t)addr);
+        physical_page_ledger_ptr[i].count += 1;
+        addr += PAGE_SIZE;
+    }
+}
+
+/*
+ *
+ * This is run in protected mode before
+ * paging is set up
+ *
+ */
+void setup_memory(void)
+{
+    int i = 0;
+    int total_nr_pages = 0;
+    uint32_t kernel_end;
+    uint32_t size_of_ledger = 0;
+    uint32_t addr = 0;
+    uint32_t identity_addr_ptr = 0;
+
+    // Organize and find out how much memory we have
+    sanitize_meme820_map();
+
+    total_nr_pages = get_total_nr_pages();
+    if(total_nr_pages <= 0)
+    {
+        kernel_bug();
+    }
+
+    // TODO: Priority LOW
+    // Add function in meme820 code that can query the memory map to verify
+    // that there is in fact enough available memory for the memory map.
+
+    // The starting address of the pages will be at the first page aligned
+    // address after the kernel's end
+    // This is a virtual address
+    kernel_end = (uint32_t)(&__kernel_end);
+    kernel_end += PAGE_SIZE;
+    physical_page_ledger_ptr = (struct page *)PAGE_ALIGN(kernel_end);
+
+    // Calclulate the size of the array of struct pages
+    size_of_ledger = total_nr_pages*sizeof(struct page);
+    
+    // TODO: Remove?
+    // These are global values used for testing
+    ledger_size = size_of_ledger;
+    nr_mem_pages = total_nr_pages;
+
+    // Set pointer to the allocatable unused high memory kernel virtual addresses
+    unused_kernel_virt_addresses_ptr =(uint8_t *)(physical_page_ledger_ptr + size_of_ledger);
+
+    //
+    // Set a marker to unused kernel virtual address.
+    // This is the first page aligned addresses after the frame ledger ends.
+    //
+    // If the unused high memory kernel virtual addresses does not align flush on a page boundary add
+    // a page and align.
+    //
+    // if unused high memory kernel virtual addresses starts a bit into A, add a page then page align...
+    // --------------           -------------------------
+    // |            |           |           |           | 
+    // |    A       |   ==>     |   A       |   B       |
+    // |            |           |           |           |
+    // --^-----------           ------------^--*---------
+    //   |                                  |
+    //
+    // adding a page moves the marker to * , then PAGE_ALIGNing aligns to the
+    // boundary between A and B.
+    //
+    if (((unsigned long)unused_kernel_virt_addresses_ptr%(unsigned long)PAGE_SIZE) != 0)
+    {
+        // If I try to shorten this, the PAGE_ALIGN macro freaks out. Turn it
+        // into a funciton?
+        unused_kernel_virt_addresses_ptr += PAGE_SIZE;
+        addr = (uint32_t)unused_kernel_virt_addresses_ptr;
+        unused_kernel_virt_addresses_ptr = (uint8_t *)PAGE_ALIGN(addr);
+    }
+
+    // 1. Map virtual addresses to frame ledger (create page tables as
+    //    necessary)
+    // 2. Memset the frame ledger.
+    // 3. Within the frame ledger, mark memory used by the frame ledger in use.
+    // 4. Mark any allocated space for page tables as in use
+    boot_map_physical_page_ledger_ptr((pde_t *)KERNEL_PD_ADDR);
+
+    // Offically reserve meme820 map
+    reserve_meme820_pages();
+
+    // Offically reserve the identity page table
+    for (i = 0; i < NUM_IDENTITY_PAGES; identity_addr_ptr += PAGE_SIZE, i++)
+    {
+        // All pages should be mapped...
+        if (is_page_mapped((pde_t *)KERNEL_PD_ADDR, identity_addr_ptr) == 1)
+        {
+            if (physical_page_ledger_ptr[i].count == 0)
+            {
+                physical_page_ledger_ptr[i].count += 1;
+                //printk("%s: identity address = %p is in use = %p\n", __func__, identity_addr_ptr, physical_page_ledger_ptr[i].count);
+            }
+            else
+            {
+                printk("%s: Identity page with virtual/physical address = %p, alread in use.\n", __func__, identity_addr_ptr);
+                kernel_bug();
+            }
+        }
+        else{
+            printk("%s: Identity mapping does not exist for virtual address = %p\n", __func__, identity_addr_ptr);
+            kernel_bug();
+        }
+    }
+}
+
 // This function is called from low memory identity mapped code
 // to help get into paging mode successfully. 
 /* Name:        setupPaging
  *
  * Abstract:    Initializes page tables used for booting.
  *
- * Description: This function is called during boot when th process is in real
+ * Description: This function is called during boot when the process is in real
  *              mode. The purpose is to initialize the page tables for to prep for 
  *              the switch to protected mode.
  *              
@@ -835,4 +687,6 @@ void setupPaging()
         virt_addr += PAGE_SIZE;
         x++;
 	}
+
+    //
 }
