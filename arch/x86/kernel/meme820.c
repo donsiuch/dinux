@@ -230,7 +230,7 @@ void reserve_meme820_pages()
         while (raw_page_ptr < limit_addr)
         {
             //printk("Marking = %p as used\n", raw_page_ptr);
-            mark_frame_used(raw_page_ptr); 
+            pmm_mark_frame_in_use(raw_page_ptr); 
             raw_page_ptr += PAGE_SIZE;
         }
     }

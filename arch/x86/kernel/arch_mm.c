@@ -55,6 +55,26 @@ unsigned long pmm_get_free_frame()
 }
 
 /*
+ * Name:        pmm_mark_frame_in_use
+ *
+ * Description: Increment the use count the page that represents the
+ *              corresponding physical frame.
+ *
+ * Arguments:   phys_addr - Physical address that should be marked in use.
+ *
+ * Return:      void
+ *
+ */
+void pmm_mark_frame_in_use(unsigned long phys_addr)
+{
+    int ledger_idx = phys_to_ledger_idx(phys_addr);
+
+    //printk("%s: Marking page used = %p at ledger idx = %p\n", __func__, phys_addr, ledger_idx);
+
+    physical_page_ledger_ptr[ledger_idx].count++;
+}
+
+/*
  * Name:        phys_to_ledger_idx
  *
  * Description: Given a physical address find the index into the frame ledger.
@@ -283,7 +303,7 @@ void map_virt_to_phys(unsigned long virt_addr, unsigned long phys_addr)
             kernel_bug(); 
         }
 
-        mark_frame_used(new_addr);
+        pmm_mark_frame_in_use(new_addr);
 
         install_page_table(virt_addr, new_addr);
     }
@@ -322,7 +342,7 @@ void * alloc_page(unsigned long flags)
 
     phys_addr = pmm_get_free_frame();
 
-    mark_frame_used(phys_addr);
+    pmm_mark_frame_in_use(phys_addr);
 
     printk("%s: Found a free physical frame = %p\n", __func__, phys_addr);
 
@@ -335,26 +355,6 @@ void * alloc_page(unsigned long flags)
     printk("%s: Allocated page = %p\n", __func__, virt_addr);
 
     return (void *)virt_addr;
-}
-
-/*
- * Name:        mark_frame_used
- *
- * Description: Increment the use count the page that represents the
- *              corresponding physical frame.
- *
- * Arguments:   phys_addr - Physical address that should be marked in use.
- *
- * Return:      void
- *
- */
-void mark_frame_used(unsigned long phys_addr)
-{
-    int ledger_idx = phys_to_ledger_idx(phys_addr);
-
-    //printk("%s: Marking page used = %p at ledger idx = %p\n", __func__, phys_addr, ledger_idx);
-
-    physical_page_ledger_ptr[ledger_idx].count++;
 }
 
 /*
@@ -443,7 +443,7 @@ void boot_map_physical_page_ledger_ptr(pde_t *pgd_ptr)
     {
         // The xth PAGE_SIZE page of the physical ledger (containing
         // PAGE_SIZE/sizeof(struct page) indices) is now officially in use!
-        mark_frame_used(VIRT_TO_PHYS((uint32_t)page_ptr));
+        pmm_mark_frame_in_use(VIRT_TO_PHYS((uint32_t)page_ptr));
 
         page_ptr += PAGE_SIZE;
     }
@@ -455,7 +455,7 @@ void boot_map_physical_page_ledger_ptr(pde_t *pgd_ptr)
     unsigned long addr = (unsigned long)VIRT_TO_PHYS(unused_kernel_virt_addresses_ptr);
     while (addr < (unsigned long)free_physical_memory_ptr)
     {
-        mark_frame_used(addr);
+        pmm_mark_frame_in_use(addr);
         addr += PAGE_SIZE;
     }
 }
@@ -550,7 +550,7 @@ void setup_memory(void)
     {
         // There may be meme820 'used' regions within the identity region.
         // Allow those 'used' regions to increment to 2.
-        mark_frame_used(identity_addr_ptr);
+        pmm_mark_frame_in_use(identity_addr_ptr);
     }
 }
 
