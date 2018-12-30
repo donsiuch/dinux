@@ -32,14 +32,9 @@ extern uint32_t __physical_load_address;
 #define PAGE_SHIFT_SIZE  12
 #define MEMORY_SIZE	0x1000000
 #define TOTAL_NUM_PAGES	(MEMORY_SIZE/PAGE_SIZE)
-
-// 1 Byte ( 8 bits ) will be the data type
-// for the array. Each Byte can track
-// 8 physical, contiguous frames
-#define BITMAP_UNIT		uint8_t
-#define PAGES_PER_BITMAP_UNIT	8
-#define PAGES_PER_UNIT		(1*PAGES_PER_BITMAP_UNIT)
-#define NUM_LEDGER_UNITS 	(TOTAL_NUM_PAGES/PAGES_PER_UNIT)
+#define NUM_PD_ENTRIES (PAGE_SIZE/sizeof(uint32_t))
+#define NUM_PT_ENTRIES NUM_PD_ENTRIES
+#define TOTAL_MEM_REGION_PER_PT (NUM_PT_ENTRIES*PAGE_SIZE)
 
 // Page table entry
 typedef struct {
@@ -112,22 +107,28 @@ struct page {
 }
 __attribute((packed));
 
-void set_frame_in_use(BITMAP_UNIT *, uint32_t);
 int getFirstFreeIndex(void);
-unsigned long alloc_page(unsigned long);
+void * alloc_page(unsigned long);
 void	setupPaging(void);
 unsigned long 	get_free_frame(void);
 uint32_t get_pd_idx(uint32_t);
 uint32_t get_pt_idx(uint32_t);
 void setup_memory(void);
-void mark_page_used(unsigned long);
+void mark_frame_used(unsigned long);
 int is_page_mapped(pde_t *, uint32_t );
-int is_pt_present(pde_t *, uint32_t );
+int is_pt_present(unsigned long);
 int is_pg_present(pte_t *, uint32_t );
+void map_virt_to_phys(unsigned long, unsigned long);
+void unmap_virt(unsigned long);
+void install_page_table(unsigned long, unsigned long);
+void install_page(unsigned long, unsigned long);
+int is_page_present(unsigned);
 
 #endif	// #ifndef ASSEMBLY
 
 #define HIGH_MEM_START_ADDR 0xc0000000
+
+#define SELF_MAP_ADDR 0xFFC00000
 
 // These macros are most useful when dealing with
 // memory at HIGH_MEM_START_ADDR+

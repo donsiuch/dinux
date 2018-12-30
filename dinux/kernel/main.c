@@ -17,7 +17,15 @@ void kernel_main() {
 
     setup_memory();
 
-    alloc_page(GFP_KERNEL);
+    unsigned char *ptr = alloc_page(GFP_KERNEL);
+
+    printk("%p --> %p\n", ptr, *ptr);
+
+    unsigned long val = 0xdeadbeef;
+    memcpy(ptr, &val, 4);
+    dumpBytes(ptr, 4);
+
+
 
     //memset(0x100000, 0xff, 4);
     //dumpBytes(0xc0105a88, 64);
