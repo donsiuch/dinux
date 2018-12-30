@@ -31,7 +31,7 @@ static int phys_to_ledger_idx(unsigned long);
 /*
  * Name:        pmm_get_free_frame
  *
- * Description: Allocate the available physical frame
+ * Description: Allocate an available physical frame
  *
  * Arguments:   void
  *
@@ -127,6 +127,17 @@ uint32_t get_pd_idx(uint32_t virt_addr)
     return (virt_addr/(PAGE_SIZE*total_num_pte_per_pt));
 }
 
+/*
+ * Name: is_page_present
+ *
+ * Description: Return whether a physical frame is mapped to a address.
+ *
+ * Arguments:   virt_addr 
+ *
+ * Returns:     1 - Physical frame is present
+ *              0 - Physical frame is not present.
+ *
+ */
 int is_page_present(unsigned virt_addr)
 {
     pte_t *pte_ptr = NULL;
@@ -146,6 +157,17 @@ int is_page_present(unsigned virt_addr)
     return 0;
 }
 
+/*
+ * Name: is_pt_present
+ *
+ * Description: Return whether a page table is present for a virtual address.
+ *
+ * Arguments:   virt_addr
+ *
+ * Returns:     1 - Page table is present
+ *              0 - Page table is not present
+ *
+ */
 int is_pt_present(unsigned long virt_addr)
 {
     pde_t *pde_ptr = NULL;
@@ -166,6 +188,22 @@ int is_pt_present(unsigned long virt_addr)
     return 0;
 }
 
+/*
+ * Name: install_page
+ *
+ * Description: Given a virtual address and the address of a physical frame
+ *              map that virtual address to that physical frame (creates
+ *              a pte_t and installs in page table).
+ *
+ * Arguments:   virt_addr
+ *              phys_addr - Address of physical frame page
+ *
+ * Returns:     void
+ * 
+ * Note: This function does not check for an installed page table (aka. pde_t)
+ * for that virtual address.
+ *
+ */
 void install_page(unsigned long virt_addr, unsigned long phys_addr)
 {
     pte_t *pte_ptr = NULL;
@@ -179,6 +217,19 @@ void install_page(unsigned long virt_addr, unsigned long phys_addr)
     memset((void *)virt_addr, 0, PAGE_SIZE);
 }
 
+/*
+ * Name: install_page_table
+ *
+ * Description: Install a physical frame as the page table for the a virtual 
+ *              address. (creates a pde_t and set in the page directory corresponding to
+ *              that virtual address.
+ *
+ *  Arguments:  virt_addr
+ *              phy_addr - Address of physical frame page table
+ *
+ *  Returns:    void
+ *
+ */
 void install_page_table(unsigned long virt_addr, unsigned long phys_addr)
 {
     pde_t *pde_ptr = NULL;
@@ -205,7 +256,14 @@ void install_page_table(unsigned long virt_addr, unsigned long phys_addr)
 /*
  * Name: map_virt_to_phys 
  *
- * 
+ * Description: Map a virtual address to the physical address of a physical frame.
+ *              This function may allocate and install a page table if one is
+ *              missing for given virtual address.
+ *
+ * Arguments:   virt_addr
+ *              phys_addr - Address of physical frame
+ *
+ * Returns:     void
  *
  */
 void map_virt_to_phys(unsigned long virt_addr, unsigned long phys_addr)
