@@ -19,9 +19,18 @@
  *
  */
 
+// TODO: These are used in assembly files
+#define HIGH_MEM_START_ADDR 0xc0000000
+#define PAGING_BIT	0x80000000
+#define KERNEL_PD_ADDR	0x1d000
+
 #ifndef ASSEMBLY
 
 #include <stdint.h>
+
+// These macros are most useful when dealing with
+// memory at HIGH_MEM_START_ADDR+
+#define VIRTUAL_OFFSET HIGH_MEM_START_ADDR
 
 extern uint32_t __kernel_virtual_start;
 extern uint32_t __kernel_start;
@@ -35,6 +44,24 @@ extern uint32_t __physical_load_address;
 #define NUM_PD_ENTRIES (PAGE_SIZE/sizeof(uint32_t))
 #define NUM_PT_ENTRIES NUM_PD_ENTRIES
 #define TOTAL_MEM_REGION_PER_PT (NUM_PT_ENTRIES*PAGE_SIZE)
+
+// "Get free page" -- for allocating pages
+#define GFP_KERNEL  0x00000001
+#define GFP_USER    0x00000020
+
+#define SELF_MAP_ADDR 0xFFC00000
+
+#define	PT_IDENT_ADDR	0x1e000
+#define PT_KERNEL_ADDR  0x1f000 
+
+// Page directory entry 
+#define PT_PRESENT  0x01
+// Read + write 
+#define PT_RW       0x02
+
+// Page table entry
+#define PAGE_PRESENT    0x01
+#define PAGE_RW         0x02
 
 // Page table entry
 typedef struct {
@@ -112,6 +139,33 @@ struct page {
 }
 __attribute((packed));
 
+inline unsigned long PAGE_ALIGN(unsigned long addr)
+{
+    return (addr &= 0xFFFFF000);
+}
+
+// TODO: Currently unused
+inline unsigned long PAGE_SHIFT(unsigned long addr)
+{
+    return (addr << PAGE_SHIFT_SIZE);
+}
+
+inline unsigned long VIRT_TO_PHYS(unsigned long addr)
+{
+    return (addr - VIRTUAL_OFFSET);
+}
+
+inline unsigned long PHYS_TO_VIRT(unsigned long addr)
+{
+    return (addr + VIRTUAL_OFFSET);
+}
+
+inline unsigned long CREATE_PTE(uint32_t addr, uint32_t flags)
+{
+    return (addr | flags);
+}
+#define CREATE_PDE CREATE_PTE
+
 int getFirstFreeIndex(void);
 void * alloc_page(unsigned long);
 void	setupPaging(void);
@@ -129,49 +183,7 @@ void install_page_table(unsigned long, unsigned long);
 void install_page(unsigned long, unsigned long);
 int is_page_present(unsigned);
 
-inline unsigned long PAGE_ALIGN(unsigned long addr)
-{
-    return (addr &= 0xFFFFF000);
-}
-
-inline unsigned long PAGE_SHIFT(unsigned long addr)
-{
-    return (addr << PAGE_SHIFT_SIZE);
-}
 
 #endif	// #ifndef ASSEMBLY
-
-#define HIGH_MEM_START_ADDR 0xc0000000
-
-#define SELF_MAP_ADDR 0xFFC00000
-
-// These macros are most useful when dealing with
-// memory at HIGH_MEM_START_ADDR+
-#define VIRTUAL_OFFSET HIGH_MEM_START_ADDR
-#define VIRT_TO_PHYS(_x)(_x-VIRTUAL_OFFSET)
-#define PHYS_TO_VIRT(_x)(_x+VIRTUAL_OFFSET)
-
-#define PAGING_BIT	0x80000000
-#define KERNEL_PD_ADDR	0x1d000
-#define	PT_IDENT_ADDR	0x1e000
-#define PT_KERNEL_ADDR  0x1f000 
-
-// Page directory entry 
-#define PT_PRESENT  0x01
-// Read + write 
-#define PT_RW       0x02
-
-// Page table entry
-#define PAGE_PRESENT    0x01
-#define PAGE_RW         0x02
-
-#define CREATE_PTE(_addr, _flags) (_addr | _flags)
-#define CREATE_PDE CREATE_PTE
-
-#define GET_FRAME_ADDR PAGE_ALIGN
-
-// "Get free page" -- for allocating pages
-#define GFP_KERNEL  0x00000001
-#define GFP_USER    0x00000020
 
 #endif	// __ARCH_MM__

@@ -237,7 +237,7 @@ void install_page(unsigned long virt_addr, unsigned long phys_addr)
                 + get_pd_idx(virt_addr)*PAGE_SIZE 
                     + get_pt_idx(virt_addr)*sizeof(pte_t));
     
-    *(uint32_t *)pte_ptr = CREATE_PTE((uint32_t)phys_addr, PAGE_PRESENT|PAGE_RW);
+    *(uint32_t *)pte_ptr = CREATE_PTE(phys_addr, PAGE_PRESENT|PAGE_RW);
 
     memset((void *)virt_addr, 0, PAGE_SIZE);
 }
