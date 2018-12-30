@@ -91,6 +91,11 @@ typedef struct {
 __attribute((packed)) 
 pde_t;
 
+struct memory_stats {
+    unsigned long nr_total_frames;
+    unsigned long nr_used_frames;
+};
+
 // Represents a region a physical memory
 struct mem_node {
     struct mem_node *next;
@@ -124,6 +129,16 @@ void install_page_table(unsigned long, unsigned long);
 void install_page(unsigned long, unsigned long);
 int is_page_present(unsigned);
 
+inline unsigned long PAGE_ALIGN(unsigned long addr)
+{
+    return (addr &= 0xFFFFF000);
+}
+
+inline unsigned long PAGE_SHIFT(unsigned long addr)
+{
+    return (addr << PAGE_SHIFT_SIZE);
+}
+
 #endif	// #ifndef ASSEMBLY
 
 #define HIGH_MEM_START_ADDR 0xc0000000
@@ -153,9 +168,7 @@ int is_page_present(unsigned);
 #define CREATE_PTE(_addr, _flags) (_addr | _flags)
 #define CREATE_PDE CREATE_PTE
 
-#define PAGE_ALIGN(_x)(_x &= 0xfffff000)
 #define GET_FRAME_ADDR PAGE_ALIGN
-#define PAGE_SHIFT(_x)(_x<<PAGE_SHIFT_SIZE)
 
 // "Get free page" -- for allocating pages
 #define GFP_KERNEL  0x00000001
