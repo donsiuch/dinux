@@ -22,7 +22,7 @@
 static uint32_t total_num_pte_per_pt = PAGE_SIZE/sizeof(pte_t);
 
 // Statistics about memory usage
-static struct memory_stats mem_stats;
+struct memory_stats mem_stats;
 
 // Array of struct pages that describe each page of physical memory
 static struct page *physical_page_ledger_ptr = NULL;
@@ -77,6 +77,9 @@ void pmm_mark_frame_in_use(unsigned long phys_addr)
     //printk("%s: Marking page used = %p at ledger idx = %p\n", __func__, phys_addr, ledger_idx);
 
     physical_page_ledger_ptr[ledger_idx].count++;
+
+    // Update memory statistics
+    mem_stats.nr_used_frames++;
 }
 
 /*
@@ -275,7 +278,7 @@ void install_page_table(unsigned long virt_addr, unsigned long phys_addr)
     // Clear the newly installed page table
     memset((void *)addr, 0, PAGE_SIZE);
 
-    printk("%s: Installed page table for %p\n", __func__, virt_addr);
+    //printk("%s: Installed page table for %p\n", __func__, virt_addr);
 }
 
 /*
@@ -555,7 +558,7 @@ void setup_memory(void)
  *              mode. The purpose is to initialize the page tables for to prep for 
  *              the switch to protected mode.
  *              
- *              This function has two main parts:
+ *              This function has three main parts:
  *                  Identity map 0x00000000 - 0x00400000
  *                      - This region contains the boot pd and pt
  *                      - Real mode code
@@ -564,6 +567,8 @@ void setup_memory(void)
  *
  *                  Map __kernel_start virtual address to where it is actually
  *                  loaded in memory.
+ *
+ *                  Map the last entry of the page directory to itself.
  *
  *  Arguments:  void
  *

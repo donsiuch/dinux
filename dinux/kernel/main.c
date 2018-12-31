@@ -4,6 +4,7 @@
 #include "x86/inc/arch_mm.h"
 
 extern void setup_memory(void);
+extern struct memory_stats mem_stats;
 
 void kernel_bug(void)
 {
@@ -25,7 +26,7 @@ void kernel_main() {
     memcpy(ptr, &val, 4);
     dumpBytes(ptr, 4);
 
-
+    printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
 
     //memset(0x100000, 0xff, 4);
     //dumpBytes(0xc0105a88, 64);

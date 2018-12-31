@@ -99,7 +99,7 @@ http://wiki.osdev.org/Interrupt_Descriptor_Table
 https://geeksww.com/tutorials/operating_systems/linux/tips_and_tricks/some_tricks_used_by_the_linux_kernel.php
 
 OS Tutorials:
-http://www.osdever.net/tutorials/
+http://www.osdever.net/tutorials/ (VMM, locks etc.)
 http://www.osdever.net/bkerndev/index.php ( http://wiki.osdev.org/Bran's_Known_Bugs )
 http://www.jamesmolloy.co.uk/tutorial_html/ ( http://wiki.osdev.org/James_Molloy's_Tutorial_Known_Bugs )
 http://www.brokenthorn.com/Resources/OSDevIndex.html

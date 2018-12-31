@@ -13,3 +13,5 @@ real_mode.s
 mm.h
 1. BITMAP_UNIT must be more generic such that number of bits in PAGES_PER_BYTE is not hardcoded as 8.
 
+locking:
+Brendan awesomeness: https://forum.osdev.org/viewtopic.php?t=28481
