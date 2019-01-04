@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Clean the architecture specific file
+if [[ -e $PWD/arch/asm ]]
+then
+    rm $PWD/arch/asm
+fi
+
+ln -s x86 $PWD/arch/asm
+
 make -s
 
 # After gdb is opened, run the command: symbol-file <...rel_path>/kernel.sym
@@ -16,3 +24,4 @@ grub-mkrescue -o myos.iso isodir
 
 # The following line writes to the USB.
 #sudo dd if=myos.iso of=/dev/sdb && sync
+

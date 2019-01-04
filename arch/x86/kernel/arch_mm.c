@@ -10,6 +10,7 @@
  *  - Memory statistics ( TODO: move to generic mm.c file?)
  *  - Page directory traversals + manipulations
  *
+ * TODO: flush TLB after changes to paging directories
  */
 
 #include "dinux/inc/io.h"

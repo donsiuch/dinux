@@ -1,8 +1,8 @@
 
-all: io memory main mm 
+all: io memory main vmm 
 
-mm: mm.c
-	$(CC) $(CFLAGS) $(COMPILE_ONLY) mm.c -o ../obj/mm.o
+vmm: vmm.c
+	$(CC) $(CFLAGS) $(COMPILE_ONLY) vmm.c -o ../obj/vmm.o
 
 io: io.c 
 	$(CC) $(CFLAGS) $(COMPILE_ONLY) io.c -I./include -o ../obj/io.o

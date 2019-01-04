@@ -390,7 +390,7 @@ void sanitize_meme820_map(void)
 
         // Region has been normalized.
 
-        num_avail_pages += (meme820_raw_ptr[i].length_low/PAGE_SIZE);
+        //num_avail_pages += (meme820_raw_ptr[i].length_low/PAGE_SIZE);
 
         //printk("Fixed up region:\n");
         //dump_raw_region(&(meme820_raw_ptr[i]));
