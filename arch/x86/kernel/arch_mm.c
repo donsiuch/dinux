@@ -10,7 +10,6 @@
  *  - Memory statistics ( TODO: move to generic mm.c file?)
  *  - Page directory traversals + manipulations
  *
- * TODO: flush TLB after changes to paging directories
  */
 
 #include "dinux/inc/io.h"
@@ -95,7 +94,7 @@ void pmm_mark_frame_in_use(unsigned long phys_addr)
  */
 static int phys_to_ledger_idx(unsigned long phys_addr)
 {
-    return phys_addr >> 12;
+    return (phys_addr >> 12);
 }
 
 /* Name: get_pt_idx
@@ -218,6 +217,24 @@ int is_pt_present(unsigned long virt_addr)
 }
 
 /*
+ * Name: invalidate_tlb_entry
+ *
+ * Description: Invalidate TLB entries
+ *
+ * Arguments: virt_addr
+ *
+ * Returns: void
+ *
+ * Note: Apparently the page must be *accessed* to invalidate it.
+ * 		!!!BE CAREFUL when freeing a page!!! 
+ *
+ */
+void invalidate_tlb_entry(unsigned long virt_addr)
+{
+	__asm__ volatile ("invlpg (%%eax);" :: "a"(virt_addr) );
+}
+
+/*
  * Name: install_page
  *
  * Description: Given a virtual address and the address of a physical frame
@@ -242,6 +259,8 @@ void install_page(unsigned long virt_addr, unsigned long phys_addr)
                     + get_pt_idx(virt_addr)*sizeof(pte_t));
     
     *(uint32_t *)pte_ptr = CREATE_PTE(phys_addr, PAGE_PRESENT|PAGE_RW);
+
+	invalidate_tlb_entry(virt_addr);
 
     memset((void *)virt_addr, 0, PAGE_SIZE);
 }
@@ -269,6 +288,8 @@ void install_page_table(unsigned long virt_addr, unsigned long phys_addr)
                     + get_pd_idx(virt_addr)*sizeof(pde_t));
 
     *(uint32_t *)pde_ptr = CREATE_PDE((uint32_t)phys_addr, PT_PRESENT|PT_RW);
+
+	invalidate_tlb_entry(virt_addr);
 
     // Calculate the address that will resolve to the top of
     // newly installed page table
