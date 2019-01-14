@@ -182,6 +182,7 @@ void unmap_virt(unsigned long);
 void install_page_table(unsigned long, unsigned long);
 void install_page(unsigned long, unsigned long);
 int is_page_present(unsigned);
+unsigned long boot_kmalloc();
 
 
 #endif	// #ifndef ASSEMBLY

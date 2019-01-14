@@ -42,6 +42,15 @@ void kernel_main()
 
     printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
 
+	unsigned long virt_addr = boot_kmalloc();
+	printk("boot_kmalloc = %p\n", virt_addr);
+	
+	virt_addr = boot_kmalloc();
+	printk("boot_kmalloc = %p\n", virt_addr);
+
+	ptr = (unsigned char *) 0xc0000000;
+	*ptr = 0x77;
+	
 
 
 

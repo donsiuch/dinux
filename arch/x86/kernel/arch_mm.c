@@ -24,6 +24,8 @@ static uint32_t total_num_pte_per_pt = PAGE_SIZE/sizeof(pte_t);
 // Statistics about memory usage
 struct memory_stats mem_stats;
 
+static unsigned long boot_unused_virt_addr_ptr = 0;
+
 // Array of struct pages that describe each page of physical memory
 static struct page *physical_page_ledger_ptr = NULL;
 
@@ -80,6 +82,27 @@ void pmm_mark_frame_in_use(unsigned long phys_addr)
 
     // Update memory statistics
     mem_stats.nr_used_frames++;
+}
+
+/*
+ * Name: pmm_alloc_free_frame
+ *
+ */
+unsigned long pmm_alloc_free_frame()
+{
+	unsigned long phys_addr = 0;
+	
+	phys_addr = pmm_get_free_frame();
+
+	if (phys_addr == 0)
+	{
+		printk("%s: Out of memory!\n");
+		kernel_bug();
+	}
+
+	pmm_mark_frame_in_use(phys_addr);
+
+	return phys_addr;
 }
 
 /*
@@ -412,16 +435,16 @@ void * alloc_page(unsigned long flags)
  * tables that are necessary.
  *
  */
-void boot_map_physical_page_ledger_ptr(unsigned long unused_virt_addr_ptr)
+void boot_map_physical_page_ledger_ptr(void)
 {
     struct page *page_ptr = NULL;
-    unsigned char *free_physical_memory_ptr = (unsigned char *)VIRT_TO_PHYS((unused_virt_addr_ptr));
+    unsigned char *free_physical_memory_ptr = (unsigned char *)VIRT_TO_PHYS((boot_unused_virt_addr_ptr));
     unsigned long limit = 0;
 
     // For each index in the frame ledger, check to see if that index is page
     // table mapped and accessible. If not, create the page table entry.
     page_ptr = physical_page_ledger_ptr;
-    limit = (unsigned long)unused_virt_addr_ptr;
+    limit = (unsigned long)boot_unused_virt_addr_ptr;
     while (((unsigned long)page_ptr) < limit)
     {
         //
@@ -460,7 +483,7 @@ void boot_map_physical_page_ledger_ptr(unsigned long unused_virt_addr_ptr)
     // Mark every physical page that is used for the page ledger 'in use'
     //
     page_ptr = physical_page_ledger_ptr;
-    while ((unsigned long)page_ptr < (unsigned long)unused_virt_addr_ptr)
+    while ((unsigned long)page_ptr < (unsigned long)boot_unused_virt_addr_ptr)
     {
         // The xth PAGE_SIZE page of the physical ledger (containing
         // PAGE_SIZE/sizeof(struct page) indices) is now officially in use!
@@ -473,12 +496,37 @@ void boot_map_physical_page_ledger_ptr(unsigned long unused_virt_addr_ptr)
     // Finally, mark every new page table that we allocated in this function as
     // 'in use,' if we allocated any.
     // //
-    unsigned long addr = (unsigned long)VIRT_TO_PHYS(unused_virt_addr_ptr);
+    unsigned long addr = (unsigned long)VIRT_TO_PHYS(boot_unused_virt_addr_ptr);
     while (addr < (unsigned long)free_physical_memory_ptr)
     {
         pmm_mark_frame_in_use(addr);
         addr += PAGE_SIZE;
     }
+}
+
+/*
+ * Name: boot_kmalloc
+ *
+ *
+ */
+unsigned long boot_kmalloc(void)
+{
+	unsigned long virt_addr = boot_unused_virt_addr_ptr;
+	unsigned long phys_addr = 0;
+
+	boot_unused_virt_addr_ptr += PAGE_SIZE;
+
+	phys_addr = pmm_alloc_free_frame();
+
+	if (phys_addr == 0)
+	{
+		printk("%s: Could not get free frame.\n");
+		return 0;
+	}
+	
+	map_virt_to_phys(virt_addr, phys_addr);
+
+	return virt_addr;
 }
 
 /*
@@ -493,7 +541,6 @@ void setup_memory(void)
     uint32_t kernel_end;
     uint32_t size_of_ledger = 0;
     uint32_t identity_addr_ptr = 0;
-    unsigned long unused_virt_addr_ptr = 0;
 
     memset(&mem_stats, 0, sizeof(mem_stats));
 
@@ -521,7 +568,7 @@ void setup_memory(void)
     size_of_ledger = mem_stats.nr_total_frames*sizeof(struct page);
     
     // Set pointer to the first unused virtual memory address after the frame ledger. 
-    unused_virt_addr_ptr = (unsigned long)physical_page_ledger_ptr + size_of_ledger;
+    boot_unused_virt_addr_ptr = (unsigned long)physical_page_ledger_ptr + size_of_ledger;
 
     //
     // Set a marker to unused kernel virtual address.
@@ -541,12 +588,12 @@ void setup_memory(void)
     // adding a page moves the marker to * , then PAGE_ALIGNing aligns to the
     // boundary between A and B.
     //
-    if (((unsigned long)unused_virt_addr_ptr%(unsigned long)PAGE_SIZE) != 0)
+    if (((unsigned long)boot_unused_virt_addr_ptr%(unsigned long)PAGE_SIZE) != 0)
     {
         // No more than PAGE_SIZE-1 Bytes of space will be unused in the worst
         // case 
-        unused_virt_addr_ptr += PAGE_SIZE;
-        unused_virt_addr_ptr = PAGE_ALIGN(unused_virt_addr_ptr);
+        boot_unused_virt_addr_ptr += PAGE_SIZE;
+        boot_unused_virt_addr_ptr = PAGE_ALIGN(boot_unused_virt_addr_ptr);
     }
     
     // 1. Map virtual addresses to frame ledger (create page tables as
@@ -554,7 +601,7 @@ void setup_memory(void)
     // 2. Memset the frame ledger.
     // 3. Within the frame ledger, mark memory used by the frame ledger in use.
     // 4. Mark any allocated space for page tables as in use
-    boot_map_physical_page_ledger_ptr(unused_virt_addr_ptr);
+    boot_map_physical_page_ledger_ptr();
 
     // Offically reserve meme820 map
     reserve_meme820_pages();
