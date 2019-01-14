@@ -16,6 +16,7 @@
 #include "dinux/inc/memory.h"
 #include "x86/inc/meme820.h"
 #include "x86/inc/arch_mm.h"
+#include "dinux/inc/vmm.h"
 
 #define NUM_IDENTITY_PAGES 1024
 
@@ -43,7 +44,7 @@ extern void kernel_bug(void);
  *              Failure: 0
  *
  */
-unsigned long pmm_get_free_frame()
+unsigned long pmm_get_free_frame(void)
 {
     unsigned int i;
     unsigned long nr_phys_frames = mem_stats.nr_total_frames;
@@ -226,6 +227,7 @@ int is_pt_present(unsigned long virt_addr)
  * Returns: void
  *
  * Note: Apparently the page must be *accessed* to invalidate it.
+ *			(I don't see this in the Intel doc describing the function)
  * 		!!!BE CAREFUL when freeing a page!!! 
  *
  */
@@ -570,8 +572,6 @@ void setup_memory(void)
     }
 }
 
-// This function is called from low memory identity mapped code
-// to help get into paging mode successfully. 
 /* Name:        setupPaging
  *
  * Abstract:    Initializes page tables used for booting.

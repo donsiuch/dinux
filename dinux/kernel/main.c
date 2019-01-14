@@ -27,20 +27,20 @@ void kernel_bug(void)
  */
 void kernel_main() 
 {
-
     terminal_initialize();
 
     setup_memory();
+
+	setup_heap(0xC0000000);
 
     unsigned char *ptr = kmalloc(4096, GFP_KERNEL); 
 
     printk("%p --> %p\n", ptr, *ptr);
 
-    unsigned long val = 0xdeadbeef;
-    memcpy(ptr, &val, 4);
-    dumpBytes(ptr, 4);
+		
 
-    printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
+
+//    printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
 
 
 

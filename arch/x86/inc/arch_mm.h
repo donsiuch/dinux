@@ -182,7 +182,7 @@ void unmap_virt(unsigned long);
 void install_page_table(unsigned long, unsigned long);
 void install_page(unsigned long, unsigned long);
 int is_page_present(unsigned);
-
+unsigned long pmm_get_free_frame(void);
 
 #endif	// #ifndef ASSEMBLY
 
