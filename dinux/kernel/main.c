@@ -42,8 +42,8 @@ void kernel_main()
 
     printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
 
-
-
+    ptr = (unsigned char *)0xc0000000;
+    *ptr = 0x77;
 
     // Kernel never returns from this function.
 	while (1) {}
