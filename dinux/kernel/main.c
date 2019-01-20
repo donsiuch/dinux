@@ -44,6 +44,18 @@ void kernel_main()
 
     ptr = (unsigned char *)0xc0000000;
     *ptr = 0x77;
+#if 0
+	unsigned long virt_addr = boot_kmalloc();
+	printk("boot_kmalloc = %p\n", virt_addr);
+	
+	virt_addr = boot_kmalloc();
+	printk("boot_kmalloc = %p\n", virt_addr);
+
+	ptr = (unsigned char *) 0xc0000000;
+	*ptr = 0x77;
+#endif
+
+
 
     // Kernel never returns from this function.
 	while (1) {}
