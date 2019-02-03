@@ -31,13 +31,19 @@ void kernel_main()
 
     setup_memory();
 
-	setup_heap(0xC0000000);
+	setup_heap();
 
-    unsigned char *ptr = kmalloc(4096, GFP_KERNEL); 
-
+    unsigned char *ptr = kmalloc(8, GFP_KERNEL); 
+    printk("%p --> %p\n", ptr, *ptr);
+    
+    ptr = kmalloc(20, GFP_KERNEL);
     printk("%p --> %p\n", ptr, *ptr);
 
-		
+    ptr = kmalloc(50, GFP_KERNEL);
+    printk("%p --> %p\n", ptr, *ptr);
+	
+    ptr = kmalloc(90, GFP_KERNEL);
+    printk("%p --> %p\n", ptr, *ptr);    
 
 
 //    printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);

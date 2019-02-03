@@ -31,6 +31,8 @@ static struct page *physical_page_ledger_ptr = NULL;
 // Function prototypes
 static int phys_to_ledger_idx(unsigned long);
 
+extern unsigned long unused_virt_addr_ptr;
+
 extern void kernel_bug(void);
 
 /*
@@ -357,39 +359,6 @@ void unmap_virt(unsigned long virt)
 #endif
 
 /*
- * Name:        alloc_page	
- *
- * Description: Get the virtual address of a new page.	
- *
- * Arguments: 	void
- *
- * Return:	Success - Virtual address of new page
- *		    Failure - NULL
- *
- */
-void * alloc_page(unsigned long flags)
-{
-    unsigned long phys_addr = 0;
-    unsigned long virt_addr = 0xa0000000;
-
-    phys_addr = pmm_get_free_frame();
-
-    pmm_mark_frame_in_use(phys_addr);
-
-    printk("%s: Found a free physical frame = %p\n", __func__, phys_addr);
-
-    // TODO: If this fails, don't go any further.
-    if (flags & GFP_KERNEL)
-    {
-        map_virt_to_phys(virt_addr, phys_addr);
-    }
-    
-    printk("%s: Allocated page = %p\n", __func__, virt_addr);
-
-    return (void *)virt_addr;
-}
-
-/*
  * Name:        boot_map_physical_page_ledger_ptr 
  *
  * Description: Create page table entries for the 'struct page' ledger array.
@@ -414,7 +383,7 @@ void * alloc_page(unsigned long flags)
  * tables that are necessary.
  *
  */
-void boot_map_physical_page_ledger_ptr(unsigned long unused_virt_addr_ptr)
+void boot_map_physical_page_ledger_ptr()
 {
     struct page *page_ptr = NULL;
     unsigned char *free_physical_memory_ptr = (unsigned char *)VIRT_TO_PHYS((unused_virt_addr_ptr));
@@ -495,7 +464,6 @@ void setup_memory(void)
     uint32_t kernel_end;
     uint32_t size_of_ledger = 0;
     uint32_t identity_addr_ptr = 0;
-    unsigned long unused_virt_addr_ptr = 0;
 
     memset(&mem_stats, 0, sizeof(mem_stats));
 
@@ -556,7 +524,7 @@ void setup_memory(void)
     // 2. Memset the frame ledger.
     // 3. Within the frame ledger, mark memory used by the frame ledger in use.
     // 4. Mark any allocated space for page tables as in use
-    boot_map_physical_page_ledger_ptr(unused_virt_addr_ptr);
+    boot_map_physical_page_ledger_ptr();
 
     // Offically reserve meme820 map
     reserve_meme820_pages();
