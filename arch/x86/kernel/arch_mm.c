@@ -28,11 +28,14 @@ struct memory_stats mem_stats;
 // Array of struct pages that describe each page of physical memory
 static struct page *physical_page_ledger_ptr = NULL;
 
+static struct mem_node mem_node;
+
 // Function prototypes
 static int phys_to_ledger_idx(unsigned long);
 
 extern unsigned long unused_virt_addr_ptr;
 
+extern int power(int, int);
 extern void kernel_bug(void);
 
 /*
@@ -452,6 +455,51 @@ void boot_map_physical_page_ledger_ptr()
     }
 }
 
+
+void build_free_page_list(ZONE_T zone)
+{
+    int order;
+    int power;
+    int num_pages = 0;
+    int first_page_idx;
+    int last_page_idx;
+
+    switch (zone)
+    {
+        case ZONE_DMA:
+            first_page_idx = 0;
+            last_page_idx = MEM_ZONE_DMA_MAX_ADDR/PAGE_SIZE;
+            break;
+
+        default:
+            // ZONE_NORMAL
+            last_page_idx = mem_stats.nr_total_frames;
+            break;
+    }
+
+    //
+    // For each order starting from the largest size
+    //
+    for(order = MEM_MAX_ORDER; order >= 0; order--)
+    {
+        //
+        // Calculate how many pages are used for this order
+        //
+        //power = power(2, order);
+     
+        //
+        // Tally the total number of pages reserved
+        //
+        num_pages += power;
+
+    #if 0
+        if (num_pages
+        mem_node.mem_zone[order]
+    #endif
+    }
+    
+}
+
 /*
  *
  * This is run in protected mode before
@@ -538,6 +586,12 @@ void setup_memory(void)
         // Allow those 'used' regions to increment to 2.
         pmm_mark_frame_in_use(identity_addr_ptr);
     }
+
+    //
+    // Build free page lists
+    //
+    memset(&mem_node, 0, sizeof(mem_node));
+    build_free_page_list(ZONE_DMA);
 }
 
 /* Name:        setupPaging

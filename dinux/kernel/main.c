@@ -19,6 +19,11 @@ void kernel_bug(void)
     __asm__ volatile ("hlt;");
 }
 
+struct dummy {
+    struct list_head list;
+    uint32_t value;
+};
+
 /*
  * Name: kernel_main
  *
@@ -33,6 +38,7 @@ void kernel_main()
 
 	setup_heap();
 
+#if 0
     unsigned char *ptr = kmalloc(8, GFP_KERNEL); 
     printk("%p --> %p\n", ptr, *ptr);
     
@@ -44,10 +50,9 @@ void kernel_main()
 	
     ptr = kmalloc(90, GFP_KERNEL);
     printk("%p --> %p\n", ptr, *ptr);    
-
+#endif
 
 //    printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
-
 
 
 
