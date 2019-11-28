@@ -50,6 +50,7 @@ myos.bin: objects
 	$(MAKE_DIR)/arch/x86/obj/system.o \
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
 	$(MAKE_DIR)/arch/x86/obj/arch_mm.o \
+	$(MAKE_DIR)/arch/x86/obj/buddy.o \
 	$(MAKE_DIR)/arch/x86/obj/meme820.o \
 	$(DINUX_DIR)/obj/vmm.o \
 	$(MAKE_DIR)/arch/x86/obj/time.o \

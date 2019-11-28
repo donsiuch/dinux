@@ -181,25 +181,23 @@ void initialize_heap(struct chunk_head *chunk_ptr, unsigned long chunk_size)
         current_ptr = VMM_CHUNK_DATA(current_ptr)->next_ptr;
     }
 
-    printk("There are %p chunks\n", i); 
+    //printk("There are %p chunks\n", i); 
 }
 
 int power(int base, int power)
 {
-    int i;
-    int ret = base;
+    int res = 1;
 
-    if (power == 0)
+    while (power > 0)
     {
-        return 1;
+        if (power & 1)
+        {            
+            res = res * base;
+        }
+        base = base * base;
+        power >>= 1;
     }
-
-    for (i = 1; i < power; i++)
-    {
-        ret = ret * base;
-    }   
-
-    return ret;
+    return res;
 }
 
 /*
@@ -218,7 +216,7 @@ void setup_heap()
 	// Create the heap index
 	heap_idx_ptr = (struct heap_index *)alloc_page(GFP_KERNEL);
 
-    printk("heap_idx_ptr = %p\n", heap_idx_ptr);
+    //printk("heap_idx_ptr = %p\n", heap_idx_ptr);
 
     //
     // In the addresses immediately after the heap index the heap_head's will
@@ -247,7 +245,7 @@ void setup_heap()
         initialize_heap(heap_idx_ptr->heap_head[i]->free_chunk_ptr, power(2, i + 4));
     }
 
-    printk(">> %p\n", heap_idx_ptr->heap_head[0]->size);
+    //printk(">> %p\n", heap_idx_ptr->heap_head[0]->size);
     //dumpBytes(heap_idx_ptr->heap_head[0]->free_chunk_ptr, 64);
 }
 

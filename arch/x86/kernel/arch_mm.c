@@ -26,9 +26,7 @@ static uint32_t total_num_pte_per_pt = PAGE_SIZE/sizeof(pte_t);
 struct memory_stats mem_stats;
 
 // Array of struct pages that describe each page of physical memory
-static struct page *physical_page_ledger_ptr = NULL;
-
-static struct mem_node mem_node;
+struct page *physical_page_ledger = NULL;
 
 // Function prototypes
 static int phys_to_ledger_idx(unsigned long);
@@ -56,7 +54,7 @@ unsigned long pmm_get_free_frame(void)
 
     for (i = 0; i < nr_phys_frames; i++)
     {
-        if (physical_page_ledger_ptr[i].count == 0)
+        if (physical_page_ledger[i].count == 0)
         {
             return i*PAGE_SIZE;
         }
@@ -82,7 +80,7 @@ void pmm_mark_frame_in_use(unsigned long phys_addr)
 
     //printk("%s: Marking page used = %p at ledger idx = %p\n", __func__, phys_addr, ledger_idx);
 
-    physical_page_ledger_ptr[ledger_idx].count++;
+    physical_page_ledger[ledger_idx].count++;
 
     // Update memory statistics
     mem_stats.nr_used_frames++;
@@ -362,7 +360,7 @@ void unmap_virt(unsigned long virt)
 #endif
 
 /*
- * Name:        boot_map_physical_page_ledger_ptr 
+ * Name:        boot_map_physical_page_ledger 
  *
  * Description: Create page table entries for the 'struct page' ledger array.
  *
@@ -386,7 +384,7 @@ void unmap_virt(unsigned long virt)
  * tables that are necessary.
  *
  */
-void boot_map_physical_page_ledger_ptr()
+void boot_map_physical_page_ledger()
 {
     struct page *page_ptr = NULL;
     unsigned char *free_physical_memory_ptr = (unsigned char *)VIRT_TO_PHYS((unused_virt_addr_ptr));
@@ -394,7 +392,7 @@ void boot_map_physical_page_ledger_ptr()
 
     // For each index in the frame ledger, check to see if that index is page
     // table mapped and accessible. If not, create the page table entry.
-    page_ptr = physical_page_ledger_ptr;
+    page_ptr = physical_page_ledger;
     limit = (unsigned long)unused_virt_addr_ptr;
     while (((unsigned long)page_ptr) < limit)
     {
@@ -425,7 +423,7 @@ void boot_map_physical_page_ledger_ptr()
     }
 
     // Clear the entire ledger for the physical pages.
-    memset(physical_page_ledger_ptr, 0, mem_stats.nr_total_frames*sizeof(struct page));
+    memset(physical_page_ledger, 0, mem_stats.nr_total_frames*sizeof(struct page));
 
     // 
     // Now that the virtual addresses of the physical_page_ledger are
@@ -433,7 +431,7 @@ void boot_map_physical_page_ledger_ptr()
     // 
     // Mark every physical page that is used for the page ledger 'in use'
     //
-    page_ptr = physical_page_ledger_ptr;
+    page_ptr = physical_page_ledger;
     while ((unsigned long)page_ptr < (unsigned long)unused_virt_addr_ptr)
     {
         // The xth PAGE_SIZE page of the physical ledger (containing
@@ -453,51 +451,6 @@ void boot_map_physical_page_ledger_ptr()
         pmm_mark_frame_in_use(addr);
         addr += PAGE_SIZE;
     }
-}
-
-
-void build_free_page_list(ZONE_T zone)
-{
-    int order;
-    int power;
-    int num_pages = 0;
-    int first_page_idx;
-    int last_page_idx;
-
-    switch (zone)
-    {
-        case ZONE_DMA:
-            first_page_idx = 0;
-            last_page_idx = MEM_ZONE_DMA_MAX_ADDR/PAGE_SIZE;
-            break;
-
-        default:
-            // ZONE_NORMAL
-            last_page_idx = mem_stats.nr_total_frames;
-            break;
-    }
-
-    //
-    // For each order starting from the largest size
-    //
-    for(order = MEM_MAX_ORDER; order >= 0; order--)
-    {
-        //
-        // Calculate how many pages are used for this order
-        //
-        //power = power(2, order);
-     
-        //
-        // Tally the total number of pages reserved
-        //
-        num_pages += power;
-
-    #if 0
-        if (num_pages
-        mem_node.mem_zone[order]
-    #endif
-    }
-    
 }
 
 /*
@@ -533,13 +486,13 @@ void setup_memory(void)
     // This is a virtual address
     kernel_end = (uint32_t)(&__kernel_end);
     kernel_end += PAGE_SIZE;
-    physical_page_ledger_ptr = (struct page *)PAGE_ALIGN(kernel_end);
+    physical_page_ledger = (struct page *)PAGE_ALIGN(kernel_end);
 
     // Calclulate the size of the array of struct pages
     size_of_ledger = mem_stats.nr_total_frames*sizeof(struct page);
     
     // Set pointer to the first unused virtual memory address after the frame ledger. 
-    unused_virt_addr_ptr = (unsigned long)physical_page_ledger_ptr + size_of_ledger;
+    unused_virt_addr_ptr = (unsigned long)physical_page_ledger + size_of_ledger;
 
     //
     // Set a marker to unused kernel virtual address.
@@ -572,7 +525,7 @@ void setup_memory(void)
     // 2. Memset the frame ledger.
     // 3. Within the frame ledger, mark memory used by the frame ledger in use.
     // 4. Mark any allocated space for page tables as in use
-    boot_map_physical_page_ledger_ptr();
+    boot_map_physical_page_ledger();
 
     // Offically reserve meme820 map
     reserve_meme820_pages();
@@ -586,12 +539,6 @@ void setup_memory(void)
         // Allow those 'used' regions to increment to 2.
         pmm_mark_frame_in_use(identity_addr_ptr);
     }
-
-    //
-    // Build free page lists
-    //
-    memset(&mem_node, 0, sizeof(mem_node));
-    build_free_page_list(ZONE_DMA);
 }
 
 /* Name:        setupPaging

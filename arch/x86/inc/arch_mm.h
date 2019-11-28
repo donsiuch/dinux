@@ -131,34 +131,9 @@ struct memory_stats {
 struct page {
     struct list_head list;
     unsigned long count;
+    unsigned long order_bitmap;
 }
 __attribute((packed));
-
-#define MEM_ZONE_DMA_MAX_ADDR 0x1000000
-typedef enum {
-
-    // <= 0x01000000
-    ZONE_DMA = 0,
-
-    // > 0x01000000
-    ZONE_NORMAL = 1,
-    ZONE_MAX_NR,
-} ZONE_T;
-
-#define MEM_MAX_ORDER 5
-struct mem_zone {
-    //
-    // [0] = 2^0 = 1x page
-    // [1] = 2^1 = 2x pages
-    // [2] = 2^2 = 4x pages
-    // etc.
-    //
-    struct list_head *free_list[MEM_MAX_ORDER]; 
-};
-
-struct mem_node {
-    struct mem_zone mem_zone[ZONE_MAX_NR];
-};
 
 inline unsigned long PAGE_ALIGN(unsigned long addr)
 {

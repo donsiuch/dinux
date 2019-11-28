@@ -3,6 +3,7 @@
 #include "dinux/inc/memory.h"
 #include "asm/inc/arch_mm.h"
 #include "dinux/inc/vmm.h"
+#include "asm/inc/buddy.h"
 
 extern void setup_memory(void);
 extern struct memory_stats mem_stats;
@@ -19,11 +20,6 @@ void kernel_bug(void)
     __asm__ volatile ("hlt;");
 }
 
-struct dummy {
-    struct list_head list;
-    uint32_t value;
-};
-
 /*
  * Name: kernel_main
  *
@@ -35,6 +31,8 @@ void kernel_main()
     terminal_initialize();
 
     setup_memory();
+
+    setup_buddy();
 
 	setup_heap();
 
@@ -52,8 +50,9 @@ void kernel_main()
     printk("%p --> %p\n", ptr, *ptr);    
 #endif
 
-//    printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
+    printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
 
+    allocate_buddy(8);
 
 
     // Kernel never returns from this function.
