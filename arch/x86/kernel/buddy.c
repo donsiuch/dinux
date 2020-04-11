@@ -137,6 +137,9 @@ static int get_order(unsigned long bitmap)
     return order;
 }
 
+//
+// TODO: This is recursive. Make it iterative for speed.
+//
 static int _free_buddy(int i)
 {
     int order;
@@ -178,7 +181,11 @@ static int _free_buddy(int i)
             //
             ret = _free_buddy(buddy_i);
             if (ret > 0)
-                return ret;
+            {
+                // return ret;
+                printk("Didn't expect this to hit\n");
+                kernel_bug();
+            }
         }
 
         buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
@@ -186,69 +193,10 @@ static int _free_buddy(int i)
 
 do_free_buddy:
     add_to_free_list(&node.mem_zone[ZONE_NORMAL], order, &physical_page_ledger[i].list);
-    printk("%s: Added block = %p to free list #%p\n", __func__, i << 12, order);
+    printk("%s: Added block = %p to free list #%p\n", __func__, i << 12, get_order(physical_page_ledger[i].order_bitmap));
     return get_order(physical_page_ledger[i].order_bitmap);
 }
 
-//
-// Note: This function is recursive
-//
-#if 0
-static int _free_buddy(int i, int order)
-{
-    int buddy_i = 0;
-    int ret = 0;
-printk("i = %p, order = %p\n", i, order);
-    if (order >= (BUDDY_MAX_ORDER - 1))
-    {
-        goto do_free_buddy;
-    }
-
-    buddy_i = calc_buddy_idx(i, order);
-
-    if (physical_page_ledger[buddy_i].count == 0 &&
-        (physical_page_ledger[i].order_bitmap == 
-         physical_page_ledger[buddy_i].order_bitmap))
-    {
-        merge_blocks(i, buddy_i);
-        ret = _free_buddy(i, order + 1);
-        printk("ret = %p\n", ret);
-        return ret;
-    }
-
-do_free_buddy:
-    add_to_free_list(&node.mem_zone[ZONE_NORMAL], order, &physical_page_ledger[i].list);
-    printk("%s: Added block = %p to free list #%p\n", __func__, i << 12, order);
-    return order;
-}
-#endif
-#if 0
-void free_buddy(int i, int order)
-{
-    //
-    // If already free
-    //
-    if (physical_page_ledger[i].count == 0)
-        return;
-    
-    //
-    // Decrement the count.
-    // If page is still in use elsewhere, do not add to
-    // free buddy list.
-    //
-    if (--physical_page_ledger[i].count > 0)
-        return;
-    
-   //
-   // Free the block to the buddy list. coalesce with buddy
-   // if possible.
-   //
-   _free_buddy(i, order);   
-
-    //printk("Added to free list = %p\n", i << 12);
-    //printk("%p\n", ((struct page *)node.mem_zone[ZONE_NORMAL].free_list[0]->next));
-}
-#endif
 /*
  * Name:    setup_buddy()
  *
@@ -266,7 +214,25 @@ void setup_buddy()
 
     set_all_pages_to_zero_order();
 
-    while (i < mem_stats.nr_total_frames && x < 2)
+    // delete this while loop
+    while (i < mem_stats.nr_total_frames && x < 1)
+    {
+        if (physical_page_ledger[i].count > 0)
+        {
+            i++;
+            continue;
+        }
+
+        physical_page_ledger[i].count += 1;
+
+        _free_buddy(i);
+
+        // delete this is a test
+        x++;
+    }
+
+#if 0
+    while (i < mem_stats.nr_total_frames && x < 1)
     //while (i < mem_stats.nr_total_frames)
     {
         if (physical_page_ledger[i].count > 0)
@@ -283,7 +249,7 @@ void setup_buddy()
         // delete this is a test
         x++;
     }
-
+#endif
     while(1){}
 }
 
