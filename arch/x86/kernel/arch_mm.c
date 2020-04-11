@@ -472,6 +472,7 @@ void setup_memory(void)
     sanitize_meme820_map();
 
     mem_stats.nr_total_frames = get_total_nr_pages();
+    
     if(mem_stats.nr_total_frames <= 0)
     {
         kernel_bug();

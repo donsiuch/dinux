@@ -15,11 +15,11 @@ typedef enum {
     ZONE_MAX_NR,
 } ZONE_T;
 
-#define BUDDY_MAX_ORDER 8
+#define BUDDY_MAX_ORDER 3
 struct mem_zone {
     //
-    // [0] = 2^0 = 1x page
-    // [1] = 2^1 = 2x pages
+    // [0] = 2^0 = 1x page // 0th order
+    // [1] = 2^1 = 2x pages // 1st order
     // [2] = 2^2 = 4x pages
     // [3] = 2^3 = 8x pages
     // etc.

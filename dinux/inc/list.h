@@ -10,12 +10,16 @@ struct list_head
     struct list_head *prev;
 };
 
+//
+// WARNING: LIST IS A RING!
+//
 static inline void init_list_head(struct list_head *list)
 {
     list->prev = list;
     list->next = list;
 }
 
+// O(1)
 static inline void add_list(struct list_head *member, struct list_head *new_member)
 {
     // Setup new member
@@ -25,6 +29,22 @@ static inline void add_list(struct list_head *member, struct list_head *new_memb
     // Setup original member
     member->next->prev = new_member;
     member->next = new_member;
+}
+
+//
+// O(1)
+//
+// WARNING: Use when member is the head cell.
+//
+static inline void append_list(struct list_head *member, struct list_head *new_member)
+{
+    // Setp new member
+    new_member->next = member;
+    new_member->prev = member->prev;
+
+    // Setup original member
+    member->prev->next = new_member;
+    member->prev = new_member;
 }
 
 static inline void del_list(struct list_head *member)

@@ -34,7 +34,7 @@ void kernel_main()
 
     setup_buddy();
 
-	setup_heap();
+	//setup_heap();
 
 #if 0
     unsigned char *ptr = kmalloc(8, GFP_KERNEL); 
@@ -50,9 +50,11 @@ void kernel_main()
     printk("%p --> %p\n", ptr, *ptr);    
 #endif
 
-    printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
+    //printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
 
-    allocate_buddy(8);
+    allocate_buddy(1);
+    //allocate_buddy(1);
+    //allocate_buddy(1);
 
 
     // Kernel never returns from this function.

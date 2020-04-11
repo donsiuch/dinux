@@ -5,6 +5,8 @@
 #include "x86/inc/arch_mm.h"
 #include "x86/inc/buddy.h"
 
+extern void kernel_bug(void);
+
 extern struct page *physical_page_ledger;
 extern struct memory_stats mem_stats;
 
@@ -61,17 +63,7 @@ static void set_order_bitmap(int idx, int order)
 }
 
 #if 0
-void add_block_to_list(struct page *page_ptr, int order)
-{
-
-}
-
 void split_block(struct page *page_ptr)
-{
-
-}
-
-void merge_block(struct page *page_ptr)
 {
 
 }
@@ -95,7 +87,7 @@ static void init_mem_node(struct mem_node *ptr)
 
     for (i = 0; i < ZONE_MAX_NR ; i++)
     {
-        memset(&ptr->mem_zone[i], 0, sizeof(struct mem_zone));
+        memset(&(ptr->mem_zone[i]), 0, sizeof(struct mem_zone));
     }
 }
 
@@ -109,20 +101,173 @@ static void add_to_free_list(struct mem_zone *zone_ptr, int order, struct list_h
 
         return;
     }
-
-    add_list(zone_ptr->free_list[order], lh_ptr);
+    
+    append_list(zone_ptr->free_list[order], lh_ptr);
 }
 
+void set_all_pages_to_zero_order()
+{
+    int i;
+
+    for (i = 0; i < mem_stats.nr_total_frames; i++)
+    {
+        physical_page_ledger[i].order_bitmap = 1;
+    }
+}
+
+void merge_blocks(int i, int buddy_i)
+{
+    physical_page_ledger[i].order_bitmap <<= 1;
+    physical_page_ledger[buddy_i].order_bitmap <<= 1;
+    
+    //printk("%s: block = %p, buddy_i = %p, block bitmap = %p, count = %p,  buddy bitmap = %p, buddy count = %p\n", __func__, i << 12, buddy_i << 12, physical_page_ledger[i].order_bitmap, physical_page_ledger[i].count, physical_page_ledger[buddy_i].order_bitmap, physical_page_ledger[buddy_i].count);
+}
+
+static int get_order(unsigned long bitmap)
+{
+    unsigned long map = bitmap;
+    unsigned long order = 0;
+
+    while ( map > 1 )
+    {
+        map >>= 1;
+        order++;
+    }
+
+    return order;
+}
+
+static int _free_buddy(int i)
+{
+    int order;
+    int buddy_i = 0;
+    int ret = 0;
+
+    buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
+
+//printk("A. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+
+    //
+    // index block and buddy block are both free
+    // index block is less than the max order
+    // index is less than buddy index
+    //
+    while ( (physical_page_ledger[i].count == 0) &&
+            (physical_page_ledger[buddy_i].count == 0) && 
+            (get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER) )       
+    {
+
+//printk("B. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+        if (buddy_i < i)
+        {
+            return 0;
+        }
+
+        if ((physical_page_ledger[i].order_bitmap == 
+                 physical_page_ledger[buddy_i].order_bitmap))
+        {
+            merge_blocks(i, buddy_i);
+            ret = _free_buddy(i);
+            if (ret > 0)
+                return ret;
+        }
+        else 
+        {
+            //
+            // TODO: Can this hit?
+            //
+            ret = _free_buddy(buddy_i);
+            if (ret > 0)
+                return ret;
+        }
+
+        buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
+    }
+
+do_free_buddy:
+    add_to_free_list(&node.mem_zone[ZONE_NORMAL], order, &physical_page_ledger[i].list);
+    printk("%s: Added block = %p to free list #%p\n", __func__, i << 12, order);
+    return get_order(physical_page_ledger[i].order_bitmap);
+}
+
+//
+// Note: This function is recursive
+//
+#if 0
+static int _free_buddy(int i, int order)
+{
+    int buddy_i = 0;
+    int ret = 0;
+printk("i = %p, order = %p\n", i, order);
+    if (order >= (BUDDY_MAX_ORDER - 1))
+    {
+        goto do_free_buddy;
+    }
+
+    buddy_i = calc_buddy_idx(i, order);
+
+    if (physical_page_ledger[buddy_i].count == 0 &&
+        (physical_page_ledger[i].order_bitmap == 
+         physical_page_ledger[buddy_i].order_bitmap))
+    {
+        merge_blocks(i, buddy_i);
+        ret = _free_buddy(i, order + 1);
+        printk("ret = %p\n", ret);
+        return ret;
+    }
+
+do_free_buddy:
+    add_to_free_list(&node.mem_zone[ZONE_NORMAL], order, &physical_page_ledger[i].list);
+    printk("%s: Added block = %p to free list #%p\n", __func__, i << 12, order);
+    return order;
+}
+#endif
+#if 0
+void free_buddy(int i, int order)
+{
+    //
+    // If already free
+    //
+    if (physical_page_ledger[i].count == 0)
+        return;
+    
+    //
+    // Decrement the count.
+    // If page is still in use elsewhere, do not add to
+    // free buddy list.
+    //
+    if (--physical_page_ledger[i].count > 0)
+        return;
+    
+   //
+   // Free the block to the buddy list. coalesce with buddy
+   // if possible.
+   //
+   _free_buddy(i, order);   
+
+    //printk("Added to free list = %p\n", i << 12);
+    //printk("%p\n", ((struct page *)node.mem_zone[ZONE_NORMAL].free_list[0]->next));
+}
+#endif
+/*
+ * Name:    setup_buddy()
+ *
+ * Loop through the page ledger and add free frames to the free buddy lists
+ *
+ */
 void setup_buddy()
 {
-
-    unsigned long i = 0;
-    int buddy_i;
-    int order;
+    int i = 0;
+    
+    // delete this is for a test
+    int x = 0;
 
     init_mem_node(&node);
 
-    while (i < mem_stats.nr_total_frames)
+    set_all_pages_to_zero_order();
+
+    while (i < mem_stats.nr_total_frames && x < 2)
+    //while (i < mem_stats.nr_total_frames)
     {
         if (physical_page_ledger[i].count > 0)
         {
@@ -131,46 +276,15 @@ void setup_buddy()
         }
 
         //
-        // We found a page that has the potential to coalesce
+        // All pages are the 0th order
         //
+        i += power(2, _free_buddy(i));
 
-        //
-        // Coalesce as high as we can go
-        //
-        for (order = 0; order < BUDDY_MAX_ORDER; order++)
-        {
-            buddy_i = calc_buddy_idx(i, order);
-
-            if ((buddy_i + get_block_size(order)) > mem_stats.nr_total_frames)
-            {
-                printk("End of memory i = %p, buddy = %p, block size = %p, order = %p,left? = %p\n", i, buddy_i, power(2,order), order, is_left_buddy(i));
-                
-                // TODO: get rid of the while loop
-                //kernel_bug();
-
-                while(1){}
-            }
-       
-            //
-            // Check all the buddy's pages
-            //
-            if (is_buddy_pages_free(buddy_i, order) == 0)
-            {
-                break;
-            }
-        }
-
-        order -= 1;
-
-        add_to_free_list(&node.mem_zone[ZONE_NORMAL], order, &physical_page_ledger[i].list);
-
-        set_order_bitmap(i, order);
-
-        //
-        // Skip past all the free blocks from both buddies
-        //
-        i += 2*get_block_size(order);
+        // delete this is a test
+        x++;
     }
+
+    while(1){}
 }
 
 static struct list_head * del_from_free_list(struct mem_zone *zone_ptr, int order)
@@ -193,6 +307,8 @@ static struct list_head * del_from_free_list(struct mem_zone *zone_ptr, int orde
 
     del_list(lh_ptr);
 
+    printk("Removed from list = %p, new list head = %p\n", lh_ptr, zone_ptr->free_list[order]);
+
     return lh_ptr;
 }
 
@@ -213,11 +329,24 @@ void split_blocks_to_order(int order)
     int i;
     for (i = order; i < BUDDY_MAX_ORDER; i++)
     {
-        if (node.mem_zone[ZONE_NORMAL].free_list[i] != NULL)
-            break;
+        if (node.mem_zone[ZONE_NORMAL].free_list[i] == NULL)
+        {
+            printk("No blocks at this order.\n");
+            continue;
+        }
+
+        if (i == order)
+        {
+            printk("Found a block, returning it.\n");
+            return del_from_free_list(&node.mem_zone[ZONE_NORMAL], i);
+        }
+        
+        printk("Found a larger block that needs to be split at order = %p\n", i);
+        return split_block(i); 
     }
 
-    split_block(i);
+    printk("No blocks in memory!\n");
+    kernel_bug();
 }
 
 int allocate_buddy(int num_pages)
@@ -233,12 +362,17 @@ int allocate_buddy(int num_pages)
         if (num_pages <= get_block_size(order))
             break;
     }
-printk("%p\n", order);
-    if (node.mem_zone[ZONE_NORMAL].free_list[order] == NULL)
+
+    if (node.mem_zone[ZONE_NORMAL].free_list[order] != NULL)
     {
        split_blocks_to_order(order); 
     }
-printk("xxx\n");
+    else
+    {
+        printk("%s: No blocks in memory!\n",  __func__);
+        kernel_bug();    
+    }
+
     return 0;
 }
 
