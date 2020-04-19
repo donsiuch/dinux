@@ -186,8 +186,9 @@ printk("B. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_p
         }
  
         ret = _free_buddy(index);
-        if (ret > 0 && (index != buddy_i))
+        if (ret > 0 && (index != i))
         {
+            printk("Go to exit\n");
             goto exit; 
         }
 
