@@ -201,7 +201,7 @@ printk("B. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_p
     }
 
 free_block:
-    add_to_free_list(&node.mem_zone[ZONE_NORMAL], order, &physical_page_ledger[i].list);
+    add_to_free_list(&node.mem_zone[ZONE_NORMAL], get_order(physical_page_ledger[i].order_bitmap), &physical_page_ledger[i].list);
     printk("%s: @ Added block = %p to free list #%p\n", __func__, i << 12, get_order(physical_page_ledger[i].order_bitmap));
     ret = physical_page_ledger[i].order_bitmap;
 
