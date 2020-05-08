@@ -15,16 +15,16 @@ typedef enum {
     ZONE_MAX_NR,
 } ZONE_T;
 
-#define BUDDY_MAX_ORDER 3
+#define BUDDY_MAX_ORDER 0
 struct mem_zone {
     //
-    // [0] = 2^0 = 1x page // 0th order
-    // [1] = 2^1 = 2x pages // 1st order
-    // [2] = 2^2 = 4x pages
+    // [0] = 2^0 = 1x page  // 0th order, bitmap 1
+    // [1] = 2^1 = 2x pages // 1st order, bitmap 2
+    // [2] = 2^2 = 4x pages // 2nd order, bitmap 4
     // [3] = 2^3 = 8x pages
     // etc.
     //
-    struct list_head *free_list[BUDDY_MAX_ORDER]; 
+    struct list_head *free_list[BUDDY_MAX_ORDER + 1]; 
 };
 
 struct mem_node {

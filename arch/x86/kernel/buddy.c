@@ -101,7 +101,7 @@ static void add_to_free_list(struct mem_zone *zone_ptr, int order, struct list_h
 
         return;
     }
-    
+   
     append_list(zone_ptr->free_list[order], lh_ptr);
 }
 
@@ -142,6 +142,7 @@ static int get_order(unsigned long bitmap)
 //
 static int _free_buddy(int i)
 {
+    int prev_order = 0;
     int ret = 0;
     int index = 0;
     int buddy_i = 0;
@@ -156,37 +157,46 @@ static int _free_buddy(int i)
 
 //printk("A. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
     
+    prev_order = get_order(physical_page_ledger[i].order_bitmap);
+
     while ( physical_page_ledger[buddy_i].count == 0 &&
             (get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER) )
     {
 
-printk("B. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
-
+//printk("B. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+    
         if ((physical_page_ledger[i].order_bitmap == 
                  physical_page_ledger[buddy_i].order_bitmap))
         {
+            //
+            // Go to buddy with lower address ("left buddy")
+            //
             if ((buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap))) < i)
             {
                 index = buddy_i;
             }
             else
             {
-                merge_blocks(i, buddy_i);
                 index = i;
             }
+            prev_order = get_order(physical_page_ledger[i].order_bitmap);
+            merge_blocks(i, buddy_i);
         }
         else if (ret > 0)
         {
-            printk("Go to free block\n");
+            printk("Go to free block, block = %p, buddy = %p\n", i, buddy_i);
             goto free_block;
         }
         else
         {
             index = buddy_i;
         }
- 
+
+        //printk("_free_buddy(%p), order for %p is now %p\n", index, i, prev_order);
         ret = _free_buddy(index);
-        if (ret > 0 && (index != i))
+
+        //printk("ret _free_buddy(%p), order for %p is was %p vs now %p\n", index, i, prev_order, get_order(physical_page_ledger[i].order_bitmap));
+        if (ret > 0 && (index != i) && (prev_order != get_order(physical_page_ledger[i].order_bitmap)))
         {
             printk("Go to exit\n");
             goto exit; 
@@ -202,10 +212,20 @@ printk("B. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_p
     }
 
 free_block:
-    add_to_free_list(&node.mem_zone[ZONE_NORMAL], get_order(physical_page_ledger[i].order_bitmap), &physical_page_ledger[i].list);
-    printk("%s: @ Added block = %p to free list #%p\n", __func__, i << 12, get_order(physical_page_ledger[i].order_bitmap));
-    ret = physical_page_ledger[i].order_bitmap;
-
+    printk("%p (%p), prev_order = %p, order = %p\n", i,buddy_i,prev_order,get_order(physical_page_ledger[i].order_bitmap));
+    //
+    // Check to see if the order for this block changed out from
+    // underneath this layer.
+    //
+    if (prev_order == get_order(physical_page_ledger[i].order_bitmap))
+    {
+        add_to_free_list(&node.mem_zone[ZONE_NORMAL], get_order(physical_page_ledger[i].order_bitmap), &physical_page_ledger[i].list);
+        printk("%s: @ Added block = %p (%p) to free list #%p\n", __func__, i << 12, buddy_i << 12, get_order(physical_page_ledger[i].order_bitmap));
+        ret = physical_page_ledger[i].order_bitmap;
+    }
+    else {
+                printk("Cannot free, order change from %p to %p\n", prev_order, get_order(physical_page_ledger[i].order_bitmap));
+    }
 exit:
     return ret;
 }
@@ -279,7 +299,7 @@ void setup_buddy()
             continue;
         }
 
-        physical_page_ledger[i+5].count = 1;
+        //physical_page_ledger[i+8].count = 1;
 
         //
         // All pages are the 0th order
