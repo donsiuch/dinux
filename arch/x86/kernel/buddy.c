@@ -140,12 +140,20 @@ static int get_order(unsigned long bitmap)
 //
 // Free just what is requested.
 //
-static int _free_buddy(int i)
+static int _free_buddy(int index)
 {
+    struct frame {
+        int i;
+        int buddy_i;
+        int order_i;
+    };
+
     int ret = 0;
-    int index = 0;
+    int i = index;
     int buddy_i = 0;
-    
+    struct frame stack[BUDDY_MAX_ORDER+1];
+    int x = 0;
+
     // Count the number of 
     if (physical_page_ledger[i].count != 0)
     {
@@ -153,15 +161,46 @@ static int _free_buddy(int i)
         goto exit;
     }
 
+    stack[x].i = i;
+    stack[x].buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
+    i = stack[x].i;
+    buddy_i = stack[x].buddy_i;
+
     while ( physical_page_ledger[buddy_i].count == 0 &&
             get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER) 
     {
-        //printk("B. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
-        buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
-
-        if ((physical_page_ledger[i].order_bitmap == physical_page_ledger[buddy_i].order_bitmap)) 
+        //printk("i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+        // Merge this layer
+        if (physical_page_ledger[i].order_bitmap == physical_page_ledger[buddy_i].order_bitmap)
         {
             merge_blocks(i, buddy_i);
+            //printk("merge %p and %p into %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+            buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
+            stack[x].buddy_i = buddy_i;
+            if (x > 0)
+            {
+                x--;
+                i = stack[x].i;
+                buddy_i = stack[x].buddy_i;
+            }
+            continue;
+        }
+
+        // Run the loop again for the buddy
+        //TODO: NEED TO PROTECT AGAINST MAX
+        x++;
+        stack[x].i = buddy_i;
+        stack[x].buddy_i = calc_buddy_idx(stack[x].i, get_order(physical_page_ledger[stack[x].i].order_bitmap));
+        i = stack[x].i;
+        buddy_i = stack[x].buddy_i;
+
+        // If we can't merge the next iteration
+        if (physical_page_ledger[stack[x].buddy_i].count != 0)
+        {
+            x--;
+            i = stack[x].i;
+            buddy_i = stack[x].buddy_i;
+            break;
         }
     }
 
@@ -228,7 +267,7 @@ void setup_buddy()
             continue;
         }
 
-        physical_page_ledger[i+1].count = 1;
+//        physical_page_ledger[i+1].count = 1;
 
         //
         // All pages are the 0th order
