@@ -15,7 +15,7 @@ typedef enum {
     ZONE_MAX_NR,
 } ZONE_T;
 
-#define BUDDY_MAX_ORDER 0
+#define BUDDY_MAX_ORDER 1
 struct mem_zone {
     //
     // [0] = 2^0 = 1x page  // 0th order, bitmap 1
