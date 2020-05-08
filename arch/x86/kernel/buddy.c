@@ -153,7 +153,8 @@ static int _free_buddy(int i)
         goto exit;
     }
 
-    while (get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER)
+    while ( physical_page_ledger[buddy_i].count == 0 &&
+            get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER) 
     {
         //printk("B. i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
         buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
@@ -163,9 +164,6 @@ static int _free_buddy(int i)
             merge_blocks(i, buddy_i);
         }
     }
-
-            
-
 
 free_block:
 
@@ -230,7 +228,7 @@ void setup_buddy()
             continue;
         }
 
-        //physical_page_ledger[i+8].count = 1;
+        physical_page_ledger[i+1].count = 1;
 
         //
         // All pages are the 0th order
