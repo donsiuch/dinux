@@ -140,6 +140,16 @@ static int get_order(unsigned long bitmap)
 //
 // Free just what is requested.
 //
+// How to test:
+//  Free 400 and for each test, make a page in use: 400, 401, then 402, then
+//  403 etc...
+//
+//  Free 404 and verify 400 is added to list
+//
+//  Problems:
+//  - If we merge a bunch of blocks but later have to a abandon, we will have
+//  merged blocks that haven't been added to a list. (free 400 w/ 406 in use)
+//
 static int _free_buddy(int index)
 {
     struct frame {
@@ -169,16 +179,49 @@ static int _free_buddy(int index)
     while ( physical_page_ledger[buddy_i].count == 0 &&
             get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER) 
     {
-        //printk("i = %p, buddy_i = %p, order = %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+        if (buddy_i < i)
+        {
+
+        }
+
+        printk("x = %p i = %p, buddy_i = %p, order = %p\n", x, i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
         // Merge this layer
         if (physical_page_ledger[i].order_bitmap == physical_page_ledger[buddy_i].order_bitmap)
         {
             merge_blocks(i, buddy_i);
-            //printk("merge %p and %p into %p\n", i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+            printk("merge %p and %p into %p\n",i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
             buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
             stack[x].buddy_i = buddy_i;
             if (x > 0)
             {
+                //
+                // stack[x-1].i == buddy_i --> After a merge, if the newly
+                // calculated buddy for this layer is equal to the index of the
+                // previous layer...
+                //
+                // and
+                //
+                // stack[x-1].i > stack[x].i --> The previous layer's main
+                // block (i) is at a larger memory address...
+                //
+                // Do NOT pop the stack and go to that higher memory address to
+                // perform the merge. That higher address will then reside in
+                // the middle of the larger, newly merged block and will end up
+                // being added to the free, completely losing the first half of
+                // the block.
+                //
+                // We want the data from this layer to be the focal point of
+                // our merge; we merge the left hand buddy always. Copy the
+                // information for this layer to the previous layer and
+                // continue as normal.
+                // 
+                if (stack[x-1].i == buddy_i && stack[x-1].i > stack[x].i)
+                {
+                    printk("TRUE\n");
+                    stack[x-1] = stack[x];
+                }
+
+                // POP
                 x--;
                 i = stack[x].i;
                 buddy_i = stack[x].buddy_i;
@@ -186,6 +229,7 @@ static int _free_buddy(int index)
             continue;
         }
 
+        // PUSH
         // Run the loop again for the buddy
         //TODO: NEED TO PROTECT AGAINST MAX
         x++;
@@ -194,9 +238,14 @@ static int _free_buddy(int index)
         i = stack[x].i;
         buddy_i = stack[x].buddy_i;
 
+        // TODO: WHY IS THIS HERE??
+        //  -> This is hit under the conditions: free'ing 400, 403 is in use.
+        //  Everything works
         // If we can't merge the next iteration
+        // POP
         if (physical_page_ledger[stack[x].buddy_i].count != 0)
         {
+            printk("??????????\n");
             x--;
             i = stack[x].i;
             buddy_i = stack[x].buddy_i;
@@ -267,7 +316,7 @@ void setup_buddy()
             continue;
         }
 
-//        physical_page_ledger[i+1].count = 1;
+        physical_page_ledger[i+6].count = 1;
 
         //
         // All pages are the 0th order
