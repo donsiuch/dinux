@@ -179,11 +179,6 @@ static int _free_buddy(int index)
     while ( physical_page_ledger[buddy_i].count == 0 &&
             get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER) 
     {
-        if (buddy_i < i)
-        {
-
-        }
-
         printk("x = %p i = %p, buddy_i = %p, order = %p\n", x, i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
         // Merge this layer
         if (physical_page_ledger[i].order_bitmap == physical_page_ledger[buddy_i].order_bitmap)
@@ -238,14 +233,15 @@ static int _free_buddy(int index)
         i = stack[x].i;
         buddy_i = stack[x].buddy_i;
 
-        // TODO: WHY IS THIS HERE??
-        //  -> This is hit under the conditions: free'ing 400, 403 is in use.
-        //  Everything works
-        // If we can't merge the next iteration
+        //
+        // If we switch to take care of another block merge, we need to check
+        // whether the buddy of this layer is in use. If it is, we want to
+        // return to the previous layer b/c we can't do this merge.
+        // 
         // POP
+        //
         if (physical_page_ledger[stack[x].buddy_i].count != 0)
         {
-            printk("??????????\n");
             x--;
             i = stack[x].i;
             buddy_i = stack[x].buddy_i;
@@ -316,7 +312,7 @@ void setup_buddy()
             continue;
         }
 
-        physical_page_ledger[i+6].count = 1;
+        physical_page_ledger[i+3].count = 1;
 
         //
         // All pages are the 0th order
