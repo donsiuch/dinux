@@ -155,7 +155,7 @@ static int _free_buddy(int index)
     struct frame {
         int i;
         int buddy_i;
-        int order_i;
+        int deeper_layer_cant_merge; 
     };
 
     int ret = 0;
@@ -227,36 +227,42 @@ static int _free_buddy(int index)
             continue;
         }
 
+        //
+        // @@@ Merging sub blocks @@@
+        //
+
         // PUSH
         // Run the loop again for the buddy
-        //TODO: NEED TO PROTECT AGAINST MAX
+        //TODO: NEED TO PROTECT AGAINST MAX ?
         x++;
         stack[x].i = buddy_i;
         stack[x].buddy_i = calc_buddy_idx(stack[x].i, get_order(physical_page_ledger[stack[x].i].order_bitmap));
-        i = stack[x].i;
-        buddy_i = stack[x].buddy_i;
-
+    
         //
         // If we switch to take care of another block merge, we need to check
         // whether the buddy of this layer is in use. If it is, we want to
         // return to the previous layer b/c we can't do this merge.
         // 
-        // POP
+        // Go back to what we were trying to free initially (layer 0).
+        // and just add what we have done.
         //
         if (physical_page_ledger[stack[x].buddy_i].count != 0)
         {
-            x--;
-            i = stack[x].i;
-            buddy_i = stack[x].buddy_i;
-            break;
+            x = 0;
+            goto free_block;
         }
+
+        // Officially on a new layer
+
+        i = stack[x].i;
+        buddy_i = stack[x].buddy_i;
     }
 
 free_block:
 
-    add_to_free_list(&node.mem_zone[ZONE_NORMAL], get_order(physical_page_ledger[i].order_bitmap), &physical_page_ledger[i].list);
+    add_to_free_list(&node.mem_zone[ZONE_NORMAL], get_order(physical_page_ledger[stack[x].i].order_bitmap), &physical_page_ledger[stack[x].i].list);
     
-    printk("%s: @ Added block = %p (%p) to free list #%p\n", __func__, i << 12, buddy_i << 12, get_order(physical_page_ledger[i].order_bitmap));
+    printk("%s: @ Added block = %p (%p) to free list #%p\n", __func__, stack[x].i << 12, stack[x].buddy_i << 12, get_order(physical_page_ledger[stack[x].i].order_bitmap));
     
     ret = physical_page_ledger[i].order_bitmap;
 exit:
@@ -315,12 +321,12 @@ void setup_buddy()
             continue;
         }
 
-        physical_page_ledger[i+3].count = 1;
+        physical_page_ledger[i+8].count = 1;
 
         //
         // All pages are the 0th order
         //
-        i += power(2, get_order(_free_buddy(i)));
+        i += power(2, get_order(_free_buddy(i+1)));
 
         // delete this is a test
         x++;
