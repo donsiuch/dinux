@@ -164,7 +164,7 @@ static int _free_buddy(int index)
     struct frame stack[BUDDY_MAX_ORDER+1];
     int x = 0;
 
-    // Count the number of 
+    // Verify the block we are freeing is not already in use.
     if (physical_page_ledger[i].count != 0)
     {
         ret = get_order(physical_page_ledger[i].order_bitmap);
@@ -180,13 +180,16 @@ static int _free_buddy(int index)
             get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER) 
     {
         printk("x = %p i = %p, buddy_i = %p, order = %p\n", x, i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
-        // Merge this layer
+        
         if (physical_page_ledger[i].order_bitmap == physical_page_ledger[buddy_i].order_bitmap)
         {
             merge_blocks(i, buddy_i);
             printk("merge %p and %p into %p\n",i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+           
+            // Calculate the new buddy for this larger, newly merged block
             buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
             stack[x].buddy_i = buddy_i;
+            
             if (x > 0)
             {
                 //
