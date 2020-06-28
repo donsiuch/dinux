@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 
+#include "dinux/inc/math.h"
+
 //
 // Page aligned
 //

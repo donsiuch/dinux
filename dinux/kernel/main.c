@@ -36,8 +36,6 @@ void kernel_main()
 
     printk("Finished setting up buddy\n");
 
-    while(1){}
-
 	//setup_heap();
 
 #if 0
@@ -56,7 +54,7 @@ void kernel_main()
 
     //printk("pages used %p out of %p\n", mem_stats.nr_used_frames, mem_stats.nr_total_frames);
 
-    allocate_buddy(1);
+    //allocate_buddy(1);
     //allocate_buddy(1);
     //allocate_buddy(1);
 

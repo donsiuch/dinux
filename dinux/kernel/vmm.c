@@ -184,22 +184,6 @@ void initialize_heap(struct chunk_head *chunk_ptr, unsigned long chunk_size)
     //printk("There are %p chunks\n", i); 
 }
 
-int power(int base, int power)
-{
-    int res = 1;
-
-    while (power > 0)
-    {
-        if (power & 1)
-        {            
-            res = res * base;
-        }
-        base = base * base;
-        power >>= 1;
-    }
-    return res;
-}
-
 /*
  * Name: setup_heap
  *

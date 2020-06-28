@@ -1,4 +1,5 @@
 
+#include "dinux/inc/math.h"
 #include "dinux/inc/memory.h"
 #include "dinux/inc/list.h"
 #include "dinux/inc/io.h"
@@ -22,14 +23,7 @@ static inline int calc_buddy_idx(int idx, int order)
     return (idx ^ (1 << order));
 }
 
-//
-// TODO: I think this is wrong
-//
-static inline int is_left_buddy(int idx)
-{
-    return ((~idx) & 1);
-}
-
+#if 0
 static int is_buddy_pages_free(int idx, int order)
 {
     int i;
@@ -44,23 +38,7 @@ static int is_buddy_pages_free(int idx, int order)
 
     return 1;
 }
-
-static void set_order_bitmap(int idx, int order)
-{
-    int i;
-    int limit = idx + 2*get_block_size(order);
-
-    if (limit >= mem_stats.nr_total_frames)
-       limit = mem_stats.nr_total_frames-1;
-
-    for (i = idx; i < limit; i++)
-    {
-        physical_page_ledger[i].order_bitmap = 1;
-        physical_page_ledger[i].order_bitmap <<= order;
-    }
-
-//printk("%p \n", physical_page_ledger[mem_stats.nr_total_frames-1].order_bitmap);
-}
+#endif
 
 #if 0
 void split_block(struct page *page_ptr)
@@ -107,7 +85,7 @@ static void add_to_free_list(struct mem_zone *zone_ptr, int order, struct list_h
 
 void set_all_pages_to_zero_order()
 {
-    int i;
+    unsigned long i;
 
     for (i = 0; i < mem_stats.nr_total_frames; i++)
     {
@@ -293,7 +271,7 @@ exit:
  */
 void setup_buddy()
 {
-    int i = 0;
+    unsigned long i = 0;
     
     init_mem_node(&node);
 
@@ -313,7 +291,7 @@ void setup_buddy()
         i += power(2, get_order(_free_buddy(i)));
     }
 }
-
+#if 0
 static struct list_head * del_from_free_list(struct mem_zone *zone_ptr, int order)
 {
     struct list_head *lh_ptr;
@@ -402,4 +380,4 @@ int allocate_buddy(int num_pages)
 
     return 0;
 }
-
+#endif

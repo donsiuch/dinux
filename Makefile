@@ -44,6 +44,7 @@ all: myos.bin
 myos.bin: objects
 	$(CC) $(LDFLAGS)linker.ld -o myos.bin \
 	$(VGA_DIR)/obj/vga.o \
+	$(DINUX_DIR)/obj/math.o \
 	$(DINUX_DIR)/obj/io.o \
 	$(DINUX_DIR)/obj/memory.o \
 	$(DINUX_DIR)/obj/main.o \
