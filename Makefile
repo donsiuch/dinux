@@ -44,12 +44,14 @@ all: myos.bin
 myos.bin: objects
 	$(CC) $(LDFLAGS)linker.ld -o myos.bin \
 	$(VGA_DIR)/obj/vga.o \
+	$(DINUX_DIR)/obj/math.o \
 	$(DINUX_DIR)/obj/io.o \
 	$(DINUX_DIR)/obj/memory.o \
 	$(DINUX_DIR)/obj/main.o \
 	$(MAKE_DIR)/arch/x86/obj/system.o \
 	$(MAKE_DIR)/arch/x86/obj/idt.o \
 	$(MAKE_DIR)/arch/x86/obj/arch_mm.o \
+	$(MAKE_DIR)/arch/x86/obj/buddy.o \
 	$(MAKE_DIR)/arch/x86/obj/meme820.o \
 	$(DINUX_DIR)/obj/vmm.o \
 	$(MAKE_DIR)/arch/x86/obj/time.o \

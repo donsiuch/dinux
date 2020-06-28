@@ -1,8 +1,11 @@
 
-all: arch_mm idt  meme820 pic pit time system
+all: arch_mm idt  meme820 pic pit time system buddy
 
 arch_mm: arch_mm.c
 	$(CC) $(CFLAGS) $(COMPILE_ONLY) arch_mm.c -o ../obj/arch_mm.o
+
+buddy: buddy.c
+	$(CC) $(CFLAGS) $(COMPILE_ONLY) buddy.c -o ../obj/buddy.o
 
 idt: idt.c
 	$(CC) $(CFLAGS) $(COMPILE_ONLY) idt.c -o ../obj/idt.o

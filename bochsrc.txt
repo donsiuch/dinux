@@ -18,4 +18,4 @@ boot: cdrom
 log: bochsout.txt
 
 # We don't need mouse emulation
-mouse: enabled=0
+mouse: enabled=1

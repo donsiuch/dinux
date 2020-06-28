@@ -28,6 +28,8 @@
 
 #include <stdint.h>
 
+#include "dinux/inc/list.h"
+
 // These macros are most useful when dealing with
 // memory at HIGH_MEM_START_ADDR+
 #define VIRTUAL_OFFSET HIGH_MEM_START_ADDR
@@ -123,19 +125,13 @@ struct memory_stats {
     unsigned long nr_used_frames;
 };
 
-// Represents a region a physical memory
-struct mem_node {
-    struct mem_node *next;
-    unsigned long start_addr;
-    unsigned long end_addr;
-}
-__attribute((packed));
-
 // The size of struct page must always divide evenly into PAGE_SIZE. This is
 // because certain boot functions assume an even division when setting up page
 // tables and mapping in the physical frame ledger.
 struct page {
+    struct list_head list;
     unsigned long count;
+    unsigned long order_bitmap;
 }
 __attribute((packed));
 
@@ -183,7 +179,7 @@ void install_page_table(unsigned long, unsigned long);
 void install_page(unsigned long, unsigned long);
 int is_page_present(unsigned);
 unsigned long boot_kmalloc();
-
+unsigned long pmm_get_free_frame(void);
 
 #endif	// #ifndef ASSEMBLY
 

@@ -1,5 +1,5 @@
 
-all: io memory main vmm 
+all: io memory main vmm math
 
 vmm: vmm.c
 	$(CC) $(CFLAGS) $(COMPILE_ONLY) vmm.c -o ../obj/vmm.o
@@ -12,6 +12,9 @@ main: main.c
 
 memory: memory.c 
 	$(CC) $(CFLAGS) $(COMPILE_ONLY) memory.c -o ../obj/memory.o
+
+math: math.c 
+	$(CC) $(CFLAGS) $(COMPILE_ONLY) math.c -o ../obj/math.o
 
 clean:
 	rm -f ../obj/*.o
