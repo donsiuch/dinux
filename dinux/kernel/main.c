@@ -34,6 +34,10 @@ void kernel_main()
 
     setup_buddy();
 
+    printk("Finished setting up buddy\n");
+
+    while(1){}
+
 	//setup_heap();
 
 #if 0
