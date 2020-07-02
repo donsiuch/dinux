@@ -93,12 +93,17 @@ void set_all_pages_to_zero_order()
     }
 }
 
-void merge_blocks(int i, int buddy_i)
-{
+static void merge_blocks(int i, int buddy_i){
     physical_page_ledger[i].order_bitmap <<= 1;
     physical_page_ledger[buddy_i].order_bitmap <<= 1;
     
     //printk("%s: block = %p, buddy_i = %p, block bitmap = %p, count = %p,  buddy bitmap = %p, buddy count = %p\n", __func__, i << 12, buddy_i << 12, physical_page_ledger[i].order_bitmap, physical_page_ledger[i].count, physical_page_ledger[buddy_i].order_bitmap, physical_page_ledger[buddy_i].count);
+}
+
+static void split_block(int i) {
+    int buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
+    physical_page_ledger[i].order_bitmap >>= 1;
+    physical_page_ledger[buddy_i].order_bitmap >>= 1;
 }
 
 static int get_order(unsigned long bitmap)
@@ -135,6 +140,12 @@ struct frame {
 //  TODO: I don't know if this is even true...
 //  - If we merge a bunch of blocks but later have to a abandon, we will have
 //  merged blocks that haven't been added to a list. (free 400 w/ 406 in use)
+//  
+//  Solution 1: Add blocks and free them from free lists as we go, so we never
+//  have to unwind our merges.
+//
+//  Solution 2: Unwind our merges by getting information about what should be
+//  unwound from the stack.
 //
 static int _free_buddy(int index)
 {
@@ -168,12 +179,12 @@ static int _free_buddy(int index)
     while ( physical_page_ledger[buddy_i].count == 0 &&
             get_order(physical_page_ledger[i].order_bitmap) < BUDDY_MAX_ORDER) 
     {
-        //printk("x = %p i = %p, buddy_i = %p, order = %p\n", x, i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+        printk("x = %p i = %p, buddy_i = %p, order = %p\n", x, i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
         
         if (physical_page_ledger[i].order_bitmap == physical_page_ledger[buddy_i].order_bitmap)
         {
             merge_blocks(i, buddy_i);
-            //printk("merge %p and %p into %p\n",i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
+            printk("merge %p and %p into %p\n",i, buddy_i, get_order(physical_page_ledger[i].order_bitmap));
            
             // Calculate the new buddy for this larger, newly merged block
             buddy_i = calc_buddy_idx(i, get_order(physical_page_ledger[i].order_bitmap));
@@ -204,7 +215,7 @@ static int _free_buddy(int index)
                 // 
                 if (stack[x-1].i == buddy_i && stack[x-1].i > stack[x].i)
                 {
-                    //printk("TRUE\n");
+                    printk("TRUE\n");
                     stack[x-1] = stack[x];
                 }
 
@@ -252,11 +263,10 @@ free_block:
     add_to_free_list(&node.mem_zone[ZONE_NORMAL], 
             get_order(physical_page_ledger[stack[x].i].order_bitmap), 
             &physical_page_ledger[stack[x].i].list);
-#if 0
+
     printk("%s: @ Added block = %p (%p) to free list #%p\n", 
             __func__, stack[x].i << 12, stack[x].buddy_i << 12, 
             get_order(physical_page_ledger[stack[x].i].order_bitmap));
-#endif
     
     ret = physical_page_ledger[i].order_bitmap;
 exit:
@@ -271,7 +281,7 @@ exit:
  */
 void setup_buddy()
 {
-    unsigned long i = 0;
+    unsigned long i = 0x400;
     
     init_mem_node(&node);
 
@@ -285,10 +295,14 @@ void setup_buddy()
             continue; 
         }
 
+        physical_page_ledger[i+6].count = 1;
+
         //
         // All pages are the 0th order
         //
         i += power(2, get_order(_free_buddy(i)));
+
+        while(1){}
     }
 }
 #if 0
